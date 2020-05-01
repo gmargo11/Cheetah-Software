@@ -247,10 +247,8 @@ void SimulationRunnerHeadless::run() {
 
   _state = SimulationRunnerHeadlessState::RUNNING;
   //updateUiEnable();
-  QImage img(_graphicsWindow.size());
-  QPainter painter(&img);
-  _graphicsWindow.render(&painter);
-  img.save("./img/screenshot.jpg");
+  QImage image1 = _graphicsWindow->grabFramebuffer();
+  image1.save("bla3.png");
 }
 
 /*!

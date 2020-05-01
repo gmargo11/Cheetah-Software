@@ -185,8 +185,8 @@ Simulation::Simulation(RobotType robot, Graphics3D* window,
 
   // shared memory fields:
   _sharedMemory().simToRobot.robotType = _robot;
-  //_window->_drawList._visualizationData =
-  //    &_sharedMemory().robotToSim.visualizationData;
+  _window->_drawList._visualizationData =
+      &_sharedMemory().robotToSim.visualizationData;
 
   // load robot control parameters
   printf("[Simulation] Load control parameters...\n");

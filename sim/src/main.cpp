@@ -12,7 +12,6 @@
 #include "Graphics3D.h"
 #include "SimControlPanel.h"
 #include "Simulation.h"
-#include "SimulationRunnerHeadless.h"
 #include "Utilities/utilities.h"
 #include "Utilities/SegfaultHandler.h"
 
@@ -32,8 +31,8 @@ int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 
   // open simulator UI
-  SimulationRunnerHeadless simrunner;
-  simrunner.run();
+  SimControlPanel panel;
+  panel.show();
 
   // run the Qt program
   a.exec();

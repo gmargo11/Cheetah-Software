@@ -10,6 +10,10 @@ export QT_QPA_PLATFORM="offscreen"
 cd mc-build
 ./sim/sim
 ```
+and start the controller in a separate terminal:
+```
+./user/MIT_Controller/mit_ctrl m s
+```
 
 TODO:
 - ffmpeg pipeline to download headless sim results

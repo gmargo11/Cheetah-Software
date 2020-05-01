@@ -46,6 +46,7 @@ std::string SimulationRunnerHeadless::getDefaultUserParameterFileName() {
  */
 SimulationRunnerHeadless::SimulationRunnerHeadless()
     : _userParameters("user-parameters"),
+      _terrainFileName(getConfigDirectoryPath() + DEFAULT_TERRAIN_FILE),
       _heightmapLCM(getLcmUrl(255)),
       _pointsLCM(getLcmUrl(255)),
       _indexmapLCM(getLcmUrl(255)),
@@ -179,9 +180,9 @@ void SimulationRunnerHeadless::run() {
 
   // graphics
   printf("[SimulationRunnerHeadless] Initialize Graphics...\n");
-  //_graphicsWindow = new Graphics3D();
+  _graphicsWindow = new Graphics3D();
   //_graphicsWindow->show();
-  //_graphicsWindow->resize(1280, 720);
+  _graphicsWindow->resize(1280, 720);
 
   if (_simulationMode) {
     // run a simulation

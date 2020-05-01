@@ -38,9 +38,7 @@ int main(int argc, char *argv[]) {
   panel.show();
 
   // Run Simulator
-  panel->ui->miniCheetahButton->setChecked(true);
-  panel->ui->simulatorButton->setChecked(true);
-  panel.on_startButton_clicked();
+  panel.start_headless();
 
   // run the Qt program
   a.exec();

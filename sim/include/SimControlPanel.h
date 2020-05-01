@@ -47,6 +47,7 @@ class SimControlPanel : public QMainWindow {
 public slots:
   void update_ui();
   void errorCallback(std::string errorMessage);
+  void start_headless();
 
  private slots:
 

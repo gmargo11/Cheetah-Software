@@ -464,6 +464,101 @@ void SimControlPanel::on_stopButton_clicked() {
   updateUiEnable();
 }
 
+/*!
+ * Start a simulation/robot run -- headless mode!
+ */
+void SimControlPanel::start_headless() {
+  // get robot type
+  RobotType robotType;
+
+  //if (ui->cheetah3Button->isChecked()) {
+  //  robotType = RobotType::CHEETAH_3;
+  //} else if (ui->miniCheetahButton->isChecked()) {
+  robotType = RobotType::MINI_CHEETAH;
+  //} else {
+  //  createErrorMessage("Error: you must select a robot");
+  //  return;
+  //}
+
+  // get run type
+  //if (!ui->simulatorButton->isChecked() && !ui->robotButton->isChecked()) {
+  //  createErrorMessage(
+  //      "Error: you must select either robot or simulation mode");
+  //  return;
+  //}
+
+  _simulationMode = true//ui->simulatorButton->isChecked();
+
+  // graphics
+  printf("[SimControlPanel] Initialize Graphics...\n");
+  _graphicsWindow = new Graphics3D();
+  _graphicsWindow->show();
+  _graphicsWindow->resize(1280, 720);
+
+  if (_simulationMode) {
+    // run a simulation
+
+    try {
+      printf("[SimControlPanel] Initialize simulator...\n");
+      _simulation = new Simulation(robotType, _graphicsWindow, _parameters, _userParameters,
+        // this will allow the simulation thread to poke us when there's a state change
+        [this](){
+        QMetaObject::invokeMethod(this,"update_ui");
+      });
+      loadSimulationParameters(_simulation->getSimParams());
+      loadRobotParameters(_simulation->getRobotParams());
+
+      // terrain
+      printf("[SimControlParameter] Load terrain...\n");
+      _simulation->loadTerrainFile(_terrainFileName);
+    } catch (std::exception& e) {
+      createErrorMessage("FATAL: Exception thrown during simulator setup\n" + std::string(e.what()));
+      throw e;
+    }
+
+
+
+
+    // start sim
+    _simThread = std::thread(
+
+      // simulation function
+      [this]() {
+
+        // error callback function
+        std::function<void(std::string)> error_function = [this](std::string str) {
+          // Qt will take care of doing the call in the UI event loop
+          QMetaObject::invokeMethod(this, [=]() {
+            this->errorCallback(str);
+          });
+        };
+
+        try {
+          // pass error callback to simulator
+          _simulation->runAtSpeed(error_function);
+        } catch (std::exception &e) {
+          // also catch exceptions
+          error_function("Exception thrown in simulation thread: " + std::string(e.what()));
+        }
+
+      });
+
+    // graphics start
+    _graphicsWindow->setAnimating(true);
+  } else {
+    printf("[SimControlPanel] Init Robot Interface...\n");
+    _interfaceTaskManager = new PeriodicTaskManager;
+    _robotInterface =
+        new RobotInterface(robotType, _graphicsWindow, _interfaceTaskManager, _userParameters);
+    loadRobotParameters(_robotInterface->getParams());
+    _robotInterface->startInterface();
+    _graphicsWindow->setAnimating(true);
+  }
+
+  _state = SimulationWindowState::RUNNING;
+  updateUiEnable();
+}
+
 
 
 /*!

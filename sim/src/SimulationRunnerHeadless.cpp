@@ -181,7 +181,7 @@ void SimulationRunnerHeadless::run() {
   // graphics
   printf("[SimulationRunnerHeadless] Initialize Graphics...\n");
   _graphicsWindow = new Graphics3D();
-  //_graphicsWindow->show();
+  _graphicsWindow->show();
   _graphicsWindow->resize(1280, 720);
 
   if (_simulationMode) {
@@ -247,8 +247,8 @@ void SimulationRunnerHeadless::run() {
 
   _state = SimulationRunnerHeadlessState::RUNNING;
   //updateUiEnable();
-  QImage image1 = _graphicsWindow->grabFramebuffer();
-  image1.save("bla3.png");
+  //QPixmap image1 = _graphicsWindow->grab();
+  //image1.save("bla3.png");
 }
 
 /*!

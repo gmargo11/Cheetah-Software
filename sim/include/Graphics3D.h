@@ -33,6 +33,7 @@
 class Graphics3D : public QOpenGLWidget, protected QOpenGLFunctions {
   Q_OBJECT
  friend class SimControlPanel;
+ friend class SimulationRunnerHeadless;
  public:
   explicit Graphics3D(QWidget *parent = 0);
   virtual ~Graphics3D();

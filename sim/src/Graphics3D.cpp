@@ -548,6 +548,9 @@ void Graphics3D::paintGL() {
                     QString(infoString));
   painter2.end();
 
+  //QImage image1 = grabFramebuffer();
+  printf("grabbed frame buffer\n");
+
   ++_frame;
 }
 

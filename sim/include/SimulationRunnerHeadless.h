@@ -8,7 +8,7 @@
 
 #include <thread>
 #include "ControlParameters/SimulatorParameters.h"
-#include "Graphics3D.h"
+//#include "Graphics3D.h"
 #include "RobotInterface.h"
 #include "Simulation.h"
 
@@ -76,7 +76,7 @@ public slots:
   Simulation* _simulation = nullptr;
   PeriodicTaskManager* _interfaceTaskManager = nullptr;
   RobotInterface* _robotInterface = nullptr;
-  Graphics3D* _graphicsWindow = nullptr;
+  Object* _graphicsWindow = nullptr;
   SimulatorControlParameters _parameters;
   ControlParameters _userParameters;
   bool _simulationMode = false;

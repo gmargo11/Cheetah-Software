@@ -16,34 +16,6 @@ static void createErrorMessage(const std::string& text) {
   printf("%s\n", text.c_str());
 }
 
-
-/*!
- * Display control parameters in a qtable.
- */
-/*
-static void updateQtableWithParameters(ControlParameters& params,
-                                       QTableWidget& table) {
-  table.setRowCount((s32)params.collection._map.size());
-  table.setColumnCount(2);
-
-  s32 i = 0;
-  for (auto& kv : params.collection._map) {
-    (void)kv;
-    for (s32 col = 0; col < 2; col++) {
-      QTableWidgetItem* cell = table.item(i, col);
-      if (!cell) {
-        cell = new QTableWidgetItem;
-        table.setItem(i, col, cell);
-      }
-    }
-
-    table.item(i, 0)->setText(QString(kv.first.c_str()));
-    table.item(i, 1)->setText(QString(kv.second->toString().c_str()));
-    i++;
-  }
-}
-*/
-
 std::string SimulationRunnerHeadless::getDefaultUserParameterFileName() {
   std::string path = getConfigDirectoryPath() + DEFAULT_USER_FILE;
   ParamHandler paramHandler(path);

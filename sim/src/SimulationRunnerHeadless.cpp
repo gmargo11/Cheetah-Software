@@ -253,8 +253,8 @@ void SimulationRunnerHeadless::run() {
 
   _state = SimulationRunnerHeadlessState::RUNNING;
   //updateUiEnable();
-  QImage image1 = _graphicsWindow->grabFramebuffer();
-  image1.save("bla3.png");
+  //QPixmap image1 = _graphicsWindow->grab();
+  //image1.save("bla3.png");
 }
 
 /*!

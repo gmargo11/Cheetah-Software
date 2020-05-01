@@ -11,8 +11,8 @@
 #include "Dynamics/Quadruped.h"
 #include "Graphics3D.h"
 #include "SimControlPanel.h"
-#include "Simulation.h"
 #include "SimulationRunnerHeadless.h"
+#include "Simulation.h"
 #include "Utilities/utilities.h"
 #include "Utilities/SegfaultHandler.h"
 

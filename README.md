@@ -15,6 +15,10 @@ and start the controller in a separate terminal:
 ./user/MIT_Controller/mit_ctrl m s
 ```
 
+Parameters are loaded by the simulator from `config/mc-mit-ctrl-user-parameters.yaml`. Initial state is specified in Simulation.cpp (lines 92...150). 
+
+
+
 TODO:
 - ffmpeg pipeline to download headless sim results
 - Demonstrate hardcoded forward walk in sim

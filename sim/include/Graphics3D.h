@@ -87,7 +87,7 @@ class Graphics3D : public QOpenGLWidget, protected QOpenGLFunctions {
   bool show_floor = true;
   bool show_robot = true;
 
- private:
+ public:
   GameController _gameController;
   GamepadCommand _driverCommand;
 

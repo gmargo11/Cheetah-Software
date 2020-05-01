@@ -13,7 +13,7 @@ static void createErrorMessage(const std::string& text) {
   //QMessageBox mb;
   //mb.setText(QString(text.c_str()));
   //mb.exec();
-  printf(text.c_str());
+  printf("%s\n", text.c_str());
 }
 
 
@@ -265,7 +265,7 @@ void SimulationRunnerHeadless::handleSpiDebug(const lcm::ReceiveBuffer *rbuf, co
 
 }
 
-/*
+
 SimulationRunnerHeadless::~SimulationRunnerHeadless() {
   delete _simulation;
   delete _interfaceTaskManager;
@@ -273,7 +273,7 @@ SimulationRunnerHeadless::~SimulationRunnerHeadless() {
   delete _graphicsWindow;
   //delete ui;
 }
-*/
+
 
 /*!
  * External notification of UI update needed
@@ -364,9 +364,9 @@ void SimulationRunnerHeadless::run() {
 
   // graphics
   printf("[SimulationRunnerHeadless] Initialize Graphics...\n");
-  _graphicsWindow = new Graphics3D();
-  _graphicsWindow->show();
-  _graphicsWindow->resize(1280, 720);
+  //_graphicsWindow = new Graphics3D();
+  //_graphicsWindow->show();
+  //_graphicsWindow->resize(1280, 720);
 
   if (_simulationMode) {
     // run a simulation

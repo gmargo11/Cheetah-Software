@@ -76,7 +76,7 @@ public slots:
   Simulation* _simulation = nullptr;
   PeriodicTaskManager* _interfaceTaskManager = nullptr;
   RobotInterface* _robotInterface = nullptr;
-  Object* _graphicsWindow = nullptr;
+  void* _graphicsWindow = nullptr;
   SimulatorControlParameters _parameters;
   ControlParameters _userParameters;
   bool _simulationMode = false;

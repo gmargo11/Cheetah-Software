@@ -15,7 +15,7 @@
  * Initialize the simulator here.  It is _not_ okay to block here waiting for
  * the robot to connect. Use firstRun() instead!
  */
-Simulation::Simulation(RobotType robot, Graphics3D* window,
+Simulation::Simulation(RobotType robot,// Graphics3D* window,
                        SimulatorControlParameters& params, ControlParameters& userParams, std::function<void(void)> uiUpdate)
     : _simParams(params), _userParams(userParams), _tau(12) {
   _uiUpdate = uiUpdate;
@@ -48,7 +48,7 @@ Simulation::Simulation(RobotType robot, Graphics3D* window,
                                                  : buildCheetah3<double>();
   printf("[Simulation] Build actuator model...\n");
   _actuatorModels = _quadruped.buildActuatorModels();
-  _window = window;
+  _window = nullptr;
 
   // init graphics
   if (_window) {
@@ -56,11 +56,11 @@ Simulation::Simulation(RobotType robot, Graphics3D* window,
     Vec4<float> truthColor, seColor;
     truthColor << 0.2, 0.4, 0.2, 0.6;
     seColor << .75,.75,.75, 1.0;
-    _simRobotID = _robot == RobotType::MINI_CHEETAH ? window->setupMiniCheetah(truthColor, true, true)
-                                                    : window->setupCheetah3(truthColor, true, true);
-    _controllerRobotID = _robot == RobotType::MINI_CHEETAH
-                             ? window->setupMiniCheetah(seColor, false, false)
-                             : window->setupCheetah3(seColor, false, false);
+    //_simRobotID = _robot == RobotType::MINI_CHEETAH ? window->setupMiniCheetah(truthColor, true, true)
+    //                                                : window->setupCheetah3(truthColor, true, true);
+    //_controllerRobotID = _robot == RobotType::MINI_CHEETAH
+    //                         ? window->setupMiniCheetah(seColor, false, false)
+    //                         : window->setupCheetah3(seColor, false, false);
   }
 
   // init rigid body dynamics

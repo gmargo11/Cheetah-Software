@@ -188,7 +188,7 @@ void SimulationRunnerHeadless::run() {
 
     try {
       printf("[SimulationRunnerHeadless] Initialize simulator...\n");
-      _simulation = new Simulation(robotType, _graphicsWindow, _parameters, _userParameters,
+      _simulation = new Simulation(robotType, _parameters, _userParameters,
         // this will allow the simulation thread to poke us when there's a state change
         [this](){
         //QMetaObject::invokeMethod(this,"update_ui");
@@ -233,7 +233,7 @@ void SimulationRunnerHeadless::run() {
       });
 
     // graphics start
-    _graphicsWindow->setAnimating(true);
+    //_graphicsWindow->setAnimating(true);
   } else {
     printf("[SimulationRunnerHeadless] Init Robot Interface...\n");
     _interfaceTaskManager = new PeriodicTaskManager;
@@ -241,7 +241,7 @@ void SimulationRunnerHeadless::run() {
         new RobotInterface(robotType, _graphicsWindow, _interfaceTaskManager, _userParameters);
     //loadRobotParameters(_robotInterface->getParams());
     _robotInterface->startInterface();
-    _graphicsWindow->setAnimating(true);
+    //_graphicsWindow->setAnimating(true);
   }
 
   _state = SimulationRunnerHeadlessState::RUNNING;

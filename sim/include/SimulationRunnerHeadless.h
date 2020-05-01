@@ -28,7 +28,7 @@
 //class SimulationRunnerHeadless;
 //}
 
-enum class SimulationWindowState {
+enum class SimulationRunnerHeadlessState {
   STOPPED,
   RUNNING,
   ERROR
@@ -39,7 +39,7 @@ class SimulationRunnerHeadless{
 
  public:
   explicit SimulationRunnerHeadless();
-  ~SimControlPanel();
+  ~SimulationRunnerHeadless();
 
 
 
@@ -106,21 +106,21 @@ public slots:
   std::string getDefaultUserParameterFileName();
 //  void updateUiEnable();
   bool isStopped() {
-    return _state == SimulationWindowState::STOPPED;
+    return _state == SimulationRunnerHeadlessState::STOPPED;
   }
 
   bool isError() {
-    return _state == SimulationWindowState::ERROR;
+    return _state == SimulationRunnerHeadlessState::ERROR;
   }
 
   bool isRunning() {
-    return _state == SimulationWindowState::RUNNING;
+    return _state == SimulationRunnerHeadlessState::RUNNING;
   }
 
 
   std::thread _simThread;
   //bool _started = false;
-  SimulationWindowState _state = SimulationWindowState::STOPPED;
+  SimulationRunnerHeadlessState _state = SimulationRunnerHeadlessState::STOPPED;
 //  Ui::SimControlPanel* ui;
   Simulation* _simulation = nullptr;
   PeriodicTaskManager* _interfaceTaskManager = nullptr;

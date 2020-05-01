@@ -13,7 +13,7 @@ static void createErrorMessage(const std::string& text) {
   //QMessageBox mb;
   //mb.setText(QString(text.c_str()));
   //mb.exec();
-  printf(text);
+  printf(text.c_str());
 }
 
 
@@ -265,7 +265,7 @@ void SimulationRunnerHeadless::handleSpiDebug(const lcm::ReceiveBuffer *rbuf, co
 
 }
 
-
+/*
 SimulationRunnerHeadless::~SimulationRunnerHeadless() {
   delete _simulation;
   delete _interfaceTaskManager;
@@ -273,6 +273,7 @@ SimulationRunnerHeadless::~SimulationRunnerHeadless() {
   delete _graphicsWindow;
   //delete ui;
 }
+*/
 
 /*!
  * External notification of UI update needed
@@ -331,7 +332,7 @@ void SimulationRunnerHeadless::updateTerrainLabel() {
  * Simulation error
  */
 void SimulationRunnerHeadless::errorCallback(std::string errorMessage) {
-  _state = SimulationWindowState::ERROR; // go to error state
+  _state = SimulationRunnerHeadlessState::ERROR; // go to error state
   //updateUiEnable(); // update UI
   createErrorMessage("Simulation Error\n" + errorMessage); // display error dialog
 }
@@ -403,6 +404,7 @@ void SimulationRunnerHeadless::run() {
           //QMetaObject::invokeMethod(this, [=]() {
           //  this->errorCallback(str);
           //});
+	  this->errorCallback(str);
         };
 
         try {
@@ -427,7 +429,7 @@ void SimulationRunnerHeadless::run() {
     _graphicsWindow->setAnimating(true);
   }
 
-  _state = SimulationWindowState::RUNNING;
+  _state = SimulationRunnerHeadlessState::RUNNING;
   //updateUiEnable();
 }
 
@@ -457,7 +459,7 @@ void SimulationRunnerHeadless::on_stopButton_clicked() {
   _robotInterface = nullptr;
   _interfaceTaskManager = nullptr;
 
-  _state = SimulationWindowState::STOPPED;
+  _state = SimulationRunnerHeadlessState::STOPPED;
   //updateUiEnable();
 }
 

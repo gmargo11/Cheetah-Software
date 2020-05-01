@@ -86,11 +86,11 @@ SimulationRunnerHeadless::SimulationRunnerHeadless()
   //loadSimulationParameters(_parameters);
 
   // subscribe mc debug
-  _miniCheetahDebugLCM.subscribe("leg_control_data", &SimulationRunnerHeadless::handleSpiDebug, this);
-  _miniCheetahDebugLCMThread = std::thread([&](){
-   for(;;)
-     _miniCheetahDebugLCM.handle();
-  });
+  //_miniCheetahDebugLCM.subscribe("leg_control_data", &SimulationRunnerHeadless::handleSpiDebug, this);
+  //_miniCheetahDebugLCMThread = std::thread([&](){
+  // for(;;)
+  //   _miniCheetahDebugLCM.handle();
+  //});
 
 }
 

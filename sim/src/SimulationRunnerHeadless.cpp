@@ -1,25 +1,25 @@
-#include "SimControlPanel.h"
+#include "SimulationRunnerHeadless.h"
 #include <ControlParameters/ControlParameters.h>
-#include <QFileDialog>
-#include <QMessageBox>
 #include <ParamHandler.hpp>
 #include <leg_control_command_lcmt.hpp>
-#include "ui_SimControlPanel.h"
 #include "JoystickTest.h"
 
 
 /*!
  * Display an error messagebox with the given text
  */
+/*
 static void createErrorMessage(const std::string& text) {
   QMessageBox mb;
   mb.setText(QString(text.c_str()));
   mb.exec();
 }
+*/
 
 /*!
  * Display control parameters in a qtable.
  */
+/*
 static void updateQtableWithParameters(ControlParameters& params,
                                        QTableWidget& table) {
   table.setRowCount((s32)params.collection._map.size());
@@ -41,6 +41,7 @@ static void updateQtableWithParameters(ControlParameters& params,
     i++;
   }
 }
+*/
 
 std::string SimulationRunnerHeadless::getDefaultUserParameterFileName() {
   std::string path = getConfigDirectoryPath() + DEFAULT_USER_FILE;
@@ -89,7 +90,7 @@ SimulationRunnerHeadless::SimulationRunnerHeadless()
   }
 
   if(!_loadedUserSettings) {
-    printf("[SimControlPanel] Failed to load default user settings!\n");
+    printf("[SimulationRunnerHeadless] Failed to load default user settings!\n");
     throw std::runtime_error("Failed to load default user settings!");
   } else {
     // display user settings in qtable if we loaded successfully
@@ -97,7 +98,7 @@ SimulationRunnerHeadless::SimulationRunnerHeadless()
   }
 
   // load simulator parameters
-  printf("[SimControlPanel] Init simulator parameters...\n");
+  printf("[SimulationRunnerHeadless] Init simulator parameters...\n");
   _parameters.initializeFromYamlFile(getConfigDirectoryPath() +
                                      SIMULATOR_DEFAULT_PARAMETERS);
   if (!_parameters.isFullyInitialized()) {
@@ -111,21 +112,21 @@ SimulationRunnerHeadless::SimulationRunnerHeadless()
   }
   loadSimulationParameters(_parameters);
 
-  _pointsLCM.subscribe("cf_pointcloud", &SimControlPanel::handlePointsLCM, this);
-  _pointsLCMThread = std::thread(&SimControlPanel::pointsLCMThread, this); 
+  _pointsLCM.subscribe("cf_pointcloud", &SimulationRunnerHeadless::handlePointsLCM, this);
+  _pointsLCMThread = std::thread(&SimulationRunnerHeadless::pointsLCMThread, this); 
 
-  _heightmapLCM.subscribe("local_heightmap", &SimControlPanel::handleHeightmapLCM, this);
-  _heightmapLCMThread = std::thread(&SimControlPanel::heightmapLCMThread, this);
+  _heightmapLCM.subscribe("local_heightmap", &SimulationRunnerHeadless::handleHeightmapLCM, this);
+  _heightmapLCMThread = std::thread(&SimulationRunnerHeadless::heightmapLCMThread, this);
 
-  _indexmapLCM.subscribe("traversability", &SimControlPanel::handleIndexmapLCM, this);
-  _indexmapLCMThread = std::thread(&SimControlPanel::indexmapLCMThread, this);
+  _indexmapLCM.subscribe("traversability", &SimulationRunnerHeadless::handleIndexmapLCM, this);
+  _indexmapLCMThread = std::thread(&SimulationRunnerHeadless::indexmapLCMThread, this);
 
-  _ctrlVisionLCM.subscribe("velocity_cmd", &SimControlPanel::handleVelocityCMDLCM, this);
-  _ctrlVisionLCM.subscribe("obstacle_visual", &SimControlPanel::handleObstacleLCM, this);
-  _ctrlVisionLCMThread = std::thread(&SimControlPanel::ctrlVisionLCMThread, this);
+  _ctrlVisionLCM.subscribe("velocity_cmd", &SimulationRunnerHeadless::handleVelocityCMDLCM, this);
+  _ctrlVisionLCM.subscribe("obstacle_visual", &SimulationRunnerHeadless::handleObstacleLCM, this);
+  _ctrlVisionLCMThread = std::thread(&SimulationRunnerHeadless::ctrlVisionLCMThread, this);
 
   // subscribe mc debug
-  _miniCheetahDebugLCM.subscribe("leg_control_data", &SimControlPanel::handleSpiDebug, this);
+  _miniCheetahDebugLCM.subscribe("leg_control_data", &SimulationRunnerHeadless::handleSpiDebug, this);
   _miniCheetahDebugLCMThread = std::thread([&](){
    for(;;)
      _miniCheetahDebugLCM.handle();
@@ -133,7 +134,7 @@ SimulationRunnerHeadless::SimulationRunnerHeadless()
 
 }
 
-void SimControlPanel::handleVelocityCMDLCM(const lcm::ReceiveBuffer* rbuf, 
+void SimulationRunnerHeadless::handleVelocityCMDLCM(const lcm::ReceiveBuffer* rbuf, 
     const std::string & chan,
     const velocity_visual_t* msg){
   (void)rbuf;
@@ -148,7 +149,7 @@ void SimControlPanel::handleVelocityCMDLCM(const lcm::ReceiveBuffer* rbuf,
   }
 }
 
-void SimControlPanel::handleObstacleLCM(const lcm::ReceiveBuffer* rbuf, 
+void SimulationRunnerHeadless::handleObstacleLCM(const lcm::ReceiveBuffer* rbuf, 
     const std::string & chan,
     const obstacle_visual_t* msg){
   (void)rbuf;
@@ -172,7 +173,7 @@ void SimControlPanel::handleObstacleLCM(const lcm::ReceiveBuffer* rbuf,
   }
 
 }
-void SimControlPanel::handlePointsLCM(const lcm::ReceiveBuffer *rbuf,
+void SimulationRunnerHeadless::handlePointsLCM(const lcm::ReceiveBuffer *rbuf,
     const std::string &chan,
                                       const rs_pointcloud_t*msg) {
   (void)rbuf;
@@ -188,7 +189,7 @@ void SimControlPanel::handlePointsLCM(const lcm::ReceiveBuffer *rbuf,
   }
 }
 
-void SimControlPanel::handleIndexmapLCM(const lcm::ReceiveBuffer *rbuf,
+void SimulationRunnerHeadless::handleIndexmapLCM(const lcm::ReceiveBuffer *rbuf,
                                       const std::string &chan,
                                       const traversability_map_t *msg) {
   (void)rbuf;
@@ -205,7 +206,7 @@ void SimControlPanel::handleIndexmapLCM(const lcm::ReceiveBuffer *rbuf,
 }
 
 
-void SimControlPanel::handleHeightmapLCM(const lcm::ReceiveBuffer *rbuf,
+void SimulationRunnerHeadless::handleHeightmapLCM(const lcm::ReceiveBuffer *rbuf,
                                       const std::string &chan,
                                       const heightmap_t *msg) {
   (void)rbuf;
@@ -225,7 +226,7 @@ void SimControlPanel::handleHeightmapLCM(const lcm::ReceiveBuffer *rbuf,
   }
 }
 
-void SimControlPanel::handleSpiDebug(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+void SimulationRunnerHeadless::handleSpiDebug(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                                      const leg_control_data_lcmt *msg) {
   (void)rbuf;
   (void)chan;
@@ -264,26 +265,26 @@ void SimControlPanel::handleSpiDebug(const lcm::ReceiveBuffer *rbuf, const std::
 }
 
 
-SimControlPanel::~SimControlPanel() {
+SimulationRunnerHeadless::~SimulationRunnerHeadless() {
   delete _simulation;
   delete _interfaceTaskManager;
   delete _robotInterface;
   delete _graphicsWindow;
-  delete ui;
+  //delete ui;
 }
 
 /*!
  * External notification of UI update needed
  */
-void SimControlPanel::update_ui() {
-  updateUiEnable();
-}
+//void SimulationRunnerHeadless::update_ui() {
+//  updateUiEnable();
+//}
 
 /*!
  * Enable/disable buttons as needed based on what is running
  */
 /*
-void SimControlPanel::updateUiEnable() {
+void SimulationRunnerHeadless::updateUiEnable() {
   ui->startButton->setEnabled(!(isRunning() || isError()));
   ui->stopButton->setEnabled(isRunning() || isError());
   ui->joystickButton->setEnabled(isRunning() || isError());
@@ -321,14 +322,14 @@ void SimControlPanel::updateUiEnable() {
  * Update the name of the loaded terrain file label
  */
 /*
-void SimControlPanel::updateTerrainLabel() {
+void SimulationRunnerHeadless::updateTerrainLabel() {
   ui->terrainFileLabel->setText(QString(_terrainFileName.c_str()));
 }
 */
 /*!
  * Simulation error
  */
-void SimControlPanel::errorCallback(std::string errorMessage) {
+void SimulationRunnerHeadless::errorCallback(std::string errorMessage) {
   _state = SimulationWindowState::ERROR; // go to error state
   //updateUiEnable(); // update UI
   createErrorMessage("Simulation Error\n" + errorMessage); // display error dialog
@@ -337,7 +338,7 @@ void SimControlPanel::errorCallback(std::string errorMessage) {
 /*!
  * Start a simulation/robot run
  */
-void SimControlPanel::run() {
+void SimulationRunnerHeadless::run() {
   // get robot type
   RobotType robotType;
 
@@ -360,7 +361,7 @@ void SimControlPanel::run() {
   _simulationMode = true;//ui->simulatorButton->isChecked();
 
   // graphics
-  printf("[SimControlPanel] Initialize Graphics...\n");
+  printf("[SimulationRunnerHeadless] Initialize Graphics...\n");
   _graphicsWindow = new Graphics3D();
   _graphicsWindow->show();
   _graphicsWindow->resize(1280, 720);
@@ -369,11 +370,11 @@ void SimControlPanel::run() {
     // run a simulation
 
     try {
-      printf("[SimControlPanel] Initialize simulator...\n");
+      printf("[SimulationRunnerHeadless] Initialize simulator...\n");
       _simulation = new Simulation(robotType, _graphicsWindow, _parameters, _userParameters,
         // this will allow the simulation thread to poke us when there's a state change
         [this](){
-        QMetaObject::invokeMethod(this,"update_ui");
+        //QMetaObject::invokeMethod(this,"update_ui");
       });
       loadSimulationParameters(_simulation->getSimParams());
       loadRobotParameters(_simulation->getRobotParams());
@@ -398,9 +399,9 @@ void SimControlPanel::run() {
         // error callback function
         std::function<void(std::string)> error_function = [this](std::string str) {
           // Qt will take care of doing the call in the UI event loop
-          QMetaObject::invokeMethod(this, [=]() {
-            this->errorCallback(str);
-          });
+          //QMetaObject::invokeMethod(this, [=]() {
+          //  this->errorCallback(str);
+          //});
         };
 
         try {
@@ -416,7 +417,7 @@ void SimControlPanel::run() {
     // graphics start
     _graphicsWindow->setAnimating(true);
   } else {
-    printf("[SimControlPanel] Init Robot Interface...\n");
+    printf("[SimulationRunnerHeadless] Init Robot Interface...\n");
     _interfaceTaskManager = new PeriodicTaskManager;
     _robotInterface =
         new RobotInterface(robotType, _graphicsWindow, _interfaceTaskManager, _userParameters);
@@ -432,7 +433,7 @@ void SimControlPanel::run() {
 /*!
  * Stop the currently running simulation or robot connection
  */
-void SimControlPanel::on_stopButton_clicked() {
+void SimulationRunnerHeadless::on_stopButton_clicked() {
   if (_simulation) {
     _simulation->stop();
     _simThread.join();
@@ -464,7 +465,7 @@ void SimControlPanel::on_stopButton_clicked() {
 /*!
  * Populate the simulator qtable parameters
  */
-void SimControlPanel::loadSimulationParameters(
+void SimulationRunnerHeadless::loadSimulationParameters(
     SimulatorControlParameters& params) {
   _ignoreTableCallbacks = true;
   //updateQtableWithParameters(params, *ui->simulatorTable);
@@ -474,7 +475,7 @@ void SimControlPanel::loadSimulationParameters(
 /*!
  * Populate the robot qtable parameters
  */
-void SimControlPanel::loadRobotParameters(RobotControlParameters& params) {
+void SimulationRunnerHeadless::loadRobotParameters(RobotControlParameters& params) {
   _ignoreTableCallbacks = true;
   //updateQtableWithParameters(params, *ui->robotTable);
   _ignoreTableCallbacks = false;
@@ -483,7 +484,7 @@ void SimControlPanel::loadRobotParameters(RobotControlParameters& params) {
 /*!
  * Populate the robot qtable parameters
  */
-void SimControlPanel::loadUserParameters(ControlParameters& params) {
+void SimulationRunnerHeadless::loadUserParameters(ControlParameters& params) {
   _ignoreTableCallbacks = true;
   //updateQtableWithParameters(params, *ui->userControlTable);
   _ignoreTableCallbacks = false;
@@ -492,7 +493,7 @@ void SimControlPanel::loadUserParameters(ControlParameters& params) {
 /*!
  * Attempt to reset the joystick if a new one is connected
  */
-void SimControlPanel::on_joystickButton_clicked() {
+void SimulationRunnerHeadless::on_joystickButton_clicked() {
   if(isRunning()) {
     _graphicsWindow->resetGameController();
     JoystickTestWindow* window = new JoystickTestWindow(_graphicsWindow->getGameController());
@@ -501,7 +502,7 @@ void SimControlPanel::on_joystickButton_clicked() {
   }
 }
 
-void SimControlPanel::on_driverButton_clicked() {
+void SimulationRunnerHeadless::on_driverButton_clicked() {
   _mcDebugWindow.show();
 }
 
@@ -509,7 +510,7 @@ void SimControlPanel::on_driverButton_clicked() {
  * Respond to a change in the simulator table.
  */
 /*
-void SimControlPanel::on_simulatorTable_cellChanged(int row, int column) {
+void SimulationRunnerHeadless::on_simulatorTable_cellChanged(int row, int column) {
   if (_ignoreTableCallbacks) return;
 
   // we only allow values to change, which are in column 1
@@ -567,7 +568,7 @@ void SimControlPanel::on_simulatorTable_cellChanged(int row, int column) {
  * Save simulation config to file
  */
 /*
-void SimControlPanel::on_saveSimulatorButton_clicked() {
+void SimulationRunnerHeadless::on_saveSimulatorButton_clicked() {
   QString fileName = QFileDialog::getSaveFileName(
       nullptr, ("Save Simulator Table Values"), "../config", "All Files (*)");
   if (fileName == nullptr || fileName == "") {
@@ -583,7 +584,7 @@ void SimControlPanel::on_saveSimulatorButton_clicked() {
 /*!
  * Load simulation config from file
  *//*
-void SimControlPanel::on_loadSimulatorButton_clicked() {
+void SimulationRunnerHeadless::on_loadSimulatorButton_clicked() {
   QString fileName = QFileDialog::getOpenFileName(
       nullptr, ("Load Simulator Table Values"), "../config", "All Files (*)");
   if (fileName == nullptr || fileName == "") {
@@ -604,7 +605,7 @@ void SimControlPanel::on_loadSimulatorButton_clicked() {
   _parameters.unlockMutex();
 }
 
-void SimControlPanel::on_robotTable_cellChanged(int row, int column) {
+void SimulationRunnerHeadless::on_robotTable_cellChanged(int row, int column) {
   if (_ignoreTableCallbacks) return;
   if (column != 1) {
     return;
@@ -661,7 +662,7 @@ void SimControlPanel::on_robotTable_cellChanged(int row, int column) {
   }
 }
 
-void SimControlPanel::on_saveRobotButton_clicked() {
+void SimulationRunnerHeadless::on_saveRobotButton_clicked() {
   QString fileName = QFileDialog::getSaveFileName(
       nullptr, ("Save Robot Table Values"), "../config", "All Files (*)");
   if (fileName == nullptr || fileName == "") {
@@ -671,7 +672,7 @@ void SimControlPanel::on_saveRobotButton_clicked() {
   _simulation->getRobotParams().writeToYamlFile(fileName.toStdString());
 }
 
-void SimControlPanel::on_loadRobotButton_clicked() {
+void SimulationRunnerHeadless::on_loadRobotButton_clicked() {
   QString fileName = QFileDialog::getOpenFileName(
       nullptr, ("Load Quadruped Table Values"), "../config", "All Files (*)");
   if (fileName == nullptr || fileName == "") {
@@ -724,7 +725,7 @@ void SimControlPanel::on_loadRobotButton_clicked() {
   }
 }
 
-void SimControlPanel::on_setTerrainButton_clicked() {
+void SimulationRunnerHeadless::on_setTerrainButton_clicked() {
   QString fileName = QFileDialog::getOpenFileName(
       nullptr, ("Load Terrain Definition"), "../config", "All Files (*)");
   if (fileName == nullptr || fileName == "") {
@@ -736,7 +737,7 @@ void SimControlPanel::on_setTerrainButton_clicked() {
   updateTerrainLabel();
 }
 
-void SimControlPanel::on_userControlTable_cellChanged(int row, int column) {
+void SimulationRunnerHeadless::on_userControlTable_cellChanged(int row, int column) {
   if (_ignoreTableCallbacks) return;
   if (column != 1) {
     return;
@@ -797,7 +798,7 @@ void SimControlPanel::on_userControlTable_cellChanged(int row, int column) {
   }
 }
 
-void SimControlPanel::on_loadUserButton_clicked() {
+void SimulationRunnerHeadless::on_loadUserButton_clicked() {
   QString fileName = QFileDialog::getOpenFileName(
       nullptr, ("Load User Table Values"), "../config", "All Files (*)");
   if (fileName == nullptr || fileName == "") {
@@ -831,7 +832,7 @@ void SimControlPanel::on_loadUserButton_clicked() {
   }
 }
 
-void SimControlPanel::on_saveUserButton_clicked() {
+void SimulationRunnerHeadless::on_saveUserButton_clicked() {
   QString fileName = QFileDialog::getSaveFileName(
       nullptr, ("Save User Table Values"), "../config", "All Files (*)");
   if (fileName == nullptr || fileName == "") {
@@ -841,7 +842,7 @@ void SimControlPanel::on_saveUserButton_clicked() {
   _userParameters.writeToYamlFile(fileName.toStdString());
 }
 
-void SimControlPanel::on_goHomeButton_clicked() {
+void SimulationRunnerHeadless::on_goHomeButton_clicked() {
   printf("go home\n");
   FBModelState<double> homeState;
   homeState.bodyOrientation << 1, 0, 0, 0;
@@ -854,7 +855,7 @@ void SimControlPanel::on_goHomeButton_clicked() {
   _simulation->setRobotState(homeState);
 }
 
-void SimControlPanel::on_kickButton_clicked() {
+void SimulationRunnerHeadless::on_kickButton_clicked() {
   // velocity of the floating base:
   SVec<double> kickVelocity;
   kickVelocity << ui->kickAngularX->text().toDouble(),

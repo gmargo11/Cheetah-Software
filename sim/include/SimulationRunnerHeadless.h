@@ -3,10 +3,9 @@
  * @brief QT gui for the simulator
  */
 
-#ifndef SIMCONTROLPANEL_H
-#define SIMCONTROLPANEL_H
+#ifndef SIMULATORRUNNERHEADLESS_H
+#define SIMULATORRUNNERHEADLESS_H
 
-#include <QMainWindow>
 #include <thread>
 #include "ControlParameters/SimulatorParameters.h"
 #include "Graphics3D.h"

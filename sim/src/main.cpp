@@ -12,6 +12,7 @@
 #include "Graphics3D.h"
 #include "SimControlPanel.h"
 #include "Simulation.h"
+#include "SimulationRunnerHeadless.h"
 #include "Utilities/utilities.h"
 #include "Utilities/SegfaultHandler.h"
 
@@ -25,17 +26,20 @@
 /*!
  * Setup QT and run a simulation
  */
-int main(int argc, char *argv[]) {
+int main() {
   install_segfault_handler(nullptr);
   // set up Qt
-  QApplication a(argc, argv);
+  //QApplication a(argc, argv);
 
   // open simulator UI
-  SimControlPanel panel;
-  panel.show();
+  //SimControlPanel panel;
+  //panel.show();
 
   // run the Qt program
-  a.exec();
+  //a.exec();
+  //
+  SimulationRunnerHeadless simheadless;
+  simheadless.run();
 
   return 0;
 }

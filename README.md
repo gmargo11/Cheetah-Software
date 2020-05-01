@@ -10,3 +10,10 @@ export QT_QPA_PLATFORM="offscreen"
 cd mc-build
 ./sim/sim
 ```
+
+TODO:
+- ffmpeg pipeline to download headless sim results
+- Demonstrate hardcoded forward walk in sim
+- Send direction, velocity commands from python via lcm
+- ...
+- Send footstep commands via LCM

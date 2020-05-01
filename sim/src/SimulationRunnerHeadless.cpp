@@ -113,19 +113,6 @@ SimulationRunnerHeadless::SimulationRunnerHeadless()
   }
   //loadSimulationParameters(_parameters);
 
-  _pointsLCM.subscribe("cf_pointcloud", &SimulationRunnerHeadless::handlePointsLCM, this);
-  _pointsLCMThread = std::thread(&SimulationRunnerHeadless::pointsLCMThread, this); 
-
-  _heightmapLCM.subscribe("local_heightmap", &SimulationRunnerHeadless::handleHeightmapLCM, this);
-  _heightmapLCMThread = std::thread(&SimulationRunnerHeadless::heightmapLCMThread, this);
-
-  _indexmapLCM.subscribe("traversability", &SimulationRunnerHeadless::handleIndexmapLCM, this);
-  _indexmapLCMThread = std::thread(&SimulationRunnerHeadless::indexmapLCMThread, this);
-
-  _ctrlVisionLCM.subscribe("velocity_cmd", &SimulationRunnerHeadless::handleVelocityCMDLCM, this);
-  _ctrlVisionLCM.subscribe("obstacle_visual", &SimulationRunnerHeadless::handleObstacleLCM, this);
-  _ctrlVisionLCMThread = std::thread(&SimulationRunnerHeadless::ctrlVisionLCMThread, this);
-
   // subscribe mc debug
   _miniCheetahDebugLCM.subscribe("leg_control_data", &SimulationRunnerHeadless::handleSpiDebug, this);
   _miniCheetahDebugLCMThread = std::thread([&](){

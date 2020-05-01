@@ -548,6 +548,8 @@ void Graphics3D::paintGL() {
                     QString(infoString));
   painter2.end();
 
+  
+
   ++_frame;
 }
 

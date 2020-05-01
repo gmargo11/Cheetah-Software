@@ -32,8 +32,15 @@ int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 
   // open simulator UI
-  SimulationRunnerHeadless simrunner;
-  simrunner.run();
+  //SimulationRunnerHeadless simrunner;
+  //simrunner.run();
+  SimControlPanel panel;
+  panel.show();
+
+  // Run Simulator
+  panel->ui->miniCheetahButton->setChecked(true);
+  panel->ui->simulatorButton->setChecked(true);
+  panel.on_startButton_clicked();
 
   // run the Qt program
   a.exec();

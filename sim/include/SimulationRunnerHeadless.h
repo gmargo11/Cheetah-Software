@@ -35,7 +35,7 @@ enum class SimulationWindowState {
 };
 
 class SimulationRunnerHeadless{
-  Q_OBJECT
+//  Q_OBJECT
 
  public:
   explicit SimulationRunnerHeadless();
@@ -97,9 +97,9 @@ public slots:
 
   void updateTerrainLabel();
 
-  void loadSimulationParameters(SimulatorControlParameters& params);
-  void loadRobotParameters(RobotControlParameters& params);
-  void loadUserParameters(ControlParameters& params);
+  //void loadSimulationParameters(SimulatorControlParameters& params);
+  //void loadRobotParameters(RobotControlParameters& params);
+  //void loadUserParameters(ControlParameters& params);
 
  private:
 

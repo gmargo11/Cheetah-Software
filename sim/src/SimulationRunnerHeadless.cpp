@@ -8,13 +8,14 @@
 /*!
  * Display an error messagebox with the given text
  */
-/*
+
 static void createErrorMessage(const std::string& text) {
-  QMessageBox mb;
-  mb.setText(QString(text.c_str()));
-  mb.exec();
+  //QMessageBox mb;
+  //mb.setText(QString(text.c_str()));
+  //mb.exec();
+  printf(text);
 }
-*/
+
 
 /*!
  * Display control parameters in a qtable.
@@ -73,7 +74,7 @@ std::string SimulationRunnerHeadless::getDefaultUserParameterFileName() {
  */
 SimulationRunnerHeadless::SimulationRunnerHeadless()
     : _userParameters("user-parameters"),
-      _heightmapLCM9getLcmUrl(255)),
+      _heightmapLCM(getLcmUrl(255)),
       _pointsLCM(getLcmUrl(255)),
       _indexmapLCM(getLcmUrl(255)),
       _ctrlVisionLCM(getLcmUrl(255)),
@@ -94,7 +95,7 @@ SimulationRunnerHeadless::SimulationRunnerHeadless()
     throw std::runtime_error("Failed to load default user settings!");
   } else {
     // display user settings in qtable if we loaded successfully
-    loadUserParameters(_userParameters);
+    //loadUserParameters(_userParameters);
   }
 
   // load simulator parameters
@@ -110,7 +111,7 @@ SimulationRunnerHeadless::SimulationRunnerHeadless()
   } else {
     printf("\tsim parameters are all good\n");
   }
-  loadSimulationParameters(_parameters);
+  //loadSimulationParameters(_parameters);
 
   _pointsLCM.subscribe("cf_pointcloud", &SimulationRunnerHeadless::handlePointsLCM, this);
   _pointsLCMThread = std::thread(&SimulationRunnerHeadless::pointsLCMThread, this); 
@@ -376,8 +377,8 @@ void SimulationRunnerHeadless::run() {
         [this](){
         //QMetaObject::invokeMethod(this,"update_ui");
       });
-      loadSimulationParameters(_simulation->getSimParams());
-      loadRobotParameters(_simulation->getRobotParams());
+      //loadSimulationParameters(_simulation->getSimParams());
+      //loadRobotParameters(_simulation->getRobotParams());
 
       // terrain
       printf("[SimControlParameter] Load terrain...\n");
@@ -421,7 +422,7 @@ void SimulationRunnerHeadless::run() {
     _interfaceTaskManager = new PeriodicTaskManager;
     _robotInterface =
         new RobotInterface(robotType, _graphicsWindow, _interfaceTaskManager, _userParameters);
-    loadRobotParameters(_robotInterface->getParams());
+    //loadRobotParameters(_robotInterface->getParams());
     _robotInterface->startInterface();
     _graphicsWindow->setAnimating(true);
   }
@@ -465,34 +466,39 @@ void SimulationRunnerHeadless::on_stopButton_clicked() {
 /*!
  * Populate the simulator qtable parameters
  */
+/*
 void SimulationRunnerHeadless::loadSimulationParameters(
     SimulatorControlParameters& params) {
   _ignoreTableCallbacks = true;
   //updateQtableWithParameters(params, *ui->simulatorTable);
   _ignoreTableCallbacks = false;
 }
+*/
 
 /*!
  * Populate the robot qtable parameters
  */
+/*
 void SimulationRunnerHeadless::loadRobotParameters(RobotControlParameters& params) {
   _ignoreTableCallbacks = true;
   //updateQtableWithParameters(params, *ui->robotTable);
   _ignoreTableCallbacks = false;
 }
-
+*/
 /*!
  * Populate the robot qtable parameters
  */
+/*
 void SimulationRunnerHeadless::loadUserParameters(ControlParameters& params) {
   _ignoreTableCallbacks = true;
   //updateQtableWithParameters(params, *ui->userControlTable);
   _ignoreTableCallbacks = false;
 }
-
+*/
 /*!
  * Attempt to reset the joystick if a new one is connected
  */
+/*
 void SimulationRunnerHeadless::on_joystickButton_clicked() {
   if(isRunning()) {
     _graphicsWindow->resetGameController();
@@ -501,10 +507,12 @@ void SimulationRunnerHeadless::on_joystickButton_clicked() {
     delete window;
   }
 }
-
+*/
+/*
 void SimulationRunnerHeadless::on_driverButton_clicked() {
   _mcDebugWindow.show();
 }
+*/
 
 /*!
  * Respond to a change in the simulator table.

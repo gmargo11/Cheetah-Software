@@ -487,7 +487,7 @@ void SimControlPanel::start_headless() {
   //  return;
   //}
 
-  _simulationMode = true//ui->simulatorButton->isChecked();
+  _simulationMode = true;//ui->simulatorButton->isChecked();
 
   // graphics
   printf("[SimControlPanel] Initialize Graphics...\n");

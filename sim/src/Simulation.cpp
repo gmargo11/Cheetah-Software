@@ -110,7 +110,7 @@ Simulation::Simulation(RobotType robot, Graphics3D* window,
   // x0.q[11] = 2.4;
 
   // Initial (Mini Cheetah stand)
-  /x0.bodyPosition[2] = -0.185;
+  x0.bodyPosition[2] = -0.185;
   // Cheetah 3
   // x0.bodyPosition[2] = -0.075;
 

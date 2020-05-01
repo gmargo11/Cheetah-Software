@@ -44,10 +44,8 @@ std::string SimulationRunnerHeadless::getDefaultUserParameterFileName() {
 /*!
  * Init sim window
  */
-SimulationRunnerHeadless::SimulationRunnerHeadless(QWidget* parent)
-    : QMainWindow(parent),
-      ui(new Ui::SimControlPanel),
-      _userParameters("user-parameters"),
+SimulationRunnerHeadless::SimulationRunnerHeadless()
+    : _userParameters("user-parameters"),
       _terrainFileName(getConfigDirectoryPath() + DEFAULT_TERRAIN_FILE),
       _heightmapLCM(getLcmUrl(255)),
       _pointsLCM(getLcmUrl(255)),
@@ -56,7 +54,7 @@ SimulationRunnerHeadless::SimulationRunnerHeadless(QWidget* parent)
       _miniCheetahDebugLCM(getLcmUrl(255))
 {
 
-  ui->setupUi(this); // QT setup
+  //ui->setupUi(this); // QT setup
   //updateUiEnable();  // enable/disable buttons as needed.
   //updateTerrainLabel(); // display name of loaded terrain file
 

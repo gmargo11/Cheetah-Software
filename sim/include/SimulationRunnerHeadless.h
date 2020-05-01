@@ -49,57 +49,8 @@ public slots:
 
   void run();
 
- private slots:
+  void stop();
 
-//  void run();
-
-  void on_stopButton_clicked();
-
-//  void on_joystickButton_clicked();
-
-//  void on_driverButton_clicked();
-
-//  void on_simulatorTable_cellChanged(int row, int column);
-
-//  void on_saveSimulatorButton_clicked();
-
-//  void on_loadSimulatorButton_clicked();
-
-//  void on_robotTable_cellChanged(int row, int column);
-
-//  void on_saveRobotButton_clicked();
-
-//  void on_loadRobotButton_clicked();
-
-//  void on_goHomeButton_clicked();
-
-//  void on_kickButton_clicked();
-
-//  void on_userControlTable_cellChanged(int row, int column);
-
-//  void on_saveUserButton_clicked();
-
-//  void on_loadUserButton_clicked();
-
-//  void on_setTerrainButton_clicked();
-
-  void on_hide_floor_checkbox_toggled(bool x) {
-    if(_graphicsWindow) {
-      _graphicsWindow->setHideFloor(x);
-    }
-  }
-
-  void on_hide_robot_checkbox_toggled(bool x) {
-    if(_graphicsWindow) {
-      _graphicsWindow->setHideRobot(x);
-    }
-  }
-
-  void updateTerrainLabel();
-
-  //void loadSimulationParameters(SimulatorControlParameters& params);
-  //void loadRobotParameters(RobotControlParameters& params);
-  //void loadUserParameters(ControlParameters& params);
 
  private:
 
@@ -133,25 +84,6 @@ public slots:
   bool _ignoreTableCallbacks = false;
   bool _loadedUserSettings = false;
   std::string _terrainFileName;
-
-  // Vision data Drawing
-  void handleHeightmapLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, 
-      const heightmap_t* msg);
-  void heightmapLCMThread() { while (true) { _heightmapLCM.handle(); } }
-
-  void handlePointsLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, 
-      const rs_pointcloud_t* msg);
-  void pointsLCMThread() { while (true) { _pointsLCM.handle(); } }
-
-  void handleIndexmapLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, 
-      const traversability_map_t* msg);
-  void indexmapLCMThread() { while (true) { _indexmapLCM.handle(); } }
-
-  void handleObstacleLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, 
-      const obstacle_visual_t* msg);
-  void handleVelocityCMDLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, 
-      const velocity_visual_t* msg);
-  void ctrlVisionLCMThread(){ while(true){ _ctrlVisionLCM.handle();  } }
 
   void handleSpiDebug(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const leg_control_data_lcmt* msg);
 

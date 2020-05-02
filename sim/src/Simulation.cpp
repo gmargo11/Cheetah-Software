@@ -637,6 +637,7 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
     if (frameTimer.getSeconds() > frameTime) {
       double realElapsedTime = frameTimer.getSeconds();
       frameTimer.start();
+      //printf("frame!\n");
       if (graphics && _window) {
         double simRate = (_currentSimTime - lastSimTime) / realElapsedTime;
         lastSimTime = _currentSimTime;
@@ -648,6 +649,11 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
                 _desiredSimSpeed, freeRunTimer.getSeconds(), _currentSimTime,
                 simRate);
         updateGraphics();
+	//printf("graphics update!\n");
+	printf("%f %f %f\n",_simulator->getState().bodyPosition[0],
+			_simulator->getState().bodyPosition[1],
+			_simulator->getState().bodyPosition[2]);
+	//_window->grab();
       }
       if (!_window->IsPaused() && (desiredSteps - steps) < nStepsPerFrame)
         desiredSteps += nStepsPerFrame;

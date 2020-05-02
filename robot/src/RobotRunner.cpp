@@ -103,6 +103,7 @@ void RobotRunner::run() {
     _legController->setEnabled(true);
 
     if( (rc_control.mode == 0) && controlParameters->use_rc ) {
+    //if(false){ // eliminate estop!!
       if(count_ini%1000 ==0)   printf("ESTOP!\n");
       for (int leg = 0; leg < 4; leg++) {
         _legController->commands[leg].zero();

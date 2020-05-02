@@ -492,7 +492,7 @@ void SimControlPanel::start_headless() {
   // graphics
   printf("[SimControlPanel] Initialize Graphics...\n");
   _graphicsWindow = new Graphics3D();
-  _graphicsWindow->show();
+  //_graphicsWindow->show();
   _graphicsWindow->resize(1280, 720);
 
   if (_simulationMode) {

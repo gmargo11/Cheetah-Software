@@ -50,7 +50,10 @@ class Graphics3D : public QOpenGLWidget, protected QOpenGLFunctions {
   DrawList _drawList;
   char infoString[200] = "";
 
-  GamepadCommand &getDriverCommand() { return _driverCommand; }
+  GamepadCommand &getDriverCommand() {
+	  printf("[Graphics] updating gamepad command"); 
+	  _gameController.updateGamepadCommand(_driverCommand);
+	  return _driverCommand; }
   GameController &getGameController() { return _gameController; }
 
   void resetGameController() { _gameController.findNewController(); }

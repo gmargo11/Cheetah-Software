@@ -79,8 +79,11 @@ void GameController::updateGamepadCommand(GamepadCommand &gamepadCommand) {
     gamepadCommand.rightStickAnalog =
         Vec2<float>(_qGamepad->axisRightX(), -_qGamepad->axisRightY());
   } else {
-    printf("%f", gamepadCommand.a)
-    //gamepadCommand.zero();  // no joystick, return all zeros
+    printf("%d", gamepadCommand.a);
+    printf("[GameController] zeroing");
+    gamepadCommand.zero();  // no joystick, return all zeros
+    gamepadCommand.a = 1;
+    gamepadCommand.leftStickAnalog = Vec2<float>(0.0, 1.0);
   }
 
 

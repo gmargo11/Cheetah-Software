@@ -56,7 +56,7 @@ void DesiredStateCommand<T>::convertToStateCommands() {
       joystickRight.setZero();
     }
   } else { // No Remote Controller
-    printf("getting gamepad command!");
+    //printf("getting gamepad command!");
     joystickLeft = gamepadCommand->leftStickAnalog;
     joystickRight = gamepadCommand->rightStickAnalog;
     trigger_pressed = gamepadCommand->a;
@@ -85,7 +85,7 @@ void DesiredStateCommand<T>::convertToStateCommands() {
   data.stateDes(4) = deadband(rightAnalogStick[1], minPitch, maxPitch);  // Pitch
   data.stateDes(5) = dt * data.stateDes(11);  // Yaw
 
-  printf("%f", data.stateDes(6));
+  //printf("%f", data.stateDes(6));
 }
 
 template <typename T>

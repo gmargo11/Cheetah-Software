@@ -1,0 +1,9 @@
+struct phase_target_lcmt {
+  float CoM_rotation;
+  float CoM_translation[2];
+  float CoM_vel[2];
+  float p_foot[4][2];
+  int64_t contacts[4];
+  float t_S;
+  float t_E;
+}

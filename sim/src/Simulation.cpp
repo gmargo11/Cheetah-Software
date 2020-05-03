@@ -228,7 +228,7 @@ void Simulation::handleControlParameter(
     case (s8)ControlParameterRequestKind::SET_USER_PARAM_BY_NAME: {
       
         std::string name((char*)msg->name);
-        ControlParameter& param = _userParams->collection.lookup(name);
+        ControlParameter& param = _userParams.collection.lookup(name);
 
         // type check
         if ((s8)param._kind != msg->parameterKind) {
@@ -315,7 +315,7 @@ void Simulation::handleControlParameter(
     break;
   }
 
-  _lcm.publish("control_response_pybridge", &_parameter_response_lcmt);
+  _lcm->publish("control_response_pybridge", &_parameter_response_lcmt);
 }
 
 void Simulation::sendControlParameter(const std::string& name,

@@ -41,7 +41,7 @@ Simulation::Simulation(RobotType robot, Graphics3D* window,
     }
     //setup lcm param setting
     _parameter_request_lcmt.requestNumber = 0;
-    _lcm->subscribe("control_command_pybridge", &Simulation:handleControlParameter, )
+    _lcm->subscribe("control_command_pybridge", &Simulation::handleControlParameter, this);
   }
 
   // init quadruped info

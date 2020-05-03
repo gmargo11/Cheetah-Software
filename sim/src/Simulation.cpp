@@ -245,7 +245,7 @@ void Simulation::handleControlParameter(
         memcpy(&v, msg->value, sizeof(v));
         param.set(v, (ControlParameterValueKind)msg->parameterKind);
         
-        this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true)
+        this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true);
 
         /*
         // respond:
@@ -287,7 +287,7 @@ void Simulation::handleControlParameter(
       memcpy(&v, msg->value, sizeof(v));
       param.set(v, (ControlParameterValueKind)msg->parameterKind);
       
-      this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true)
+      this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true);
 
       /*
       // respond:

@@ -150,7 +150,7 @@ class Simulation {
   lcm::LCM* _lcm = nullptr;
 
   control_parameter_request_lcmt _parameter_request_lcmt;
-  control_parameter_response_lcmt _parameter_response_lcmt;
+  control_parameter_respones_lcmt _parameter_response_lcmt;
 
   std::function<void(void)> _uiUpdate;
   std::function<void(std::string)> _errorCallback;

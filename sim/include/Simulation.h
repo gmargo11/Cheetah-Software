@@ -28,6 +28,7 @@
 #include <lcm/lcm-cpp.hpp>
 #include "simulator_lcmt.hpp"
 #include "control_parameter_request_lcmt.hpp"
+#include "control_parameter_respones_lcmt.hpp"
 
 #define SIM_LCM_NAME "simulator_state"
 

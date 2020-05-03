@@ -39,6 +39,9 @@ Simulation::Simulation(RobotType robot, Graphics3D* window,
       printf("[ERROR] Failed to set up LCM\n");
       throw std::runtime_error("lcm bad");
     }
+    //setup lcm param setting
+    _parameter_request_lcmt.requestNumber = 0;
+    _lcm->subscribe("control_command_pybridge", &Simulation:handleControlParameter, )
   }
 
   // init quadruped info
@@ -211,6 +214,109 @@ Simulation::Simulation(RobotType robot, Graphics3D* window,
 
   _simParams.unlockMutex();
   printf("[Simulation] Ready!\n");
+}
+
+void Simulation::handleControlParameter(
+    const lcm::ReceiveBuffer* rbuf, const std::string& chan,
+    const control_parameter_request_lcmt* msg) {
+  (void)rbuf;
+  (void)chan;
+
+  printf("[Simulation] Received Control Parameter Message!");
+
+  switch (msg->requestKind) {
+    case (s8)ControlParameterRequestKind::SET_USER_PARAM_BY_NAME: {
+      if(!_userParams) {
+        printf("[Warning] Got user param %s, but not using user parameters!\n",
+               (char*)msg->name);
+      } else {
+        std::string name((char*)msg->name);
+        ControlParameter& param = _userParams->collection.lookup(name);
+
+        // type check
+        if ((s8)param._kind != msg->parameterKind) {
+          throw std::runtime_error(
+              "type mismatch for parameter " + name + ", robot thinks it is " +
+              controlParameterValueKindToString(param._kind) +
+              " but received a command to set it to " +
+              controlParameterValueKindToString(
+                  (ControlParameterValueKind)msg->parameterKind));
+        }
+
+        // do the actual set
+        /*ControlParameterValue v;
+        memcpy(&v, msg->value, sizeof(v));
+        param.set(v, (ControlParameterValueKind)msg->parameterKind);
+        */
+        this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true)
+
+        // respond:
+        _parameter_response_lcmt.requestNumber =
+            msg->requestNumber;  // acknowledge that the set has happened
+        _parameter_response_lcmt.parameterKind =
+            msg->parameterKind;  // just for debugging print statements
+        memcpy(_parameter_response_lcmt.value, msg->value, 64);
+        //_parameter_response_lcmt.value = _parameter_request_lcmt.value; // just
+        //for debugging print statements
+        strcpy((char*)_parameter_response_lcmt.name,
+               name.c_str());  // just for debugging print statements
+        _parameter_response_lcmt.requestKind = msg->requestKind;
+
+        printf("[User Control Parameter] set %s to %s\n", name.c_str(),
+               controlParameterValueToString(
+                   v, (ControlParameterValueKind)msg->parameterKind)
+                   .c_str());
+      }
+    } break;
+
+    case (s8)ControlParameterRequestKind::SET_ROBOT_PARAM_BY_NAME: {
+      std::string name((char*)msg->name);
+      ControlParameter& param = _robotParams.collection.lookup(name);
+
+      // type check
+      if ((s8)param._kind != msg->parameterKind) {
+        throw std::runtime_error(
+            "type mismatch for parameter " + name + ", robot thinks it is " +
+            controlParameterValueKindToString(param._kind) +
+            " but received a command to set it to " +
+            controlParameterValueKindToString(
+                (ControlParameterValueKind)msg->parameterKind));
+      }
+
+      // do the actual set
+      /*
+      ControlParameterValue v;
+      memcpy(&v, msg->value, sizeof(v));
+      param.set(v, (ControlParameterValueKind)msg->parameterKind);
+      */
+      this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true)
+
+      // respond:
+      _parameter_response_lcmt.requestNumber =
+          msg->requestNumber;  // acknowledge that the set has happened
+      _parameter_response_lcmt.parameterKind =
+          msg->parameterKind;  // just for debugging print statements
+      memcpy(_parameter_response_lcmt.value, msg->value, 64);
+      //_parameter_response_lcmt.value = _parameter_request_lcmt.value; // just
+      //for debugging print statements
+      strcpy((char*)_parameter_response_lcmt.name,
+             name.c_str());  // just for debugging print statements
+      _parameter_response_lcmt.requestKind = msg->requestKind;
+
+      printf("[Robot Control Parameter] set %s to %s\n", name.c_str(),
+             controlParameterValueToString(
+                 v, (ControlParameterValueKind)msg->parameterKind)
+                 .c_str());
+
+    } break;
+
+    default: {
+      throw std::runtime_error("parameter type unsupported");
+    }
+    break;
+  }
+
+  _interfaceLCM.publish("control_response_pybridge", &_parameter_response_lcmt);
 }
 
 void Simulation::sendControlParameter(const std::string& name,

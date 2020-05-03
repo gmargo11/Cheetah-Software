@@ -27,6 +27,7 @@
 
 #include <lcm/lcm-cpp.hpp>
 #include "simulator_lcmt.hpp"
+#include "control_parameter_request_lcmt.hpp"
 
 #define SIM_LCM_NAME "simulator_state"
 
@@ -143,6 +144,8 @@ class Simulation {
   TI_BoardControl _tiBoards[4];
   RobotType _robot;
   lcm::LCM* _lcm = nullptr;
+
+  control_parameter_request_lcmt _parameter_request_lcmt;
 
   std::function<void(void)> _uiUpdate;
   std::function<void(std::string)> _errorCallback;

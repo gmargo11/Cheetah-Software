@@ -46,7 +46,7 @@ void FSM_State_StandUp<T>::onEnter() {
  */
 template <typename T>
 void FSM_State_StandUp<T>::run() {
-
+  //printf("[FSM_State_Standup] running");
   if(this->_data->_quadruped->_robotType == RobotType::MINI_CHEETAH) {
     T hMax = 0.25;
     T progress = 2 * iter * this->_data->controlParameters->controller_dt;
@@ -74,7 +74,9 @@ template <typename T>
 FSM_StateName FSM_State_StandUp<T>::checkTransition() {
   this->nextStateName = this->stateName;
   iter++;
-
+  printf("[FSM_State_Standup] %f", this->_data->controlParameters->control_mode);
+  
+  
   // Switch FSM control mode
   switch ((int)this->_data->controlParameters->control_mode) {
     case K_STAND_UP:

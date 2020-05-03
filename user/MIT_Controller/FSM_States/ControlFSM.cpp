@@ -95,7 +95,7 @@ void ControlFSM<T>::runFSM() {
 
   // Check the robot state for safe operation
   operatingMode = safetyPreCheck();
-
+  
   if(data.controlParameters->use_rc){
     int rc_mode = data._desiredStateCommand->rcCommand->mode;
     if(rc_mode == RC_mode::RECOVERY_STAND){
@@ -123,6 +123,10 @@ void ControlFSM<T>::runFSM() {
     if (operatingMode == FSM_OperatingMode::NORMAL) {
       // Check the current state for any transition
       nextStateName = currentState->checkTransition();
+      //std::cout << currentState->stateString;
+      //nextState = getNextState(nextStateName);
+      //std::cout << nextState->stateString;
+      //nextState = FSM_StateName::LOCOMOTION;
 
       // Detect a commanded transition
       if (nextStateName != currentState->stateName) {
@@ -133,7 +137,7 @@ void ControlFSM<T>::runFSM() {
         nextState = getNextState(nextStateName);
 
         // Print transition initialized info
-        //printInfo(1);
+       // printInfo(1);
 
       } else {
         // Run the iteration for the current state normally

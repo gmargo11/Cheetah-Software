@@ -66,6 +66,7 @@ void FSM_State_Locomotion<T>::onEnter() {
 template <typename T>
 void FSM_State_Locomotion<T>::run() {
   // Call the locomotion control logic for this iteration
+  printf("[FSM_State_Locomotion] Locomotion Control Step!");
   LocomotionControlStep();
 }
 

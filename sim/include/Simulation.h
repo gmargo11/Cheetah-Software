@@ -80,10 +80,10 @@ class Simulation {
                             ControlParameterValue value,
                             ControlParameterValueKind kind,
                             bool isUser);
-  
+
   void handleControlParameter(const lcm::ReceiveBuffer* rbuf,
                               const std::string& chan,
-                              const control_parameter_respones_lcmt* msg);
+                              const control_parameter_request_lcmt* msg);
 
   void resetSimTime() {
     _currentSimTime = 0.;

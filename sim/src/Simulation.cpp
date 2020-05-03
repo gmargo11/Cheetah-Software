@@ -226,10 +226,7 @@ void Simulation::handleControlParameter(
 
   switch (msg->requestKind) {
     case (s8)ControlParameterRequestKind::SET_USER_PARAM_BY_NAME: {
-      if(!_userParams) {
-        printf("[Warning] Got user param %s, but not using user parameters!\n",
-               (char*)msg->name);
-      } else {
+      
         std::string name((char*)msg->name);
         ControlParameter& param = _userParams->collection.lookup(name);
 
@@ -244,12 +241,13 @@ void Simulation::handleControlParameter(
         }
 
         // do the actual set
-        /*ControlParameterValue v;
+        ControlParameterValue v;
         memcpy(&v, msg->value, sizeof(v));
         param.set(v, (ControlParameterValueKind)msg->parameterKind);
-        */
+        
         this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true)
 
+        /*
         // respond:
         _parameter_response_lcmt.requestNumber =
             msg->requestNumber;  // acknowledge that the set has happened
@@ -266,7 +264,7 @@ void Simulation::handleControlParameter(
                controlParameterValueToString(
                    v, (ControlParameterValueKind)msg->parameterKind)
                    .c_str());
-      }
+        */
     } break;
 
     case (s8)ControlParameterRequestKind::SET_ROBOT_PARAM_BY_NAME: {
@@ -284,13 +282,14 @@ void Simulation::handleControlParameter(
       }
 
       // do the actual set
-      /*
+      
       ControlParameterValue v;
       memcpy(&v, msg->value, sizeof(v));
       param.set(v, (ControlParameterValueKind)msg->parameterKind);
-      */
+      
       this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true)
 
+      /*
       // respond:
       _parameter_response_lcmt.requestNumber =
           msg->requestNumber;  // acknowledge that the set has happened
@@ -307,7 +306,7 @@ void Simulation::handleControlParameter(
              controlParameterValueToString(
                  v, (ControlParameterValueKind)msg->parameterKind)
                  .c_str());
-
+      */
     } break;
 
     default: {
@@ -316,7 +315,7 @@ void Simulation::handleControlParameter(
     break;
   }
 
-  _interfaceLCM.publish("control_response_pybridge", &_parameter_response_lcmt);
+  _lcm.publish("control_response_pybridge", &_parameter_response_lcmt);
 }
 
 void Simulation::sendControlParameter(const std::string& name,

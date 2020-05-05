@@ -229,7 +229,7 @@ void Simulation::handleControlParameter(
     case (s8)ControlParameterRequestKind::SET_USER_PARAM_BY_NAME: {
       
         std::string name((char*)msg->name);
-        std::cout << name;
+        std::cout << "Name" << name;
         ControlParameter& param = _userParams.collection.lookup(name);
 
         // type check
@@ -271,6 +271,7 @@ void Simulation::handleControlParameter(
 
     case (s8)ControlParameterRequestKind::SET_ROBOT_PARAM_BY_NAME: {
       std::string name((char*)msg->name);
+      std::cout << "Name" << name;
       ControlParameter& param = _robotParams.collection.lookup(name);
 
       // type check

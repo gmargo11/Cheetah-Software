@@ -230,22 +230,22 @@ void Simulation::handleControlParameter(
       
         std::string name((char*)msg->name); 
         std::cout << "Name" << name;
-        ControlParameter& param = _userParams.collection.lookup(name);
+        //ControlParameter& param = _userParams.collection.lookup(name);
 
         // type check
-        if ((s8)param._kind != msg->parameterKind) {
+        /*if ((s8)param._kind != msg->parameterKind) {
           throw std::runtime_error(
               "type mismatch for parameter " + name + ", robot thinks it is " +
               controlParameterValueKindToString(param._kind) +
               " but received a command to set it to " +
               controlParameterValueKindToString(
                   (ControlParameterValueKind)msg->parameterKind));
-        }
+        }*/
 
         // do the actual set
         ControlParameterValue v;
         memcpy(&v, msg->value, sizeof(v));
-        param.set(v, (ControlParameterValueKind)msg->parameterKind);
+        //param.set(v, (ControlParameterValueKind)msg->parameterKind);
         
         this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true);
 

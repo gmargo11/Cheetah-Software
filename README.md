@@ -17,11 +17,13 @@ and start the controller in a separate terminal:
 
 Parameters are loaded by the simulator from `config/mc-mit-ctrl-user-parameters.yaml`. Initial state is specified in Simulation.cpp (lines 92...150). 
 
+Send updates to parameters from python using pycheetah (https://github.com/Improbable-AI/locomotion/tree/master/mini_cheetah/pycheetah)
+
 
 
 TODO:
-- ffmpeg pipeline to download headless sim results -> using a simple footstep plotter for now
-- ~~Demonstrate hardcoded forward walk in sim~~ DONE!
+- ffmpeg pipeline to download headless sim results -> 5/2 using a simple footstep plotter for now
+- ~~Demonstrate hardcoded forward walk in sim~~ 5/4 Done!
 - Send direction, velocity commands from python via lcm
 - ...
 - Send footstep commands via LCM

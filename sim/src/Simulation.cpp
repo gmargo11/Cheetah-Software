@@ -416,7 +416,7 @@ void Simulation::firstRun() {
   // send all control parameters
   printf("[Simulation] Send robot control parameters to robot...\n");
   for (auto& kv : _robotParams.collection._map) {
-    std::cout << kv.first
+    std::cout << kv.first;
     sendControlParameter(kv.first, kv.second->get(kv.second->_kind),
                          kv.second->_kind, false);
   }

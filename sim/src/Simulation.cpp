@@ -43,7 +43,7 @@ Simulation::Simulation(RobotType robot, Graphics3D* window,
     _parameter_request_lcmt.requestNumber = 0;
     _lcm->subscribe("control_command_pybridge", &Simulation::handleControlParameter, this);
 
-    _lcmThread = std::thread(&RobotInterface::lcmHandler, this);
+    _lcmThread = std::thread(&Simulation::lcmHandler, this);
   }
 
   // init quadruped info
@@ -954,7 +954,7 @@ void Simulation::updateGraphics() {
 
 void Simulation::lcmHandler() {
   while (_running) {
-    _lcm.handleTimeout(1000);
+    _lcm->handleTimeout(1000);
   }
 }
 

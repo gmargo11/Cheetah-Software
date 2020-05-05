@@ -154,6 +154,7 @@ class Simulation {
 
   control_parameter_request_lcmt _parameter_request_lcmt;
   control_parameter_respones_lcmt _parameter_response_lcmt;
+  std::thread _lcmThread;
 
   std::function<void(void)> _uiUpdate;
   std::function<void(std::string)> _errorCallback;

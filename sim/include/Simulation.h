@@ -24,6 +24,7 @@
 #include <queue>
 #include <utility>
 #include <vector>
+#include <thread>
 
 #include <lcm/lcm-cpp.hpp>
 #include "simulator_lcmt.hpp"

@@ -86,6 +86,8 @@ class Simulation {
                               const std::string& chan,
                               const control_parameter_request_lcmt* msg);
 
+  void lcmHandler();
+
   void resetSimTime() {
     _currentSimTime = 0.;
     _timeOfNextLowLevelControl = 0.;

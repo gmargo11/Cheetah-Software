@@ -228,7 +228,7 @@ void Simulation::handleControlParameter(
   switch (msg->requestKind) {
     case (s8)ControlParameterRequestKind::SET_USER_PARAM_BY_NAME: {
       
-        std::string name((char*)msg->name);
+        std::string name((char*)msg->name); 
         std::cout << "Name" << name;
         ControlParameter& param = _userParams.collection.lookup(name);
 
@@ -272,25 +272,26 @@ void Simulation::handleControlParameter(
     case (s8)ControlParameterRequestKind::SET_ROBOT_PARAM_BY_NAME: {
       std::string name((char*)msg->name);
       std::cout << "Name" << name;
-      ControlParameter& param = _robotParams.collection.lookup(name);
+      //ControlParameter& param = _robotParams.collection.lookup(name);
 
       // type check
-      if ((s8)param._kind != msg->parameterKind) {
+
+      /*if ((s8)param._kind != msg->parameterKind) {
         throw std::runtime_error(
             "type mismatch for parameter " + name + ", robot thinks it is " +
             controlParameterValueKindToString(param._kind) +
             " but received a command to set it to " +
             controlParameterValueKindToString(
                 (ControlParameterValueKind)msg->parameterKind));
-      }
+      }*/
 
       // do the actual set
       
       ControlParameterValue v;
       memcpy(&v, msg->value, sizeof(v));
-      param.set(v, (ControlParameterValueKind)msg->parameterKind);
+      //param.set(v, (ControlParameterValueKind)msg->parameterKind);
       
-      this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, true);
+      this->sendControlParameter(name, v, (ControlParameterValueKind)msg->parameterKind, false);
 
       /*
       // respond:
@@ -415,6 +416,7 @@ void Simulation::firstRun() {
   // send all control parameters
   printf("[Simulation] Send robot control parameters to robot...\n");
   for (auto& kv : _robotParams.collection._map) {
+    std::cout << kv.first
     sendControlParameter(kv.first, kv.second->get(kv.second->_kind),
                          kv.second->_kind, false);
   }

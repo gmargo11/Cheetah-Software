@@ -954,7 +954,7 @@ void Simulation::updateGraphics() {
 
 void Simulation::lcmHandler() {
   while (_running) {
-    printf("[Simulation] Monitoring for incoming LCM messages!")
+    printf("[Simulation] Monitoring for incoming LCM messages!");
     _lcm->handleTimeout(1000);
   }
 }

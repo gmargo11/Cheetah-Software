@@ -74,8 +74,6 @@ template <typename T>
 FSM_StateName FSM_State_StandUp<T>::checkTransition() {
   this->nextStateName = this->stateName;
   iter++;
-  printf("[FSM_State_Standup] %f", this->_data->controlParameters->control_mode);
-  
   
   // Switch FSM control mode
   switch ((int)this->_data->controlParameters->control_mode) {

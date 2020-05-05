@@ -51,7 +51,7 @@ class Graphics3D : public QOpenGLWidget, protected QOpenGLFunctions {
   char infoString[200] = "";
 
   GamepadCommand &getDriverCommand() {
-	  printf("[Graphics] updating gamepad command"); 
+	  //printf("[Graphics] updating gamepad command"); 
 	  _gameController.updateGamepadCommand(_driverCommand);
 	  return _driverCommand; }
   GameController &getGameController() { return _gameController; }

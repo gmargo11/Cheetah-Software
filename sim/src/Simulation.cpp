@@ -229,7 +229,7 @@ void Simulation::handleControlParameter(
     case (s8)ControlParameterRequestKind::SET_USER_PARAM_BY_NAME: {
       
         std::string name((char*)msg->name); 
-        std::cout << "Name" << name;
+        std::cout << "Name" << name << (s8)msg->requestKind << (s8)ControlParameterRequestKind::SET_USER_PARAM_BY_NAME;
         //ControlParameter& param = _userParams.collection.lookup(name);
 
         // type check

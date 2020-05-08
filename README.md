@@ -6,9 +6,8 @@ The first order of business was to make the simulator run headless so we can use
 
 To run a headless sim:
 ```
-export QT_QPA_PLATFORM="offscreen"
 cd mc-build
-./sim/sim
+xvfb-run -a --server-args="-screen 0, 1280x1024x24" ./sim/sim
 ```
 and start the controller in a separate terminal:
 ```

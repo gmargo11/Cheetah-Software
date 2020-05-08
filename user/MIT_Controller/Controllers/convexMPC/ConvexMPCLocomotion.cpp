@@ -126,7 +126,7 @@ void ConvexMPCLocomotion::run(ControlFSMData<float>& data) {
     //[Gabe] USE PYTHON INPUTS!
     //_usePython = true;
   //}
-  else if(gaitNumber >= 10) {
+  if(gaitNumber >= 10) {
     gaitNumber -= 10;
     omniMode = true;
   }
@@ -729,7 +729,7 @@ void ConvexMPCLocomotion::handlePhaseTarget(
   (void)rbuf;
   (void)chan;
 
-  printf("[ConvexMPCLocomotion] Recieved new target phase!")
+  printf("[ConvexMPCLocomotion] Recieved new target phase!");
 
   _t_E = msg->t_E;
   _t_S = msg->t_S;
@@ -741,12 +741,12 @@ void ConvexMPCLocomotion::handlePhaseTarget(
   _x_translation = msg->CoM_translation[0];
   _y_translation = msg->CoM_translation[1];
 
-  for (int i = 0; i<4; i++) 
+  for (int i = 0; i<4; i++) {
     _pfxs[i] = msg->p_foot[0][i] + _x_translation;
     _pfys[i] = msg->p_foot[1][i] + _y_translation;
     _contactStates[i] = msg->contacts[i];
     _swingStates[i] = 1 - msg->contacts[i];
-
+  }
 
 }
 
@@ -756,14 +756,14 @@ void ConvexMPCLocomotion::handleFootstepHeightCmd(
   (void)rbuf;
   (void)chan;
 
-  printf("[ConvexMPCLocomotion] Recieved new footswing height command!")
+  printf("[ConvexMPCLocomotion] Recieved new footswing height command!");
 
   _footswing_height = msg->footstep_height;
 
 }
 
 void ConvexMPCLocomotion::lcmHandler() {
-  while (_running) {
+  while (true) {
     printf("[ConvexMPCLocomotion] Monitoring for incoming LCM messages!");
     _lcm->handleTimeout(1000);
   }

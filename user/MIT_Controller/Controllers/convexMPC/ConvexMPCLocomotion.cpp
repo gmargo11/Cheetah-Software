@@ -122,10 +122,10 @@ void ConvexMPCLocomotion::run(ControlFSMData<float>& data) {
   // Command Setup
   _SetupCommand(data);
   gaitNumber = data.userParameters->cmpc_gait;
-  if(gaitNumber == 99) {
+  //if(gaitNumber == 99) {
     //[Gabe] USE PYTHON INPUTS!
-    _usePython = true;
-  }
+    //_usePython = true;
+  //}
   else if(gaitNumber >= 10) {
     gaitNumber -= 10;
     omniMode = true;
@@ -734,9 +734,9 @@ void ConvexMPCLocomotion::handlePhaseTarget(
   _t_E = msg->t_E;
   _t_S = msg->t_S;
 
-  _x_vel_des = msg->CoM_vel[0];
-  _y_vel_des = msg->CoM_vel[1];
-  _yaw_des = msg->CoM_rotation;
+  _x_vel_com = msg->CoM_vel[0];
+  _y_vel_com = msg->CoM_vel[1];
+  _yaw_com = msg->CoM_rotation;
 
   _x_translation = msg->CoM_translation[0];
   _y_translation = msg->CoM_translation[1];

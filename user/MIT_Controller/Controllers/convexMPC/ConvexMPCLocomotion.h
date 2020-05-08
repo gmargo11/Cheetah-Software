@@ -8,9 +8,8 @@
 #include "Gait.h"
 
 #include <lcm/lcm-cpp.hpp>
-#include "simulator_lcmt.hpp"
-#include "control_parameter_request_lcmt.hpp"
-#include "control_parameter_respones_lcmt.hpp"
+#include "footstep_height_lcmt.hpp"
+#include "phase_target_lcmt.hpp"
 
 #include <cstdio>
 #include <thread>
@@ -176,6 +175,11 @@ private:
   void handlePhaseTarget(const lcm::ReceiveBuffer* rbuf,
                          const std::string& chan,
                          const phase_target_lcmt* msg);
+  float _t_E, _t_S;
+  float _x_vel_com, _y_vel_com, _yaw_com;
+  float _x_translation, _y_translation;
+  float _pfxs[4], _pfys[4], _contactStates[4], _swingStates[4];
+
   void handleFootstepHeightCmd(const lcm::ReceiveBuffer* rbuf,
                                const std::string& chan,
                                const footstep_height_lcmt* msg);

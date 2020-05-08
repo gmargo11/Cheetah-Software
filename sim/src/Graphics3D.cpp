@@ -445,7 +445,7 @@ void Graphics3D::renderDrawlist() {
     //printf("solid object # %ld %d %d\n", id, _drawList.getCanBeHidden(id), show_robot);
     if(!_drawList.getCanBeHidden(id) || show_robot) {
       if (_drawList._instanceColor[id].useSolidColor) {
-        _solidColorProgram->setUniformValue(
+        _solidColorProgram->setUniformValue(""
             _matrixUniformSolidColor,
             _cameraMatrix * _drawList.getModelKinematicTransform(id) *
                 _drawList.getModelBaseTransform(id));

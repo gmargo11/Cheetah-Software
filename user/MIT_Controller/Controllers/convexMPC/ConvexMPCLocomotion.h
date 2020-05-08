@@ -13,6 +13,7 @@
 #include "control_parameter_respones_lcmt.hpp"
 
 #include <cstdio>
+#include <thread>
 
 using Eigen::Array4f;
 using Eigen::Array4i;
@@ -171,6 +172,14 @@ private:
   SparseCMPC _sparseCMPC;
 
   lcm::LCM* _lcm = nullptr;
+  std::thread _lcmThread;
+  void handlePhaseTarget(const lcm::ReceiveBuffer* rbuf,
+                         const std::string& chan,
+                         const phase_target_lcmt* msg);
+  void handleFootstepHeightCmd(const lcm::ReceiveBuffer* rbuf,
+                               const std::string& chan,
+                               const footstep_height_lcmt* msg);
+  void lcmHandler();
 
 };
 

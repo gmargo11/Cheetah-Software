@@ -67,7 +67,6 @@ ConvexMPCLocomotion::ConvexMPCLocomotion(float _dt, int _iterations_between_mpc,
     throw std::runtime_error("lcm bad");
   }
   //setup lcm param setting
-  _parameter_request_lcmt.requestNumber = 0;
   _lcm->subscribe("footstep_height_pybridge", &ConvexMPCLocomotion::handleFootstepHeightCmd, this);
   _lcm->subscribe("phase_target_pybridge", &ConvexMPCLocomotion::handlePhaseTarget, this);
 
@@ -295,15 +294,15 @@ void ConvexMPCLocomotion::run(ControlFSMData<float>& data) {
 
     // Using the estimated velocity is correct
     //Vec3<float> des_vel_world = seResult.rBody.transpose() * des_vel;
-    //float pfx_rel = seResult.vWorld[0] * (.5 + _parameters->cmpc_bonus_swing) * stance_time +
-    //  .03f*(seResult.vWorld[0]-v_des_world[0]) +
-    //  (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*_yaw_turn_rate);
-    float pfx_rel = _pfx_rels[i]
+    float pfx_rel = seResult.vWorld[0] * (.5 + _parameters->cmpc_bonus_swing) * stance_time +
+      .03f*(seResult.vWorld[0]-v_des_world[0]) +
+      (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*_yaw_turn_rate);
+    //float pfx_rel = _pfx_rels[i]
     
-    //float pfy_rel = seResult.vWorld[1] * .5 * stance_time * dtMPC +
-    //  .03f*(seResult.vWorld[1]-v_des_world[1]) +
-    //  (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*_yaw_turn_rate);
-    float pfy_rel = _pfy_rels[i]
+    float pfy_rel = seResult.vWorld[1] * .5 * stance_time * dtMPC +
+      .03f*(seResult.vWorld[1]-v_des_world[1]) +
+      (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*_yaw_turn_rate);
+    //float pfy_rel = _pfy_rels[i]
 
     pfx_rel = fminf(fmaxf(pfx_rel, -p_rel_max), p_rel_max);
     pfy_rel = fminf(fmaxf(pfy_rel, -p_rel_max), p_rel_max);

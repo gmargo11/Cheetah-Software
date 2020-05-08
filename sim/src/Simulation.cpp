@@ -960,7 +960,7 @@ void Simulation::updateGraphics() {
 
   //save image
   printf("[SIMULATION] saving image...");
-  QPixmap::grabWindow( _window->winId() ).save( "/some/file.jpg" )
+  QPixmap::grabWindow( _window->winId() ).save( "/some/file.jpg" );
 }
 
 void Simulation::lcmHandler() {

@@ -2,7 +2,7 @@
 #include "Dynamics/Quadruped.h"
 #include "ParamHandler.hpp"
 
-#include <QPixMap>
+#include <QPixmap>
 
 #include <Configuration.h>
 #include <include/GameController.h>

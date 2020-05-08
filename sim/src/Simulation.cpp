@@ -720,7 +720,7 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
   u64 desiredSteps = 0;
   u64 steps = 0;
 
-  double frameTime = 1. / 60.;
+  double frameTime = 3; //1. / 60.;
   double lastSimTime = 0;
 
   printf(
@@ -737,7 +737,7 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
     if(_window && _window->wantSloMo()) {
       _desiredSimSpeed /= 10.;
     }
-    u64 nStepsPerFrame = (u64)(((1. / 60.) / dt) * _desiredSimSpeed);
+    u64 nStepsPerFrame = (u64)((frameTime / dt) * _desiredSimSpeed);
     if (!_window->IsPaused() && steps < desiredSteps) {
       _simParams.lockMutex();   
       step(dt, dtLowLevelControl, dtHighLevelControl);

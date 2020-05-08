@@ -742,8 +742,8 @@ void ConvexMPCLocomotion::handlePhaseTarget(
   _y_translation = msg->CoM_translation[1];
 
   for (int i = 0; i<4; i++) {
-    _pfxs[i] = msg->p_foot[0][i] + _x_translation;
-    _pfys[i] = msg->p_foot[1][i] + _y_translation;
+    _pfxs[i] = msg->p_foot[i][0] + _x_translation;
+    _pfys[i] = msg->p_foot[i][1] + _y_translation;
     _contactStates[i] = msg->contacts[i];
     _swingStates[i] = 1 - msg->contacts[i];
   }

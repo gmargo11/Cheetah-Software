@@ -66,10 +66,12 @@ class Graphics3D : public QOpenGLWidget, protected QOpenGLFunctions {
   void setHideFloor(bool x);
   void setHideRobot(bool x);
 
- protected:
   void initializeGL() override;
-  // void resizeGL(int w, int h) override;
   void paintGL() override;
+
+ protected:
+  // void resizeGL(int w, int h) override;
+  
   // bool event(QEvent *event) override;
 
   // void exposeEvent(QExposeEvent *event) override; ??

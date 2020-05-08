@@ -727,6 +727,10 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
       _simParams.dynamics_dt, _simParams.low_level_dt, _simParams.high_level_dt,
       _simParams.simulation_speed, graphics);
 
+  if (graphics && _window){
+    _window->initializeGL();
+  }
+
   while (_running) {
     double dt = _simParams.dynamics_dt;
     double dtLowLevelControl = _simParams.low_level_dt;
@@ -750,7 +754,6 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
     if (frameTimer.getSeconds() > frameTime) {
       double realElapsedTime = frameTimer.getSeconds();
       frameTimer.start();
-      printf("frame!\n");
       if (graphics && _window) {
         double simRate = (_currentSimTime - lastSimTime) / realElapsedTime;
         lastSimTime = _currentSimTime;
@@ -761,7 +764,6 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
                 "rate:       %8.3f\n",
                 _desiredSimSpeed, freeRunTimer.getSeconds(), _currentSimTime,
                 simRate);
-        printf("graphics frame!");
         updateGraphics();
 	//printf("graphics update!\n");
 	printf("%f %f %f\n",_simulator->getState().bodyPosition[0],
@@ -956,7 +958,9 @@ void Simulation::updateGraphics() {
   _window->_drawList.updateRobotFromModel(*_robotDataSimulator,
                                           _controllerRobotID, false);
   _window->_drawList.updateAdditionalInfo(*_simulator);
-  _window->update();
+  printf("update window");
+  //_window->update();
+  _window->paintGL();
 }
 
 void Simulation::lcmHandler() {

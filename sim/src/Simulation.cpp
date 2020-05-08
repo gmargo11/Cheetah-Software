@@ -2,6 +2,9 @@
 #include "Dynamics/Quadruped.h"
 #include "ParamHandler.hpp"
 
+#include <QImage>
+#include <QPainter>
+
 #include <Configuration.h>
 #include <include/GameController.h>
 #include <unistd.h>
@@ -727,10 +730,6 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
       _simParams.dynamics_dt, _simParams.low_level_dt, _simParams.high_level_dt,
       _simParams.simulation_speed, graphics);
 
-  if (graphics && _window){
-    _window->initializeGL();
-  }
-
   while (_running) {
     double dt = _simParams.dynamics_dt;
     double dtLowLevelControl = _simParams.low_level_dt;
@@ -958,9 +957,14 @@ void Simulation::updateGraphics() {
   _window->_drawList.updateRobotFromModel(*_robotDataSimulator,
                                           _controllerRobotID, false);
   _window->_drawList.updateAdditionalInfo(*_simulator);
-  printf("update window");
-  //_window->update();
-  _window->paintGL();
+  _window->update();
+
+  //save image
+  printf("[SIMULATION] saving image...");
+  QImage img(_window->size());
+  QPainter painter(&img);
+  _window->render(&painter);
+  img.save("/img/screen.jpg");
 }
 
 void Simulation::lcmHandler() {

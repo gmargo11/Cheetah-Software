@@ -956,6 +956,7 @@ void Simulation::updateGraphics() {
   _window->_drawList.updateRobotFromModel(*_robotDataSimulator,
                                           _controllerRobotID, false);
   _window->_drawList.updateAdditionalInfo(*_simulator);
+  printf("update window");
   _window->update();
 }
 

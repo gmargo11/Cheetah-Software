@@ -2,8 +2,7 @@
 #include "Dynamics/Quadruped.h"
 #include "ParamHandler.hpp"
 
-#include <QImage>
-#include <QPainter>
+#include <QPixMap>
 
 #include <Configuration.h>
 #include <include/GameController.h>
@@ -961,10 +960,7 @@ void Simulation::updateGraphics() {
 
   //save image
   printf("[SIMULATION] saving image...");
-  QImage img(_window->size());
-  QPainter painter(&img);
-  _window->render(&painter);
-  img.save("/img/screen.jpg");
+  QPixmap::grabWindow( _window->winId() ).save( "/some/file.jpg" )
 }
 
 void Simulation::lcmHandler() {

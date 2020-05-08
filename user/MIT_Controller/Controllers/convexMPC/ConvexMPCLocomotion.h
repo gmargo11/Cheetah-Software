@@ -7,6 +7,11 @@
 #include "cppTypes.h"
 #include "Gait.h"
 
+#include <lcm/lcm-cpp.hpp>
+#include "simulator_lcmt.hpp"
+#include "control_parameter_request_lcmt.hpp"
+#include "control_parameter_respones_lcmt.hpp"
+
 #include <cstdio>
 
 using Eigen::Array4f;
@@ -117,6 +122,8 @@ private:
   float _x_vel_des = 0.;
   float _y_vel_des = 0.;
 
+  float _footswing_height = 0.06;
+
   // High speed running
   //float _body_height = 0.34;
   float _body_height = 0.29;
@@ -162,6 +169,8 @@ private:
   vectorAligned<Vec12<double>> _sparseTrajectory;
 
   SparseCMPC _sparseCMPC;
+
+  lcm::LCM* _lcm = nullptr;
 
 };
 

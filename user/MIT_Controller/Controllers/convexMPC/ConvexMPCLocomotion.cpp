@@ -55,9 +55,23 @@ ConvexMPCLocomotion::ConvexMPCLocomotion(float _dt, int _iterations_between_mpc,
 
   initSparseMPC();
 
-   pBody_des.setZero();
-   vBody_des.setZero();
-   aBody_des.setZero();
+  pBody_des.setZero();
+  vBody_des.setZero();
+  aBody_des.setZero();
+
+  // LCM Setup
+  printf("[ConvexMPCLocomotion] Setup LCM...\n");
+  _lcm = new lcm::LCM(getLcmUrl(255));
+  if (!_lcm->good()) {
+    printf("[ERROR] Failed to set up LCM\n");
+    throw std::runtime_error("lcm bad");
+  }
+  //setup lcm param setting
+  _parameter_request_lcmt.requestNumber = 0;
+  _lcm->subscribe("footstep_height_pybridge", &ConvexMPCLocomotion::handleFootstepHeightCmd, this);
+  _lcm->subscribe("phase_target_pybridge", &ConvexMPCLocomotion::handlePhaseTarget, this);
+
+  _lcmThread = std::thread(&ConvexMPCLocomotion::lcmHandler, this);
 }
 
 void ConvexMPCLocomotion::initialize(){
@@ -255,7 +269,7 @@ void ConvexMPCLocomotion::run(ControlFSMData<float>& data) {
     }
     //if(firstSwing[i]) {
     //footSwingTrajectories[i].setHeight(.05);
-    footSwingTrajectories[i].setHeight(.06);
+    footSwingTrajectories[i].setHeight(_footswing_height);
     Vec3<float> offset(0, side_sign[i] * .065, 0);
 
     Vec3<float> pRobotFrame = (data._quadruped->getHipLocation(i) + offset);
@@ -281,13 +295,16 @@ void ConvexMPCLocomotion::run(ControlFSMData<float>& data) {
 
     // Using the estimated velocity is correct
     //Vec3<float> des_vel_world = seResult.rBody.transpose() * des_vel;
-    float pfx_rel = seResult.vWorld[0] * (.5 + _parameters->cmpc_bonus_swing) * stance_time +
-      .03f*(seResult.vWorld[0]-v_des_world[0]) +
-      (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*_yaw_turn_rate);
+    //float pfx_rel = seResult.vWorld[0] * (.5 + _parameters->cmpc_bonus_swing) * stance_time +
+    //  .03f*(seResult.vWorld[0]-v_des_world[0]) +
+    //  (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*_yaw_turn_rate);
+    float pfx_rel = _pfx_rels[i]
+    
+    //float pfy_rel = seResult.vWorld[1] * .5 * stance_time * dtMPC +
+    //  .03f*(seResult.vWorld[1]-v_des_world[1]) +
+    //  (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*_yaw_turn_rate);
+    float pfy_rel = _pfy_rels[i]
 
-    float pfy_rel = seResult.vWorld[1] * .5 * stance_time * dtMPC +
-      .03f*(seResult.vWorld[1]-v_des_world[1]) +
-      (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*_yaw_turn_rate);
     pfx_rel = fminf(fmaxf(pfx_rel, -p_rel_max), p_rel_max);
     pfy_rel = fminf(fmaxf(pfy_rel, -p_rel_max), p_rel_max);
     Pf[0] +=  pfx_rel;
@@ -707,3 +724,48 @@ void ConvexMPCLocomotion::initSparseMPC() {
   _sparseTrajectory.resize(horizonLength);
 }
 
+void ConvexMPCLocomotion::handlePhaseTarget(
+    const lcm::ReceiveBuffer* rbuf, const std::string& chan,
+    const phase_target_lcmt* msg) {
+  (void)rbuf;
+  (void)chan;
+
+  printf("[ConvexMPCLocomotion] Recieved new target phase!")
+
+  _t_E = msg->t_E;
+  _t_S = msg->t_S;
+
+  _x_vel_des = msg->CoM_vel[0];
+  _y_vel_des = msg->CoM_vel[1];
+  _yaw_des = msg->CoM_rotation;
+
+  _x_translation = msg->CoM_translation[0];
+  _y_translation = msg->CoM_translation[1];
+
+  for (int i = 0; i<4; i++) 
+    _pfxs[i] = msg->p_foot[0][i] + _x_translation;
+    _pfys[i] = msg->p_foot[1][i] + _y_translation;
+    _contactStates[i] = msg->contacts[i];
+    _swingStates[i] = 1 - msg->contacts[i];
+
+
+}
+
+void ConvexMPCLocomotion::handleFootstepHeightCmd(
+    const lcm::ReceiveBuffer* rbuf, const std::string& chan,
+    const footstep_height_lcmt* msg) {
+  (void)rbuf;
+  (void)chan;
+
+  printf("[ConvexMPCLocomotion] Recieved new footswing height command!")
+
+  _footswing_height = msg->footstep_height;
+
+}
+
+void ConvexMPCLocomotion::lcmHandler() {
+  while (_running) {
+    printf("[ConvexMPCLocomotion] Monitoring for incoming LCM messages!");
+    _lcm->handleTimeout(1000);
+  }
+}

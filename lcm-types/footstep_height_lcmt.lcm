@@ -1,0 +1,3 @@
+struct footstep_height_lcmt {
+  float footstep_height;
+}

@@ -2,7 +2,7 @@
 #include "Dynamics/Quadruped.h"
 #include "ParamHandler.hpp"
 
-#include <QScreen>
+#include <QPixmap>
 
 #include <Configuration.h>
 #include <include/GameController.h>
@@ -960,7 +960,7 @@ void Simulation::updateGraphics() {
 
   //save image
   printf("[SIMULATION] saving image...");
-  QScreen::grabWindow( _window->winId() ).save( "./file.jpg" );
+  QPixmap::grabWidget( _window ).save( "file.jpg" );
 }
 
 void Simulation::lcmHandler() {

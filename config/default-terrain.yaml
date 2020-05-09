@@ -1,4 +1,4 @@
-ground-plane:
+#ground-plane:
     type: "infinite-plane"
     mu: 0.5
     restitution: 0.0
@@ -53,7 +53,7 @@ ground-plane:
     #transparent: 1
 
     
-#stairs-1:
+stairs-1:
     type: "stairs"
     steps: 5
     rise: 0.1 #0.1778 # 7 inches

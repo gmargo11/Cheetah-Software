@@ -720,7 +720,7 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
   u64 desiredSteps = 0;
   u64 steps = 0;
 
-  double frameTime = 3; //1. / 60.;
+  double frameTime = 1. ;/// 60.;
   double lastSimTime = 0;
 
   printf(

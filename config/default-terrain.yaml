@@ -1,3 +1,16 @@
+stairs-1:
+    type: "stairs"
+    steps: 5
+    rise: 0.1 #0.1778 # 7 inches
+    run: 0.17 #0.2794 # 11 inches
+    width: 1.2
+    mu: .7
+    restitution: 0
+    #position: [0.5, 0, -0.52]
+    position: [0.5, 0, 0.0]
+    orientation: [0, 0, 0]
+    transparent: 0
+    
 #ground-plane:
     type: "infinite-plane"
     mu: 0.5
@@ -52,19 +65,6 @@
     #orientation: [0,.0,0]  # roll pitch yaw
     #transparent: 1
 
-    
-stairs-1:
-    type: "stairs"
-    steps: 5
-    rise: 0.1 #0.1778 # 7 inches
-    run: 0.17 #0.2794 # 11 inches
-    width: 1.2
-    mu: .7
-    restitution: 0
-    #position: [0.5, 0, -0.52]
-    position: [0.5, 0, 0.0]
-    orientation: [0, 0, 0]
-    transparent: 0
 
 #stairs-2:
     #type: "stairs"

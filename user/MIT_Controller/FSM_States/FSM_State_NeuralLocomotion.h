@@ -58,6 +58,14 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   size_t y_size = 100;
   double grid_size = 0.015;
 
+  Vec3<T> target_rotation;
+  Vec3<T> target_translation;
+  Vec3<T> target_vel;
+  Vec2<T> target_p_foot[4];
+  Vec4<T> target_contacts;
+  float target_t_S;
+  float target_t_E;
+
   DMat<T> _height_map;
   DMat<int> _idx_map;
 

@@ -455,7 +455,7 @@ void FSM_State_NeuralLocomotion<T>::onExit() {
  * each stance or swing leg.
  */
 template <typename T>
-void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> & des_fp_rel[4], const Vec4<T> & des_contact, const float & des_swing_time) {
+void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> & des_contact, const float & des_swing_time) {
   // StateEstimate<T> stateEstimate = this->_data->_stateEstimator->getResult();
 
   // Contact state logic

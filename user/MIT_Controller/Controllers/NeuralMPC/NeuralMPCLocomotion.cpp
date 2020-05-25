@@ -397,8 +397,8 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
 
   for(int foot = 0; foot < 4; foot++)
   {
-    float contactState = contactStates[foot];
-    float swingState = swingStates[foot];
+    float contactState = contact_cmd[foot];//contactStates[foot];
+    float swingState = 1 - contact_cmd[foot];
     if(swingState > 0) // foot is in swing
     {
       if(firstSwing[foot])

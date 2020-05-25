@@ -99,15 +99,15 @@ void FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM(const lcm::ReceiveBuffe
   (void)rbuf;
   (void)chan;
 
-  target_rotation = msg->CoM_rotation;
-  target_translation = msg->CoM_translation;
-  target_vel = msg->CoM_vel;
-  target_p_foot = msg->p_foot;
-  target_contacts = msg->contacts;
-  target_t_S = msg->t_S;
-  target_t_E = msg->t_E;
+  //target_rotation = msg->CoM_rotation;
+  //target_translation = msg->CoM_translation;
+  //target_vel = msg->CoM_vel;
+  //target_p_foot = msg->p_foot;
+  //target_contacts = msg->contacts;
+  //target_t_S = msg->t_S;
+  //target_t_E = msg->t_E;
   
-
+  printf("Recieved phase target")
 
 }
 

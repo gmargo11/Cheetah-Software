@@ -52,6 +52,7 @@ ControlFSM<T>::ControlFSM(Quadruped<T>* _quadruped,
   statesList.vision = new FSM_State_Vision<T>(&data);
   statesList.backflip = new FSM_State_BackFlip<T>(&data);
   statesList.frontJump = new FSM_State_FrontJump<T>(&data);
+  statesList.neuralLocomotion = new FSM_State_NeuralLocomotion<T>(&data);
 
   safetyChecker = new SafetyChecker<T>(&data);
 
@@ -112,7 +113,10 @@ void ControlFSM<T>::runFSM() {
 
     } else if(rc_mode == RC_mode::BACKFLIP || rc_mode == RC_mode::BACKFLIP_PRE){
       data.controlParameters->control_mode = K_BACKFLIP;
-   }
+    
+    } else if(rc_mode == RC_mode::NEURAL_LOCOMOTION){
+      data.controlParameters->control_mode = K_NEURAL_LOCOMOTION;
+    }
       //data.controlParameters->control_mode = K_FRONTJUMP;
     //std::cout<< "control mode: "<<data.controlParameters->control_mode<<std::endl;
   }
@@ -264,6 +268,9 @@ FSM_State<T>* ControlFSM<T>::getNextState(FSM_StateName stateName) {
 
     case FSM_StateName::LOCOMOTION:
       return statesList.locomotion;
+
+    case FSM_StateName::NEURAL_LOCOMOTION:
+      return statesList.neuralLocomotion;
 
     case FSM_StateName::RECOVERY_STAND:
       return statesList.recoveryStand;

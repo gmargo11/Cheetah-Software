@@ -320,7 +320,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   swingTimes[0] = swing_time_cmd;//dtMPC * gait->_swing;
   swingTimes[1] = swing_time_cmd;//dtMPC * gait->_swing;
   swingTimes[2] = swing_time_cmd;//dtMPC * gait->_swing;
-  swingTimes[3] = swing_time_cmd//dtMPC * gait->_swing;
+  swingTimes[3] = swing_time_cmd;//dtMPC * gait->_swing;
 
   float side_sign[4] = {-1, 1, -1, 1};
 

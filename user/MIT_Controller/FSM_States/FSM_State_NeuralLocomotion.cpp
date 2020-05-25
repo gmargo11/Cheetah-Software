@@ -57,13 +57,7 @@ void FSM_State_NeuralLocomotion<T>::onEnter() {
   this->transitionData.zero();
   cMPCOld->initialize();
   this->_data->_gaitScheduler->gaitData._nextGait = GaitType::TROT;
-
-
-
-
-
   printf("[FSM LOCOMOTION] On Enter\n");
-
 }
 
 /**
@@ -310,11 +304,3 @@ void FSM_State_NeuralLocomotion<T>::StanceLegImpedanceControl(int leg) {
 
 // template class FSM_State_NeuralLocomotion<double>;
 template class FSM_State_NeuralLocomotion<float>;
-
-
-void FSM_State_NeuralLocomotion<T>::lcmHandler() {
-  while (_running) {
-    printf("[FSM_State_NeuralLocomotion] Monitoring for incoming LCM messages!");
-    _lcm->handleTimeout(1000);
-  }
-}

@@ -157,6 +157,10 @@ void NeuralMPCLocomotion::_UpdateFoothold(Vec3<float> & foot, const Vec3<float> 
 
     _IdxMapChecking(x_idx, y_idx, x_idx_selected, y_idx_selected, idx_map);
 
+    // Get foot position from neural planner
+
+
+
     foot[0] = (x_idx_selected - row_idx_half)*grid_size + body_pos[0];
     foot[1] = (y_idx_selected - col_idx_half)*grid_size + body_pos[1];
     foot[2] = height_map(x_idx_selected, y_idx_selected);
@@ -228,7 +232,8 @@ void NeuralMPCLocomotion::_IdxMapChecking(int x_idx, int y_idx, int & x_idx_sele
 
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data, 
-    const Vec3<float> & vel_cmd, const DMat<float> & height_map, const DMat<int> & idx_map) {
+    const Vec3<float> & vel_cmd, Vec2<float> & fp_rel_cmd[4], Vec3<float> & contact_cmd, Vec3<float> & swing_time_cmd, 
+    const DMat<float> & height_map, const DMat<int> & idx_map) {
   (void)idx_map;
 
   if(data.controlParameters->use_rc ){
@@ -312,10 +317,10 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
   
   // foot placement
-  swingTimes[0] = dtMPC * gait->_swing;
-  swingTimes[1] = dtMPC * gait->_swing;
-  swingTimes[2] = dtMPC * gait->_swing;
-  swingTimes[3] = dtMPC * gait->_swing;
+  swingTimes[0] = swing_time_cmd;//dtMPC * gait->_swing;
+  swingTimes[1] = swing_time_cmd;//dtMPC * gait->_swing;
+  swingTimes[2] = swing_time_cmd;//dtMPC * gait->_swing;
+  swingTimes[3] = swing_time_cmd//dtMPC * gait->_swing;
 
   float side_sign[4] = {-1, 1, -1, 1};
 
@@ -336,20 +341,24 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
       coordinateRotation(CoordinateAxis::Z, 
           -v_rpy_des[2] * gait->_stance * dtMPC / 2) * pRobotFrame;
 
+    // Estimate the future robot position at foot touchdown
     Vec3<float> des_vel = seResult.rBody * v_des_world;
     Vec3<float> Pf = seResult.position +
       seResult.rBody.transpose() * (pYawCorrected + des_vel * swingTimeRemaining[i]);
 
     float p_rel_max = 0.3f;
 
-    // Using the estimated velocity is correct
-    float pfx_rel = seResult.vWorld[0] * .5 * gait->_stance * dtMPC +
-      .03f*(seResult.vWorld[0]-v_des_world[0]) +
-      (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*v_rpy_des[2]);
+    // Set the foot target positions in relative frame
+    //float pfx_rel = seResult.vWorld[0] * .5 * gait->_stance * dtMPC +
+    //  .03f*(seResult.vWorld[0]-v_des_world[0]) +
+    //  (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*v_rpy_des[2]);
 
-    float pfy_rel = seResult.vWorld[1] * .5 * gait->_stance * dtMPC +
-      .03f*(seResult.vWorld[1]-v_des_world[1]) +
-      (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*v_rpy_des[2]);
+    //float pfy_rel = seResult.vWorld[1] * .5 * gait->_stance * dtMPC +
+    //  .03f*(seResult.vWorld[1]-v_des_world[1]) +
+    //  (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*v_rpy_des[2]);
+    float pfx_rel = fp_rel_cmd[i][0];
+    float pfy_rel = fp_rel_cmd[i][1];
+
     pfx_rel = fminf(fmaxf(pfx_rel, -p_rel_max), p_rel_max);
     pfy_rel = fminf(fmaxf(pfy_rel, -p_rel_max), p_rel_max);
     Pf[0] +=  pfx_rel;

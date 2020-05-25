@@ -44,6 +44,7 @@ FSM_State_NeuralLocomotion<T>::FSM_State_NeuralLocomotion(
   _neuralLCM.subscribe("local_heightmap", &FSM_State_NeuralLocomotion<T>::handleHeightmapLCM, this);
   _neuralLCM.subscribe("traversability", &FSM_State_NeuralLocomotion<T>::handleIndexmapLCM, this);
   _neuralLCM.subscribe("global_to_robot", &FSM_State_NeuralLocomotion<T>::handleLocalization, this);
+  _neuralLCM.subscribe("phase_target_pybridge", &FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM, this);
   _neuralLCMThread = std::thread(&FSM_State_NeuralLocomotion<T>::neuralLCMThread, this);
 
   _height_map = DMat<T>::Zero(x_size, y_size);
@@ -91,6 +92,25 @@ void FSM_State_NeuralLocomotion<T>::handleIndexmapLCM(const lcm::ReceiveBuffer *
   }
 }
 
+template<typename T>
+void FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM(const lcm::ReceiveBuffer *rbuf,
+    const std::string &chan,
+    const traversability_map_t *msg) {
+  (void)rbuf;
+  (void)chan;
+
+  this->target_rotation = msg->CoM_rotation;
+  this->target_translation = msg->CoM_translation;
+  this->target_vel = msg->CoM_vel;
+  this->target_p_foot = msg->p_foot;
+  this->target_contacts = msg->contacts;
+  this->target_t_S = msg->t_S;
+  this->target_t_E = msg->t_E;
+  
+
+
+}
+
 
 template <typename T>
 void FSM_State_NeuralLocomotion<T>::onEnter() {
@@ -122,11 +142,14 @@ void FSM_State_NeuralLocomotion<T>::run() {
   }
   // Call the locomotion control logic for this iteration
   Vec3<T> des_vel; // x,y, yaw
+  Vec2<T> des_fp_rel[4]; // x,y, yaw
+  Vec4<T> des_contact; // x,y, yaw
+  float des_swing_time; // x,y, yaw
   _UpdateObstacle();
 
   // Neural Walking
-  _UpdateVelCommand(des_vel);
-  _LocomotionControlStep(des_vel);
+  _UpdatePhaseCommand(des_vel, des_fp_rel, des_contact, des_swing_time);
+  _LocomotionControlStep(des_vel, des_fp_rel, des_contact, des_swing_time);
 
   // Convex Locomotion
   //_RCLocomotionControl();
@@ -254,7 +277,7 @@ void FSM_State_NeuralLocomotion<T>::_Visualization(const Vec3<T> & des_vel){
 }
 
 template <typename T>
-void FSM_State_NeuralLocomotion<T>::_UpdateVelCommand(Vec3<T> & des_vel) {
+void FSM_State_NeuralLocomotion<T>::_updatePhaseCommand(Vec3<T> & des_vel, Vec2<T> & des_fp_rel[4], Vec4<T> & des_contact, float & des_swing_time) {
   des_vel.setZero();
 
   Vec3<T> target_pos, curr_pos, curr_ori_rpy;
@@ -308,6 +331,9 @@ void FSM_State_NeuralLocomotion<T>::_UpdateVelCommand(Vec3<T> & des_vel) {
     des_vel[1] += vel_y;
   }
   //printf("des vel_x, y: %f, %f\n", des_vel[0], des_vel[1]);
+
+  
+
 
   des_vel[0] = fminf(fmaxf(des_vel[0], -1.), 1.);
   des_vel[1] = fminf(fmaxf(des_vel[1], -1.), 1.);
@@ -429,11 +455,11 @@ void FSM_State_NeuralLocomotion<T>::onExit() {
  * each stance or swing leg.
  */
 template <typename T>
-void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel) {
+void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> & des_fp_rel[4], const Vec4<T> & des_contact, const float & des_swing_time) {
   // StateEstimate<T> stateEstimate = this->_data->_stateEstimator->getResult();
 
   // Contact state logic
-  neural_MPC.run<T>(*this->_data, des_vel, _height_map, _idx_map);
+  neural_MPC.run<T>(*this->_data, des_vel, des_fp_rel, des_contact, des_swing_time, _height_map, _idx_map);
 
   if(this->_data->userParameters->use_wbc > 0.9){
     _wbc_data->pBody_des = neural_MPC.pBody_des;

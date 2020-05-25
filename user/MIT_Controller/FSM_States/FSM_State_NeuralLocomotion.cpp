@@ -18,7 +18,7 @@
  */
 template <typename T>
 FSM_State_NeuralLocomotion<T>::FSM_State_NeuralLocomotion(ControlFSMData<T>* _controlFSMData)
-    : FSM_State<T>(_controlFSMData, FSM_StateName::LOCOMOTION, "LOCOMOTION")
+    : FSM_State<T>(_controlFSMData, FSM_StateName::NEURAL_LOCOMOTION, "NEURAL LOCOMOTION")
 {
   if(_controlFSMData->_quadruped->_robotType == RobotType::MINI_CHEETAH){
     cMPCOld = new ConvexMPCLocomotion(_controlFSMData->controlParameters->controller_dt,

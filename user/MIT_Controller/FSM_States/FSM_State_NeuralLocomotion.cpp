@@ -1,4 +1,4 @@
-/*============================ Vision =============================*/
+/*============================ Neural =============================*/
 /**
  * FSM State for robot locomotion. Manages the contact specific logic
  * and handles calling the interfaces to the controllers. This state
@@ -19,13 +19,13 @@ template <typename T>
 FSM_State_NeuralLocomotion<T>::FSM_State_NeuralLocomotion(
     ControlFSMData<T>* _controlFSMData)
     : FSM_State<T>(_controlFSMData, FSM_StateName::NEURAL_LOCOMOTION, "NEURAL_LOCOMOTION"),
-        vision_MPC(_controlFSMData->controlParameters->controller_dt,
+        neural_MPC(_controlFSMData->controlParameters->controller_dt,
                 30 / (1000. * _controlFSMData->controlParameters->controller_dt),
                 _controlFSMData->userParameters),
         cMPCOld(_controlFSMData->controlParameters->controller_dt,
                 30 / (1000. * _controlFSMData->controlParameters->controller_dt),
                 _controlFSMData->userParameters),
-         _visionLCM(getLcmUrl(255))
+         _neuralLCM(getLcmUrl(255))
 {
   // Set the safety checks
   this->turnOnAllSafetyChecks();
@@ -41,10 +41,10 @@ FSM_State_NeuralLocomotion<T>::FSM_State_NeuralLocomotion(
   _global_robot_loc.setZero();
   _robot_rpy.setZero();
 
-  _visionLCM.subscribe("local_heightmap", &FSM_State_NeuralLocomotion<T>::handleHeightmapLCM, this);
-  _visionLCM.subscribe("traversability", &FSM_State_NeuralLocomotion<T>::handleIndexmapLCM, this);
-  _visionLCM.subscribe("global_to_robot", &FSM_State_NeuralLocomotion<T>::handleLocalization, this);
-  _visionLCMThread = std::thread(&FSM_State_NeuralLocomotion<T>::visionLCMThread, this);
+  _neuralLCM.subscribe("local_heightmap", &FSM_State_NeuralLocomotion<T>::handleHeightmapLCM, this);
+  _neuralLCM.subscribe("traversability", &FSM_State_NeuralLocomotion<T>::handleIndexmapLCM, this);
+  _neuralLCM.subscribe("global_to_robot", &FSM_State_NeuralLocomotion<T>::handleLocalization, this);
+  _neuralLCMThread = std::thread(&FSM_State_NeuralLocomotion<T>::neuralLCMThread, this);
 
   _height_map = DMat<T>::Zero(x_size, y_size);
   _idx_map = DMat<int>::Zero(x_size, y_size);
@@ -99,7 +99,7 @@ void FSM_State_NeuralLocomotion<T>::onEnter() {
 
   // Reset the transition data
   this->transitionData.zero();
-  vision_MPC.initialize();
+  neural_MPC.initialize();
 
   if(_b_localization_data){
     _updateStateEstimator();
@@ -124,7 +124,7 @@ void FSM_State_NeuralLocomotion<T>::run() {
   Vec3<T> des_vel; // x,y, yaw
   _UpdateObstacle();
 
-  // Vision Walking
+  // Neural Walking
   _UpdateVelCommand(des_vel);
   _LocomotionControlStep(des_vel);
 
@@ -238,7 +238,7 @@ void FSM_State_NeuralLocomotion<T>::_Visualization(const Vec3<T> & des_vel){
     vel_visual.vel_cmd[i] = des_vel[i];
     vel_visual.base_position[i] = (this->_data->_stateEstimator->getResult()).position[i];
   }
-  _visionLCM.publish("velocity_cmd", &vel_visual);
+  _neuralLCM.publish("velocity_cmd", &vel_visual);
   
 
   _obs_visual_lcm.num_obs = _obs_list.size();
@@ -250,7 +250,7 @@ void FSM_State_NeuralLocomotion<T>::_Visualization(const Vec3<T> & des_vel){
   _obs_visual_lcm.sigma = 0.15;
   _obs_visual_lcm.height = 0.5;
 
-  _visionLCM.publish("obstacle_visual", &_obs_visual_lcm);
+  _neuralLCM.publish("obstacle_visual", &_obs_visual_lcm);
 }
 
 template <typename T>
@@ -433,23 +433,23 @@ void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_v
   // StateEstimate<T> stateEstimate = this->_data->_stateEstimator->getResult();
 
   // Contact state logic
-  vision_MPC.run<T>(*this->_data, des_vel, _height_map, _idx_map);
+  neural_MPC.run<T>(*this->_data, des_vel, _height_map, _idx_map);
 
   if(this->_data->userParameters->use_wbc > 0.9){
-    _wbc_data->pBody_des = vision_MPC.pBody_des;
-    _wbc_data->vBody_des = vision_MPC.vBody_des;
-    _wbc_data->aBody_des = vision_MPC.aBody_des;
+    _wbc_data->pBody_des = neural_MPC.pBody_des;
+    _wbc_data->vBody_des = neural_MPC.vBody_des;
+    _wbc_data->aBody_des = neural_MPC.aBody_des;
 
-    _wbc_data->pBody_RPY_des = vision_MPC.pBody_RPY_des;
-    _wbc_data->vBody_Ori_des = vision_MPC.vBody_Ori_des;
+    _wbc_data->pBody_RPY_des = neural_MPC.pBody_RPY_des;
+    _wbc_data->vBody_Ori_des = neural_MPC.vBody_Ori_des;
     
     for(size_t i(0); i<4; ++i){
-      _wbc_data->pFoot_des[i] = vision_MPC.pFoot_des[i];
-      _wbc_data->vFoot_des[i] = vision_MPC.vFoot_des[i];
-      _wbc_data->aFoot_des[i] = vision_MPC.aFoot_des[i];
-      _wbc_data->Fr_des[i] = vision_MPC.Fr_des[i]; 
+      _wbc_data->pFoot_des[i] = neural_MPC.pFoot_des[i];
+      _wbc_data->vFoot_des[i] = neural_MPC.vFoot_des[i];
+      _wbc_data->aFoot_des[i] = neural_MPC.aFoot_des[i];
+      _wbc_data->Fr_des[i] = neural_MPC.Fr_des[i]; 
     }
-    _wbc_data->contact_state = vision_MPC.contact_state;
+    _wbc_data->contact_state = neural_MPC.contact_state;
     _wbc_ctrl->run(_wbc_data, *this->_data);
 
   }

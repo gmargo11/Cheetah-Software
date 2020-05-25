@@ -22,6 +22,7 @@ file(GLOB_RECURSE sources
 add_subdirectory(Controllers/WBC)
 add_subdirectory(Controllers/WBC_Ctrl)
 add_subdirectory(Controllers/VisionMPC)
+add_subdirectory(Controllers/NeuralMPC)
 
 add_executable(mit_ctrl ${sources} MIT_Controller.cpp main.cpp)
 target_link_libraries(mit_ctrl robot biomimetics)
@@ -29,3 +30,4 @@ target_link_libraries(mit_ctrl dynacore_param_handler qpOASES)
 target_link_libraries(mit_ctrl Goldfarb_Optimizer osqp)
 target_link_libraries(mit_ctrl WBC_Ctrl)
 target_link_libraries(mit_ctrl VisionMPC)
+target_link_libraries(mit_ctrl NeuralMPC)

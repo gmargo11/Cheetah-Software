@@ -2,7 +2,7 @@
 #define FSM_STATE_NEURALLOCOMOTION_H
 
 #include <Controllers/convexMPC/ConvexMPCLocomotion.h>
-#include <Controllers/VisionMPC/VisionMPCLocomotion.h>
+#include <Controllers/NeuralMPC/NeuralMPCLocomotion.h>
 #include "FSM_State.h"
 #include <thread>
 #include <lcm-cpp.hpp>
@@ -37,11 +37,11 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
 
   // Behavior to be carried out when exiting a state
   void onExit();
-  
+
  private:
   // Keep track of the control iterations
   int iter = 0;
-  VisionMPCLocomotion vision_MPC;
+  NeuralMPCLocomotion neural_MPC;
   ConvexMPCLocomotion cMPCOld;
 
   WBC_Ctrl<T> * _wbc_ctrl;
@@ -64,10 +64,10 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   void handleIndexmapLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const traversability_map_t* msg);
   void handleLocalization(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const localization_lcmt* msg);
   bool _b_localization_data = false;
-  void visionLCMThread() { while (true) { _visionLCM.handle(); } }
+  void neuralLCMThread() { while (true) { _neuralLCM.handle(); } }
 
-  lcm::LCM _visionLCM;
-  std::thread _visionLCMThread;
+  lcm::LCM _neuralLCM;
+  std::thread _neuralLCMThread;
 
   vectorAligned< Vec3<T> > _obs_list; // loc, height
   obstacle_visual_t _obs_visual_lcm;

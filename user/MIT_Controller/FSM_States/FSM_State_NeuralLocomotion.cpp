@@ -59,20 +59,6 @@ void FSM_State_NeuralLocomotion<T>::onEnter() {
   this->_data->_gaitScheduler->gaitData._nextGait = GaitType::TROT;
 
 
-  // Set up LCM
-  printf("[VisionMPCLocomotion] Setup LCM...\n");
-  _lcm = new lcm::LCM(getLcmUrl(255));
-  if (!_lcm->good()) {
-    printf("[ERROR] Failed to set up LCM\n");
-    throw std::runtime_error("lcm bad");
-  }
-  //setup lcm param setting
-  _lcm->subscribe("footstep_height_pybridge", &VisionMPCLocomotion::handleFootstepHeightCmd, this);
-  _lcm->subscribe("phase_target_pybridge", &VisionMPCLocomotion::handlePhaseTarget, this);
-
-  _lcmThread = std::thread(&VisionMPCLocomotion::lcmHandler, this);
-
-
   printf("[FSM NEURAL LOCOMOTION] On Enter\n");
 
 }
@@ -321,11 +307,3 @@ void FSM_State_NeuralLocomotion<T>::StanceLegImpedanceControl(int leg) {
 
 // template class FSM_State_NeuralLocomotion<double>;
 template class FSM_State_NeuralLocomotion<float>;
-
-
-void FSM_State_NeuralLocomotion<T>::lcmHandler() {
-  while (_running) {
-    printf("[FSM_State_NeuralLocomotion] Monitoring for incoming LCM messages!");
-    _lcm->handleTimeout(1000);
-  }
-}

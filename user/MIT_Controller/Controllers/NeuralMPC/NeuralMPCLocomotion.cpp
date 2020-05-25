@@ -388,8 +388,8 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   Kd_stance = Kd;
   
   // gait
-  Vec4<float> contactStates = gait->getContactState();
-  Vec4<float> swingStates = gait->getSwingState();
+  //Vec4<float> contactStates = gait->getContactState();
+  //Vec4<float> swingStates = gait->getSwingState();
   int* mpcTable = gait->mpc_gait();
   updateMPCIfNeeded(mpcTable, data);
 

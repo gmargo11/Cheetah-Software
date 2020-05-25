@@ -19,7 +19,7 @@
 #define K_VISION 8
 #define K_BACKFLIP 9
 #define K_FRONTJUMP 11
-#define K_NEURALLOCOMOTION 12
+#define K_NEURAL_LOCOMOTION 12
 
 // Specific control states
 #define K_JOINT_PD 51

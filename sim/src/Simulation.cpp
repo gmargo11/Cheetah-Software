@@ -720,7 +720,7 @@ void Simulation::runAtSpeed(std::function<void(std::string)> errorCallback, bool
   u64 desiredSteps = 0;
   u64 steps = 0;
 
-  double frameTime = 1. ;/// 60.;
+  double frameTime = 1. / 60.;
   double lastSimTime = 0;
 
   printf(
@@ -959,9 +959,9 @@ void Simulation::updateGraphics() {
   _window->update();
 
   //save image
-  printf("[SIMULATION] saving image...");
+  //printf("[SIMULATION] saving image...");
   //QPixmap::grabWidget( _window ).save( "file.jpg" );
-  (_window -> grab()).save("file.jpg");
+  //(_window -> grab()).save("file.jpg");
 }
 
 void Simulation::lcmHandler() {

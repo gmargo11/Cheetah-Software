@@ -21,14 +21,14 @@ FSM_State_NeuralLocomotion<T>::FSM_State_NeuralLocomotion(ControlFSMData<T>* _co
     : FSM_State<T>(_controlFSMData, FSM_StateName::NEURAL_LOCOMOTION, "NEURAL_LOCOMOTION")
 {
   if(_controlFSMData->_quadruped->_robotType == RobotType::MINI_CHEETAH){
-    vMPCOld = new VisionMPCLocomotion(_controlFSMData->controlParameters->controller_dt,
+    cMPCOld = new ConvexMPCLocomotion(_controlFSMData->controlParameters->controller_dt,
         //30 / (1000. * _controlFSMData->controlParameters->controller_dt),
         //22 / (1000. * _controlFSMData->controlParameters->controller_dt),
         27 / (1000. * _controlFSMData->controlParameters->controller_dt),
         _controlFSMData->userParameters);
 
   }else if(_controlFSMData->_quadruped->_robotType == RobotType::CHEETAH_3){
-    vMPCOld = new VisionMPCLocomotion(_controlFSMData->controlParameters->controller_dt,
+    cMPCOld = new ConvexMPCLocomotion(_controlFSMData->controlParameters->controller_dt,
         33 / (1000. * _controlFSMData->controlParameters->controller_dt),
         _controlFSMData->userParameters);
 
@@ -55,11 +55,14 @@ void FSM_State_NeuralLocomotion<T>::onEnter() {
 
   // Reset the transition data
   this->transitionData.zero();
-  vMPCOld->initialize();
+  cMPCOld->initialize();
   this->_data->_gaitScheduler->gaitData._nextGait = GaitType::TROT;
 
 
-  printf("[FSM NEURAL LOCOMOTION] On Enter\n");
+
+
+
+  printf("[FSM LOCOMOTION] On Enter\n");
 
 }
 
@@ -253,7 +256,7 @@ void FSM_State_NeuralLocomotion<T>::LocomotionControlStep() {
   // Contact state logic
   // estimateContact();
 
-  vMPCOld->run<T>(*this->_data);
+  cMPCOld->run<T>(*this->_data);
   Vec3<T> pDes_backup[4];
   Vec3<T> vDes_backup[4];
   Mat3<T> Kp_backup[4];
@@ -267,20 +270,20 @@ void FSM_State_NeuralLocomotion<T>::LocomotionControlStep() {
   }
 
   if(this->_data->userParameters->use_wbc > 0.9){
-    _wbc_data->pBody_des = vMPCOld->pBody_des;
-    _wbc_data->vBody_des = vMPCOld->vBody_des;
-    _wbc_data->aBody_des = vMPCOld->aBody_des;
+    _wbc_data->pBody_des = cMPCOld->pBody_des;
+    _wbc_data->vBody_des = cMPCOld->vBody_des;
+    _wbc_data->aBody_des = cMPCOld->aBody_des;
 
-    _wbc_data->pBody_RPY_des = vMPCOld->pBody_RPY_des;
-    _wbc_data->vBody_Ori_des = vMPCOld->vBody_Ori_des;
+    _wbc_data->pBody_RPY_des = cMPCOld->pBody_RPY_des;
+    _wbc_data->vBody_Ori_des = cMPCOld->vBody_Ori_des;
     
     for(size_t i(0); i<4; ++i){
-      _wbc_data->pFoot_des[i] = vMPCOld->pFoot_des[i];
-      _wbc_data->vFoot_des[i] = vMPCOld->vFoot_des[i];
-      _wbc_data->aFoot_des[i] = vMPCOld->aFoot_des[i];
-      _wbc_data->Fr_des[i] = vMPCOld->Fr_des[i]; 
+      _wbc_data->pFoot_des[i] = cMPCOld->pFoot_des[i];
+      _wbc_data->vFoot_des[i] = cMPCOld->vFoot_des[i];
+      _wbc_data->aFoot_des[i] = cMPCOld->aFoot_des[i];
+      _wbc_data->Fr_des[i] = cMPCOld->Fr_des[i]; 
     }
-    _wbc_data->contact_state = vMPCOld->contact_state;
+    _wbc_data->contact_state = cMPCOld->contact_state;
     _wbc_ctrl->run(_wbc_data, *this->_data);
   }
   for(int leg(0); leg<4; ++leg){
@@ -307,3 +310,11 @@ void FSM_State_NeuralLocomotion<T>::StanceLegImpedanceControl(int leg) {
 
 // template class FSM_State_NeuralLocomotion<double>;
 template class FSM_State_NeuralLocomotion<float>;
+
+
+void FSM_State_NeuralLocomotion<T>::lcmHandler() {
+  while (_running) {
+    printf("[FSM_State_NeuralLocomotion] Monitoring for incoming LCM messages!");
+    _lcm->handleTimeout(1000);
+  }
+}

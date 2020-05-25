@@ -44,7 +44,7 @@ public:
 
   template<typename T>
   void run(ControlFSMData<T>& data, 
-      const Vec3<T> & vel_cmd, const Vec3<float> & vel_cmd, Vec2<float> & fp_rel_cmd[4], Vec4<int> & contact_cmd, float & swing_time_cmd, 
+      const Vec3<T> & vel_cmd, Vec2<T> & fp_rel_cmd[4], Vec4<T> & contact_cmd, float & swing_time_cmd, 
       const DMat<T> & height_map, const DMat<int> & idx_map);
 
   Vec3<float> pBody_des;

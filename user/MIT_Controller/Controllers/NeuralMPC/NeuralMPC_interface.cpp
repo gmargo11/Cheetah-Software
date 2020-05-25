@@ -6,16 +6,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#define V_NUM_LEGS 4
+#define n_NUM_LEGS 4
 
-neural_mpc_problem_setup v_problem_config;
-neural_mpc_update_data_t v_update;
+neural_mpc_problem_setup n_problem_config;
+neural_mpc_update_data_t n_update;
 
 pthread_mutex_t neural_problem_cfg_mt;
 pthread_mutex_t neural_mpc_update_mt;
 pthread_t neural_mpc_solve_thread;
 
-u8 v_first_run = 1;
+u8 n_first_run = 1;
 
 void neural_initialize_mpc()
 {
@@ -29,17 +29,17 @@ void neural_initialize_mpc()
 
 void neural_setup_problem(double dt, int horizon, double mu, double f_max)
 {
-  if(v_first_run) {
-    v_first_run = false;
+  if(n_first_run) {
+    n_first_run = false;
     neural_initialize_mpc();
   }
 
   //pthread_mutex_lock(&problem_cfg_mt);
 
-  v_problem_config.horizon = horizon;
-  v_problem_config.f_max = f_max;
-  v_problem_config.mu = mu;
-  v_problem_config.dt = dt;
+  n_problem_config.horizon = horizon;
+  n_problem_config.f_max = f_max;
+  n_problem_config.mu = mu;
+  n_problem_config.dt = dt;
 
   //pthread_mutex_unlock(&problem_cfg_mt);
   neural_resize_qp_mats(horizon);
@@ -61,20 +61,20 @@ int neural_has_solved = 0;
 //safely copies problem data and starts the solver
 void neural_update_problem_data(double* p, double* v, double* q, double* w, double* r, double yaw, double* weights, double* state_trajectory, double alpha, int* gait)
 {
-  neural_mpf_to_flt(v_update.p,p,3);
-  neural_mpf_to_flt(v_update.v,v,3);
-  neural_mpf_to_flt(v_update.q,q,4);
-  neural_mpf_to_flt(v_update.w,w,3);
-  neural_mpf_to_flt(v_update.r,r,12);
-  v_update.yaw = yaw;
-  neural_mpf_to_flt(v_update.weights,weights,12);
-  //this is safe, the solver isn't running, and v_update_problem_data and setup_problem
+  neural_mpf_to_flt(n_update.p,p,3);
+  neural_mpf_to_flt(n_update.v,v,3);
+  neural_mpf_to_flt(n_update.q,q,4);
+  neural_mpf_to_flt(n_update.w,w,3);
+  neural_mpf_to_flt(n_update.r,r,12);
+  n_update.yaw = yaw;
+  neural_mpf_to_flt(n_update.weights,weights,12);
+  //this is safe, the solver isn't running, and n_update_problem_data and setup_problem
   //are called from the same thread
-  neural_mpf_to_flt(v_update.traj,state_trajectory,12*v_problem_config.horizon);
-  v_update.alpha = alpha;
-  neural_mint_to_u8(v_update.gait,gait,4*v_problem_config.horizon);
+  neural_mpf_to_flt(n_update.traj,state_trajectory,12*n_problem_config.horizon);
+  n_update.alpha = alpha;
+  neural_mint_to_u8(n_update.gait,gait,4*n_problem_config.horizon);
 
-  neural_solve_mpc(&v_update, &v_problem_config);
+  neural_solve_mpc(&n_update, &n_problem_config);
   neural_has_solved = 1;
 }
 
@@ -82,17 +82,17 @@ void neural_update_problem_data_floats(float* p, float* v, float* q, float* w,
                                 float* r, float yaw, float* weights,
                                 float* state_trajectory, float alpha, int* gait)
 {
-  v_update.alpha = alpha;
-  v_update.yaw = yaw;
-  neural_mint_to_u8(v_update.gait,gait,4*v_problem_config.horizon);
-  memcpy((void*)v_update.p,(void*)p,sizeof(float)*3);
-  memcpy((void*)v_update.v,(void*)v,sizeof(float)*3);
-  memcpy((void*)v_update.q,(void*)q,sizeof(float)*4);
-  memcpy((void*)v_update.w,(void*)w,sizeof(float)*3);
-  memcpy((void*)v_update.r,(void*)r,sizeof(float)*12);
-  memcpy((void*)v_update.weights,(void*)weights,sizeof(float)*12);
-  memcpy((void*)v_update.traj,(void*)state_trajectory, sizeof(float) * 12 * v_problem_config.horizon);
-  neural_solve_mpc(&v_update, &v_problem_config);
+  n_update.alpha = alpha;
+  n_update.yaw = yaw;
+  neural_mint_to_u8(n_update.gait,gait,4*n_problem_config.horizon);
+  memcpy((void*)n_update.p,(void*)p,sizeof(float)*3);
+  memcpy((void*)n_update.v,(void*)v,sizeof(float)*3);
+  memcpy((void*)n_update.q,(void*)q,sizeof(float)*4);
+  memcpy((void*)n_update.w,(void*)w,sizeof(float)*3);
+  memcpy((void*)n_update.r,(void*)r,sizeof(float)*12);
+  memcpy((void*)n_update.weights,(void*)weights,sizeof(float)*12);
+  memcpy((void*)n_update.traj,(void*)state_trajectory, sizeof(float) * 12 * n_problem_config.horizon);
+  neural_solve_mpc(&n_update, &n_problem_config);
   neural_has_solved = 1;
 
 }

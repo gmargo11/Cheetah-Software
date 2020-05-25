@@ -1,7 +1,7 @@
 #ifndef _Neural_mpc_interface
 #define _Neural_mpc_interface
 
-#define V_MAX_GAIT_SEGMENTS 36
+#define N_MAX_GAIT_SEGMENTS 36
 
 #ifdef __cplusplus
 #define EXTERNC extern "C"
@@ -26,9 +26,9 @@ struct neural_mpc_update_data_t
   float r[12];
   float yaw;
   float weights[12];
-  float traj[12*V_MAX_GAIT_SEGMENTS];
+  float traj[12*N_MAX_GAIT_SEGMENTS];
   float alpha;
-  unsigned char gait[V_MAX_GAIT_SEGMENTS];
+  unsigned char gait[N_MAX_GAIT_SEGMENTS];
   unsigned char hack_pad[1000];
   int max_iterations;
   float x_drag;

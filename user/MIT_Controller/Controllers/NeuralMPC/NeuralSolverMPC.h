@@ -4,7 +4,7 @@
 
 #include <eigen3/Eigen/Dense>
 #include "../convexMPC/common_types.h"
-#include "VisionMPC_interface.h"
+#include "NeuralMPC_interface.h"
 #include <iostream>
 #include <stdio.h>
 

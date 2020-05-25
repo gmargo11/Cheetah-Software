@@ -83,7 +83,7 @@ void neural_c2qp(Matrix<fpt,13,13> Ac, Matrix<fpt,13,12> Bc,fpt dt,s16 horizon)
   nABc.setZero();
   nABc.block(0,0,13,13) = Ac;
   nABc.block(0,13,13,12) = Bc;
-  nABc = dt*vABc;
+  nABc = dt*nABc;
   n_expmm = nABc.exp();
   nAdt = n_expmm.block(0,0,13,13);
   nBdt = n_expmm.block(0,13,13,12);
@@ -272,11 +272,11 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
   //initial state (13 state representation)
   n_x_0 << rpy(2), rpy(1), rpy(0), n_rs.p , n_rs.w, n_rs.v, -9.8f;
   nI_world = n_rs.R_yaw * n_rs.I_body * n_rs.R_yaw.transpose(); //original
-  neural_ct_ss_mats(nI_world,n_rs.m,n_rs.r_feet,n_rs.R_yaw,vA_ct,vB_ct_r, update->x_drag);
+  neural_ct_ss_mats(nI_world,n_rs.m,n_rs.r_feet,n_rs.R_yaw,nA_ct,nB_ct_r, update->x_drag);
 
 
   //QP matrices
-  neural_c2qp(nA_ct,vB_ct_r,setup->dt,setup->horizon);
+  neural_c2qp(nA_ct,nB_ct_r,setup->dt,setup->horizon);
 
   //weights
   Matrix<fpt,13,1> full_weight;
@@ -324,14 +324,14 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
     n_fmat.block(i*5,i*3,5,3) = f_block;
   }
 
-  n_qH = 2*(nB_qp.transpose()*vS*vB_qp + update->alpha*n_eye_12h);
-  n_qg = 2*vB_qp.transpose()*vS*(nA_qp*n_x_0 - nX_d);
+  n_qH = 2*(nB_qp.transpose()*nS*nB_qp + update->alpha*n_eye_12h);
+  n_qg = 2*nB_qp.transpose()*nS*(nA_qp*n_x_0 - nX_d);
 
 
   n_matrix_to_real(nH_qpoases,n_qH,setup->horizon*12, setup->horizon*12);
   n_matrix_to_real(ng_qpoases,n_qg,setup->horizon*12, 1);
   n_matrix_to_real(nA_qpoases,n_fmat,setup->horizon*20, setup->horizon*12);
-  n_matrix_to_real(nub_qpoases,vU_b,setup->horizon*20, 1);
+  n_matrix_to_real(nub_qpoases,nU_b,setup->horizon*20, 1);
 
   for(s16 i = 0; i < 20*setup->horizon; i++)
     nlb_qpoases[i] = 0.0f;
@@ -356,7 +356,7 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
   for(int i = 0; i < num_constraints; i++)
   {
     if(! (n_near_zero(nlb_qpoases[i]) && n_near_zero(nub_qpoases[i]))) continue;
-    double* c_row = &vA_qpoases[i*num_variables];
+    double* c_row = &nA_qpoases[i*num_variables];
     for(int j = 0; j < num_variables; j++)
     {
       if(n_near_one(c_row[j]))
@@ -378,7 +378,7 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
   //if(new_vars != num_variables)
   if(1==1)
   {
-    int nar_ind[new_vars];
+    int var_ind[new_vars];
     int n_con_ind[new_cons];
     int nc = 0;
     for(int i = 0; i < num_variables; i++)
@@ -389,7 +389,7 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
         {
           printf("BAD ERROR 1\n");
         }
-        nar_ind[vc] = i;
+        var_ind[nc] = i;
         nc++;
       }
     }
@@ -402,17 +402,17 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
         {
           printf("BAD ERROR 1\n");
         }
-        n_con_ind[vc] = i;
+        n_con_ind[nc] = i;
         nc++;
       }
     }
     for(int i = 0; i < new_vars; i++)
     {
-      int olda = nar_ind[i];
+      int olda = var_ind[i];
       ng_red[i] = ng_qpoases[olda];
       for(int j = 0; j < new_vars; j++)
       {
-        int oldb = nar_ind[j];
+        int oldb = var_ind[j];
         nH_red[i*new_vars + j] = nH_qpoases[olda*num_variables + oldb];
       }
     }
@@ -421,8 +421,8 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
     {
       for(int st = 0; st < new_vars; st++)
       {
-        float cval = nA_qpoases[(num_variables*n_con_ind[con]) + nar_ind[st] ];
-        nA_red[con*new_vars + st] = cval;
+        float cnAl = nA_qpoases[(num_variables*n_con_ind[con]) + var_ind[st] ];
+        nA_red[con*new_vars + st] = cnAl;
       }
     }
     for(int i = 0; i < new_cons; i++)
@@ -440,10 +440,10 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
     //int_t nWSR = 50000;
 
 
-    int rval = problem_red.init(nH_red, ng_red, nA_red, NULL, NULL, nlb_red, nub_red, nWSR);
-    (void)rval;
-    int rval2 = problem_red.getPrimalSolution(nq_red);
-    if(rval2 != qpOASES::SUCCESSFUL_RETURN)
+    int rnAl = problem_red.init(nH_red, ng_red, nA_red, NULL, NULL, nlb_red, nub_red, nWSR);
+    (void)rnAl;
+    int rnAl2 = problem_red.getPrimalSolution(nq_red);
+    if(rnAl2 != qpOASES::SUCCESSFUL_RETURN)
       printf("failed to solve!\n");
 
     // printf("solve time: %.3f ms, size %d, %d\n", solve_timer.getMs(), new_vars, new_cons);
@@ -458,7 +458,7 @@ void neural_solve_mpc(neural_mpc_update_data_t* update, neural_mpc_problem_setup
       }
       else
       {
-        nq_soln[i] = nq_red[vc];
+        nq_soln[i] = nq_red[nc];
         nc++;
       }
     }

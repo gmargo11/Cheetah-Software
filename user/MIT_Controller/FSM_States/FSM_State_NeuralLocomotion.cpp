@@ -277,7 +277,7 @@ void FSM_State_NeuralLocomotion<T>::_Visualization(const Vec3<T> & des_vel){
 }
 
 template <typename T>
-void FSM_State_NeuralLocomotion<T>::_updatePhaseCommand(Vec3<T> & des_vel, Vec2<T> & des_fp_rel[4], Vec4<T> & des_contact, float & des_swing_time) {
+void FSM_State_NeuralLocomotion<T>::_updatePhaseCommand(Vec3<T> & des_vel, Vec2<T> (& des_fp_rel)[4], Vec4<T> & des_contact, float & des_swing_time) {
   des_vel.setZero();
 
   Vec3<T> target_pos, curr_pos, curr_ori_rpy;
@@ -405,7 +405,7 @@ TransitionData<T> FSM_State_NeuralLocomotion<T>::transition() {
   // Switch FSM control mode
   switch (this->nextStateName) {
     case FSM_StateName::BALANCE_STAND:
-      _LocomotionControlStep(zero_vec3);
+      //_LocomotionControlStep(zero_vec3);
 
       iter++;
       if (iter >= this->transitionDuration * 1000) {

@@ -11,6 +11,7 @@
 #include "velocity_visual_t.hpp"
 #include "obstacle_visual_t.hpp"
 #include "localization_lcmt.hpp"
+#include "phase_target_lcmt.hpp"
 
 template<typename T> class WBC_Ctrl;
 template<typename T> class LocomotionCtrlData;
@@ -63,6 +64,7 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   void handleHeightmapLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const heightmap_t* msg);
   void handleIndexmapLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const traversability_map_t* msg);
   void handleLocalization(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const localization_lcmt* msg);
+  void handlePhaseTargetLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const phase_target_lcmt* msg);
   bool _b_localization_data = false;
   void neuralLCMThread() { while (true) { _neuralLCM.handle(); } }
 
@@ -75,8 +77,8 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   void _updateStateEstimator();
   void _JPosStand();
   void _UpdateObstacle();
-  void _LocomotionControlStep(const Vec3<T> & vel_cmd);
-  void _UpdateVelCommand(Vec3<T> & vel_cmd);
+  void _LocomotionControlStep(const Vec3<T> & vel_cmd, const Vec2<T> & des_fp_rel[4], const Vec4<T> & des_contact, const float & des_swing_time);
+  void _UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<T> (& des_fp_rel)[4], Vec4<T> & des_contact, float & des_swing_time);
   void _RCLocomotionControl();
   void _Visualization(const Vec3<T> & des_vel);
   void _print_obstacle_list();

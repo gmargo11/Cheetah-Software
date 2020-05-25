@@ -86,7 +86,7 @@ FSM_StateName FSM_State_NeuralLocomotion<T>::checkTransition() {
   // Switch FSM control mode
   if(locomotionSafe()) {
     switch ((int)this->_data->controlParameters->control_mode) {
-      case K_NEURALLOCOMOTION:
+      case K_NEURAL_LOCOMOTION:
         break;
 
       case K_BALANCE_STAND:

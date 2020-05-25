@@ -87,6 +87,10 @@ FSM_StateName FSM_State_StandUp<T>::checkTransition() {
       this->nextStateName = FSM_StateName::LOCOMOTION;
       break;
 
+    case K_NEURALLOCOMOTION:
+      this->nextStateName = FSM_StateName::NEURALLOCOMOTION;
+      break;
+
     case K_VISION:
       this->nextStateName = FSM_StateName::VISION;
       break;

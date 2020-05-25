@@ -1,7 +1,7 @@
 #ifndef FSM_STATE_NEURALLOCOMOTION_H
 #define FSM_STATE_NEURALLOCOMOTION_H
 
-#include <Controllers/convexMPC/ConvexMPCLocomotion.h>
+#include <Controllers/VisionMPC/VisionMPCLocomotion.h>
 #include "FSM_State.h"
 
 template<typename T> class WBC_Ctrl;
@@ -33,7 +33,7 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
  private:
   // Keep track of the control iterations
   int iter = 0;
-  ConvexMPCLocomotion* cMPCOld;
+  VisionMPCLocomotion* vMPCOld;
   WBC_Ctrl<T> * _wbc_ctrl;
   LocomotionCtrlData<T> * _wbc_data;
 

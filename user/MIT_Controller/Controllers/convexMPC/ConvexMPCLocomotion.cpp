@@ -16,7 +16,7 @@
 // Controller
 ////////////////////
 
-ConvexMPCLocomotion::ConvexMPCLocomotion(float _dt, int _iterations_between_mpc, MIT_UserParameters* parameters) :
+ConvexMPCLocomotion::ConvexMPCLocomotion(float _dt, int _iterations_between_mpc, MIT_UserParameters* parameters, int neural) :
   iterationsBetweenMPC(_iterations_between_mpc),
   horizonLength(10),
   dt(_dt),

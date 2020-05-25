@@ -9,7 +9,7 @@
 #define EXTERNC
 #endif
 
-struct Neural_mpc_problem_setup
+struct neural_mpc_problem_setup
 {
   float dt;
   float mu;
@@ -17,7 +17,7 @@ struct Neural_mpc_problem_setup
   int horizon;
 };
 
-struct Neural_mpc_update_data_t
+struct neural_mpc_update_data_t
 {
   float p[3];
   float v[3];

@@ -95,7 +95,7 @@ void FSM_State_NeuralLocomotion<T>::handleIndexmapLCM(const lcm::ReceiveBuffer *
 template<typename T>
 void FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM(const lcm::ReceiveBuffer *rbuf,
     const std::string &chan,
-    const traversability_map_t *msg) {
+    const phase_target_lcmt *msg) {
   (void)rbuf;
   (void)chan;
 

@@ -107,7 +107,7 @@ void FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM(const lcm::ReceiveBuffe
   //target_t_S = msg->t_S;
   //target_t_E = msg->t_E;
   
-  printf("Recieved phase target")
+  printf("Recieved phase target");
 
 }
 

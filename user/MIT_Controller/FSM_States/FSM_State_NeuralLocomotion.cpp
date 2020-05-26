@@ -283,7 +283,9 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
   Vec3<T> target_pos, curr_pos, curr_ori_rpy;
 
   target_pos.setZero();
-  target_p_foot.setZero();
+  for(int i = 0; i < 4; i++) {
+    target_p_foot[i].setZero();
+  } 
   target_vel.setZero();
   target_contacts.setZero();
   target_translation.setZero();

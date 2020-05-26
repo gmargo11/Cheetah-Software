@@ -348,7 +348,7 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
   des_contact = target_contacts;
   des_swing_time = target_t_E + target_t_S;
 
-  std::cout << "phase update" << des_fp_rel << des_contact << des_swing_time;
+  std::cout << "phase update" << des_vel << des_contact << des_swing_time;
 
 
   des_vel[0] = fminf(fmaxf(des_vel[0], -1.), 1.);

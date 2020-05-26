@@ -283,6 +283,13 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
   Vec3<T> target_pos, curr_pos, curr_ori_rpy;
 
   target_pos.setZero();
+  target_p_foot.setZero();
+  target_vel.setZero();
+  target_contacts.setZero();
+  target_translation.setZero();
+  target_rotation.setZero();
+  target_t_E.setZero();
+  target_t_S.setZero();
 
   T moving_time = 25.0;
   T curr_time = (T)iter * 0.002;

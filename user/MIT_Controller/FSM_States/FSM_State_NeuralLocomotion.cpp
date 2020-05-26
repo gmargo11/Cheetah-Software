@@ -287,9 +287,9 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
   target_vel.setZero();
   target_contacts.setZero();
   target_translation.setZero();
-  target_rotation.setZero();
-  target_t_E.setZero();
-  target_t_S.setZero();
+  target_rotation = 0.0;
+  target_t_E = 0.0;
+  target_t_S = 0.0;
 
   T moving_time = 25.0;
   T curr_time = (T)iter * 0.002;
@@ -340,7 +340,7 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
   //printf("des vel_x, y: %f, %f\n", des_vel[0], des_vel[1]);
 
   //des_vel = target_vel;
-  des_fp_rel = target_p_foot;
+  //des_fp_rel = target_p_foot;
   des_contact = target_contacts;
   des_swing_time = target_t_E + target_t_S;
 

@@ -100,14 +100,14 @@ void FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM(const lcm::ReceiveBuffe
   (void)chan;
 
   target_rotation = msg->CoM_rotation;
-  target_translation = msg->CoM_translation;
+  //target_translation = msg->CoM_translation;
   //target_vel = msg->CoM_vel;
   //target_p_foot = msg->p_foot;
   //target_contacts = msg->contacts;
   //target_t_S = msg->t_S;
   //target_t_E = msg->t_E;
   
-  printf("Recieved phase target")
+  printf("Recieved phase target");
 
 }
 
@@ -336,7 +336,7 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
   //des_fp_rel = target_p_foot;
   //des_contact = target_contacts;
   //des_swing_time = target_t_E + target_t_S;
-  std::cout << des_fp_rel << des_contact << des_swing_time
+  std::cout << des_fp_rel << des_contact << des_swing_time;
 
 
   des_vel[0] = fminf(fmaxf(des_vel[0], -1.), 1.);

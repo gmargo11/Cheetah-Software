@@ -317,10 +317,10 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
   
   // foot placement
-  swingTimes[0] = swing_time_cmd;//dtMPC * gait->_swing;
-  swingTimes[1] = swing_time_cmd;//dtMPC * gait->_swing;
-  swingTimes[2] = swing_time_cmd;//dtMPC * gait->_swing;
-  swingTimes[3] = swing_time_cmd;//dtMPC * gait->_swing;
+  swingTimes[0] = dtMPC * gait->_swing; // swing_time_cmd;
+  swingTimes[1] = dtMPC * gait->_swing; // swing_time_cmd;
+  swingTimes[2] = dtMPC * gait->_swing; // swing_time_cmd;
+  swingTimes[3] = dtMPC * gait->_swing; // swing_time_cmd;
 
   float side_sign[4] = {-1, 1, -1, 1};
 
@@ -349,15 +349,15 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     float p_rel_max = 0.3f;
 
     // Set the foot target positions in relative frame
-    //float pfx_rel = seResult.vWorld[0] * .5 * gait->_stance * dtMPC +
-    //  .03f*(seResult.vWorld[0]-v_des_world[0]) +
-    //  (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*v_rpy_des[2]);
+    float pfx_rel = seResult.vWorld[0] * .5 * gait->_stance * dtMPC +
+      .03f*(seResult.vWorld[0]-v_des_world[0]) +
+      (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*v_rpy_des[2]);
 
-    //float pfy_rel = seResult.vWorld[1] * .5 * gait->_stance * dtMPC +
-    //  .03f*(seResult.vWorld[1]-v_des_world[1]) +
-    //  (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*v_rpy_des[2]);
-    float pfx_rel = fp_rel_cmd[i][0];
-    float pfy_rel = fp_rel_cmd[i][1];
+    float pfy_rel = seResult.vWorld[1] * .5 * gait->_stance * dtMPC +
+      .03f*(seResult.vWorld[1]-v_des_world[1]) +
+      (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*v_rpy_des[2]);
+    //float pfx_rel = fp_rel_cmd[i][0];
+    //float pfy_rel = fp_rel_cmd[i][1];
 
     pfx_rel = fminf(fmaxf(pfx_rel, -p_rel_max), p_rel_max);
     pfy_rel = fminf(fmaxf(pfy_rel, -p_rel_max), p_rel_max);
@@ -397,8 +397,8 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
 
   for(int foot = 0; foot < 4; foot++)
   {
-    float contactState = contact_cmd[foot];//contactStates[foot];
-    float swingState = 1 - contact_cmd[foot];
+    float contactState = contactStates[foot];//;contact_cmd[foot]
+    float swingState = swingStates[foot];
     if(swingState > 0) // foot is in swing
     {
       if(firstSwing[foot])

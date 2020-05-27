@@ -86,7 +86,7 @@ private:
   Vec3<float> f_ff[4];
   Vec4<float> swingTimes;
   FootSwingTrajectory<float> footSwingTrajectories[4];
-  NeuralGait trotting, bounding, pronking, galloping, standing, trotRunning;
+  NeuralGait trotting, bounding, pronking, galloping, standing, trotRunning, cyclic;
   Mat3<float> Kp, Kd, Kp_stance, Kd_stance;
   bool firstRun = true;
   bool firstSwing[4];

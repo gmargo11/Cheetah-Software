@@ -117,7 +117,8 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
   pronking(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(4,4,4,4),"Pronking"),
   galloping(horizonLength, Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3),"Galloping"),
   standing(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10),"Standing"),
-  trotRunning(horizonLength, Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3),"Trot Running")
+  trotRunning(horizonLength, Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3),"Trot Running"),
+  cyclic(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8),"Cyclic Walk")
 {
   _parameters = parameters;
   dtMPC = dt * iterationsBetweenMPC;
@@ -265,7 +266,8 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   else if(gaitNumber == 3)    gait = &galloping;
   else if(gaitNumber == 4)    gait = &standing;
   else if(gaitNumber == 5)    gait = &trotRunning;
-  current_gait = gaitNumber;
+  //current_gait = gaitNumber;
+  current_gait = &cyclic; // set cyclic gait for now
 
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];

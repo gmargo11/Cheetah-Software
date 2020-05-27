@@ -110,6 +110,8 @@ void FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM(const lcm::ReceiveBuffe
   
   printf("Recieved phase target");
 
+  _policyRecieved = 1;
+
 }
 
 
@@ -350,8 +352,27 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
   des_contact = target_contacts;
   des_swing_time = target_t_E + target_t_S;
 
-  std::cout << "phase update" << des_vel << des_contact << des_swing_time;
+  // Get phase from python
+  velocity_visual_t vel_visual;
+  for(size_t i(0); i<3; ++i){
+    vel_visual.vel_cmd[i] = des_vel[i];
+    vel_visual.base_position[i] = (this->_data->_stateEstimator->getResult()).position[i];
+  }
 
+  _policyRecieved = 0;
+  printf("Sending policy request...");
+  _neuralLCM.publish("policy_request", &vel_visual);
+
+  //wait for response
+  while( _policyRecieved < 1){
+    Sleep(0);
+  }
+
+  des_vel[0] = target_vel[0];
+  des_vel[1] = target_vel[1];
+
+  std::cout << "phase update" << des_vel << des_contact << des_swing_time;
+  std::cout << "Recieved velocity command" << des_vel;
 
   des_vel[0] = fminf(fmaxf(des_vel[0], -1.), 1.);
   des_vel[1] = fminf(fmaxf(des_vel[1], -1.), 1.);

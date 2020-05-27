@@ -266,8 +266,10 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   else if(gaitNumber == 3)    gait = &galloping;
   else if(gaitNumber == 4)    gait = &standing;
   else if(gaitNumber == 5)    gait = &trotRunning;
-  //current_gait = gaitNumber;
-  current_gait = &cyclic; // set cyclic gait for now
+  current_gait = gaitNumber;
+  
+  // Can modify
+  gait = &cyclic; // set cyclic gait for now
 
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];

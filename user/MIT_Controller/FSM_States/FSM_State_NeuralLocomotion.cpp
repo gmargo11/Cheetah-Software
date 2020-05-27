@@ -8,6 +8,7 @@
 #include "FSM_State_NeuralLocomotion.h"
 #include <Utilities/Timer.h>
 #include <Controllers/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
+#include <unistd.h>
 
 /**
  * Constructor for the FSM State that passes in state specific info to
@@ -365,7 +366,8 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
 
   //wait for response
   while( _policyRecieved < 1){
-    Sleep(0);
+    usleep(100);
+    printf("Waiting for a response from python...");
   }
 
   des_vel[0] = target_vel[0];

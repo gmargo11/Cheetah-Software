@@ -117,7 +117,7 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
   galloping(horizonLength, Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3),"Galloping"),
   standing(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10),"Standing"),
   trotRunning(horizonLength, Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3),"Trot Running"),
-  cyclic(8, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8),"Cyclic Walk")
+  cyclic(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8),"Cyclic Walk")
 {
   _parameters = parameters;
   dtMPC = dt * iterationsBetweenMPC;

@@ -92,6 +92,7 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   void _UpdateObstacle();
   void _LocomotionControlStep(const Vec3<T> & vel_cmd, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> & des_contact, const float & des_swing_time);
   void _UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<T> (& des_fp_rel)[4], Vec4<T> & des_contact, float & des_swing_time);
+  void _UpdateGaitCommand(Vec3<T> & des_vel);
   void _RCLocomotionControl();
   void _Visualization(const Vec3<T> & des_vel);
   void _print_obstacle_list();

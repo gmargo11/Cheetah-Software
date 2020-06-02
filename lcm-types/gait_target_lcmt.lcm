@@ -1,0 +1,6 @@
+struct gait_target_lcmt {
+  float vel[2];
+  float p_foot[4][2];
+  int64_t offsets[4];
+  int64_t durations[4];
+}

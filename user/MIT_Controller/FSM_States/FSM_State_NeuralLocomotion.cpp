@@ -176,7 +176,8 @@ void FSM_State_NeuralLocomotion<T>::run() {
   _UpdateObstacle();
 
   // Neural Walking
-  _UpdatePhaseCommand(des_vel, des_fp_rel, des_contact, des_swing_time);
+  //_UpdatePhaseCommand(des_vel, des_fp_rel, des_contact, des_swing_time);
+  _UpdateGaitCommand(des_vel);
   _LocomotionControlStep(des_vel, des_fp_rel, des_contact, des_swing_time);
 
   // Convex Locomotion

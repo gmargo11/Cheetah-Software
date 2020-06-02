@@ -8,8 +8,8 @@
 ///////////////
 // GAIT
 ///////////////
-NeuralGait::NeuralGait(int nMPC_segments, Vec8<int> offsets, 
-    Vec8<int> durations, const std::string &name) :
+NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets, 
+    Vec4<int> durations, const std::string &name) :
   _offsets(offsets.array()),
   _durations(durations.array()),
   _nIterations(nMPC_segments)

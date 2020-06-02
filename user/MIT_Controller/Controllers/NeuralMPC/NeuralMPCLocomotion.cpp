@@ -259,7 +259,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
 
   // pick gait
-  custom(horizonLength, *offsets, *durations, "Custom");
+  custom(horizonLength, offsets, durations, "Custom");
   //NeuralGait* gait = &trotting;
   //if(gaitNumber == 1)         gait = &bounding;
   //else if(gaitNumber == 2)    gait = &pronking;

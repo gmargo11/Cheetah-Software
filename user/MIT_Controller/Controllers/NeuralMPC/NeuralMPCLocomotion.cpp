@@ -8,8 +8,8 @@
 ///////////////
 // GAIT
 ///////////////
-NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets, 
-    Vec4<int> durations, const std::string &name) :
+NeuralGait::NeuralGait(int nMPC_segments, Vec8<int> offsets, 
+    Vec8<int> durations, const std::string &name) :
   _offsets(offsets.array()),
   _durations(durations.array()),
   _nIterations(nMPC_segments)
@@ -35,7 +35,6 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
 NeuralGait::~NeuralGait() {
   delete[] _mpc_table;
 }
-
 
 Vec4<float> NeuralGait::getContactState() {
   Array4f progress = _phase - _offsetsFloat;
@@ -118,7 +117,7 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
   galloping(horizonLength, Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3),"Galloping"),
   standing(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10),"Standing"),
   trotRunning(horizonLength, Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3),"Trot Running"),
-  cyclic(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8),"Cyclic Walk")
+  cyclic(8, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8),"Cyclic Walk")
 {
   _parameters = parameters;
   dtMPC = dt * iterationsBetweenMPC;
@@ -233,7 +232,7 @@ void NeuralMPCLocomotion::_IdxMapChecking(int x_idx, int y_idx, int & x_idx_sele
 
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data, 
-    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float> & contact_cmd, const float & swing_time_cmd, 
+    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], Vec4<int> offsets, Vec4<int> durations, 
     const DMat<float> & height_map, const DMat<int> & idx_map) {
   (void)idx_map;
     
@@ -260,16 +259,17 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
 
   // pick gait
-  NeuralGait* gait = &trotting;
-  if(gaitNumber == 1)         gait = &bounding;
-  else if(gaitNumber == 2)    gait = &pronking;
-  else if(gaitNumber == 3)    gait = &galloping;
-  else if(gaitNumber == 4)    gait = &standing;
-  else if(gaitNumber == 5)    gait = &trotRunning;
+  custom(horizonLength, offsets, durations, "Custom");
+  //NeuralGait* gait = &trotting;
+  //if(gaitNumber == 1)         gait = &bounding;
+  //else if(gaitNumber == 2)    gait = &pronking;
+  //else if(gaitNumber == 3)    gait = &galloping;
+  //else if(gaitNumber == 4)    gait = &standing;
+  //else if(gaitNumber == 5)    gait = &trotRunning;
   current_gait = gaitNumber;
   
   // Can modify
-  gait = &cyclic; // set cyclic gait for now
+  NeuralGait* gait = &custom; // set cyclic gait for now
 
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];

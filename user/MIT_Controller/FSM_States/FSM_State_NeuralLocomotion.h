@@ -67,6 +67,10 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   float target_t_E;
   int _policyRecieved;
 
+  Vec4<T> offsets;
+  Vec4<T> durations;
+  int _gaitRecieved;
+
   DMat<T> _height_map;
   DMat<int> _idx_map;
 

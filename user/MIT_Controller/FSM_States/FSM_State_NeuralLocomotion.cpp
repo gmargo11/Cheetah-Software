@@ -46,6 +46,7 @@ FSM_State_NeuralLocomotion<T>::FSM_State_NeuralLocomotion(
   _neuralLCM.subscribe("traversability", &FSM_State_NeuralLocomotion<T>::handleIndexmapLCM, this);
   _neuralLCM.subscribe("global_to_robot", &FSM_State_NeuralLocomotion<T>::handleLocalization, this);
   _neuralLCM.subscribe("phase_target_pybridge", &FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM, this);
+  _neuralLCM.subscribe("gait_target_pybridge", &FSM_State_NeuralLocomotion<T>::handleGaitTargetLCM, this);
   _neuralLCMThread = std::thread(&FSM_State_NeuralLocomotion<T>::neuralLCMThread, this);
 
   _height_map = DMat<T>::Zero(x_size, y_size);
@@ -114,6 +115,27 @@ void FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM(const lcm::ReceiveBuffe
   printf("Recieved phase target");
 
   _policyRecieved = 1;
+
+}
+
+
+template<typename T>
+void FSM_State_NeuralLocomotion<T>::handleGaitTargetLCM(const lcm::ReceiveBuffer *rbuf,
+    const std::string &chan,
+    const gait_target_lcmt *msg) {
+  (void)rbuf;
+  (void)chan;
+
+  target_vel[0] = msg->vel[0];
+  target_vel[1] = msg->vel[1];
+  //target_p_foot = msg->p_foot;
+  for(i=0; i<4; i++){}
+    offsets[i] = msg->offsets[i];
+    durations[i] = msg->durations[i];
+
+  printf("Recieved gait target");
+
+  _gaitRecieved = 1;
 
 }
 
@@ -384,6 +406,41 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
   printf("Phase updated");
 
 }
+
+
+template <typename T>
+void FSM_State_NeuralLocomotion<T>::_UpdateGaitCommand(Vec3<T> & des_vel) {
+  des_vel.setZero();
+
+  // Get phase from python
+  velocity_visual_t vel_visual;
+  for(size_t i(0); i<3; ++i){
+    vel_visual.vel_cmd[i] = des_vel[i];
+    vel_visual.base_position[i] = (this->_data->_stateEstimator->getResult()).position[i];
+  }
+
+  _gaitRecieved = 0;
+  printf("Sending gait request...");
+  _neuralLCM.publish("gait_request", &vel_visual);
+
+  //wait for response
+  while( _gaitRecieved < 1){
+    usleep(100);
+    printf("Waiting for a gait response from python...");
+  }
+
+  des_vel[0] = target_vel[0];
+  des_vel[1] = target_vel[1];
+
+  std::cout << "gait update" << des_vel << offsets << durations;
+  std::cout << "Recieved velocity command" << des_vel;
+
+  des_vel[0] = fminf(fmaxf(des_vel[0], -1.), 1.);
+  des_vel[1] = fminf(fmaxf(des_vel[1], -1.), 1.);
+
+  printf("Gait updated");
+
+}
  
 /**
  * Manages which states can be transitioned into either by the user
@@ -500,11 +557,11 @@ void FSM_State_NeuralLocomotion<T>::onExit() {
  * each stance or swing leg.
  */
 template <typename T>
-void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> & des_contact, const float & des_swing_time) {
+void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> & offsets, const Vec4<T> & durations) {
   // StateEstimate<T> stateEstimate = this->_data->_stateEstimator->getResult();
 
   // Contact state logic
-  neural_MPC.run<T>(*this->_data, des_vel, des_fp_rel, des_contact, des_swing_time, _height_map, _idx_map);
+  neural_MPC.run<T>(*this->_data, des_vel, des_fp_rel, offsets, durations, _height_map, _idx_map);
 
   if(this->_data->userParameters->use_wbc > 0.9){
     _wbc_data->pBody_des = neural_MPC.pBody_des;

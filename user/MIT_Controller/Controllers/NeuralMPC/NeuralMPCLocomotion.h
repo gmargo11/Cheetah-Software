@@ -43,9 +43,9 @@ public:
   void initialize();
 
   template<typename T>
-  void run(ControlFSMData<T>& data, 
-      const Vec3<T> & vel_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<T> & contact_cmd, const float & swing_time_cmd, 
-      const DMat<T> & height_map, const DMat<int> & idx_map);
+  void run(ControlFSMData<float>& data, 
+    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], Vec4<int> & offsets, Vec4<int> & durations, 
+    const DMat<float> & height_map, const DMat<int> & idx_map)
 
   Vec3<float> pBody_des;
   Vec3<float> vBody_des;
@@ -87,6 +87,7 @@ private:
   Vec4<float> swingTimes;
   FootSwingTrajectory<float> footSwingTrajectories[4];
   NeuralGait trotting, bounding, pronking, galloping, standing, trotRunning, cyclic;
+  NeuralGait custom, custom_next;
   Mat3<float> Kp, Kd, Kp_stance, Kd_stance;
   bool firstRun = true;
   bool firstSwing[4];

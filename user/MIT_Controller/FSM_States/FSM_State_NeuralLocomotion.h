@@ -67,6 +67,10 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   float target_t_E;
   int _policyRecieved;
 
+  Vec4<T> offsets_cmd;
+  Vec4<T> durations_cmd;
+  int _gaitRecieved;
+
   DMat<T> _height_map;
   DMat<int> _idx_map;
 
@@ -74,6 +78,7 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   void handleIndexmapLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const traversability_map_t* msg);
   void handleLocalization(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const localization_lcmt* msg);
   void handlePhaseTargetLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const phase_target_lcmt* msg);
+  void handleGaitTargetLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const phase_target_lcmt* msg);
   bool _b_localization_data = false;
   void neuralLCMThread() { while (true) { _neuralLCM.handle(); } }
 
@@ -88,6 +93,7 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   void _UpdateObstacle();
   void _LocomotionControlStep(const Vec3<T> & vel_cmd, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> & des_contact, const float & des_swing_time);
   void _UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<T> (& des_fp_rel)[4], Vec4<T> & des_contact, float & des_swing_time);
+  void _UpdateGaitCommand(Vec3<T> & des_vel);
   void _RCLocomotionControl();
   void _Visualization(const Vec3<T> & des_vel);
   void _print_obstacle_list();

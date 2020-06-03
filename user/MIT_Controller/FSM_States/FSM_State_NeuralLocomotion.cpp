@@ -117,6 +117,26 @@ void FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM(const lcm::ReceiveBuffe
 
 }
 
+template<typename T>
+void FSM_State_NeuralLocomotion<T>::handleGaitTargetLCM(const lcm::ReceiveBuffer *rbuf,
+    const std::string &chan,
+    const gait_target_lcmt *msg) {
+  (void)rbuf;
+  (void)chan;
+
+  target_vel[0] = msg->vel[0];
+  target_vel[1] = msg->vel[1];
+  //target_p_foot = msg->p_foot;
+  for(i=0; i<4; i++){}
+    offsets[i] = msg->offsets[i];
+    durations[i] = msg->durations[i];
+
+  printf("Recieved gait target");
+
+  _gaitRecieved = 1;
+
+}
+
 
 template <typename T>
 void FSM_State_NeuralLocomotion<T>::onEnter() {
@@ -385,6 +405,41 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
 
 }
  
+
+template <typename T>
+void FSM_State_NeuralLocomotion<T>::_UpdateGaitCommand(Vec3<T> & des_vel) {
+  des_vel.setZero();
+
+  // Get phase from python
+  velocity_visual_t vel_visual;
+  for(size_t i(0); i<3; ++i){
+    vel_visual.vel_cmd[i] = des_vel[i];
+    vel_visual.base_position[i] = (this->_data->_stateEstimator->getResult()).position[i];
+  }
+
+  _gaitRecieved = 0;
+  printf("Sending gait request...");
+  _neuralLCM.publish("gait_request", &vel_visual);
+
+  //wait for response
+  while( _gaitRecieved < 1){
+    usleep(100);
+    printf("Waiting for a gait response from python...");
+  }
+
+  des_vel[0] = target_vel[0];
+  des_vel[1] = target_vel[1];
+
+  std::cout << "gait update" << des_vel << offsets << durations;
+  std::cout << "Recieved velocity command" << des_vel;
+
+  des_vel[0] = fminf(fmaxf(des_vel[0], -1.), 1.);
+  des_vel[1] = fminf(fmaxf(des_vel[1], -1.), 1.);
+
+  printf("Gait updated");
+
+}
+
 /**
  * Manages which states can be transitioned into either by the user
  * commands or state event triggers.

@@ -127,9 +127,10 @@ void FSM_State_NeuralLocomotion<T>::handleGaitTargetLCM(const lcm::ReceiveBuffer
   target_vel[0] = msg->vel[0];
   target_vel[1] = msg->vel[1];
   //target_p_foot = msg->p_foot;
-  for(int i=0; i<4; i++){}
-    offset_cmd = msg->offsets[i];
+  for(int i=0; i<4; i++){
+    offset_cmd[i] = msg->offsets[i];
     durations_cmd[i] = msg->durations[i];
+  }
 
   printf("Recieved gait target");
 

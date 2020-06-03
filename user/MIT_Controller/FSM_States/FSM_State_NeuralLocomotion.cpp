@@ -127,9 +127,9 @@ void FSM_State_NeuralLocomotion<T>::handleGaitTargetLCM(const lcm::ReceiveBuffer
   target_vel[0] = msg->vel[0];
   target_vel[1] = msg->vel[1];
   //target_p_foot = msg->p_foot;
-  for(i=0; i<4; i++){}
-    offsets[i] = msg->offsets[i];
-    durations[i] = msg->durations[i];
+  for(int i=0; i<4; i++){}
+    offsets[i] = msg->offsets_cmd[i];
+    durations[i] = msg->durations_cmd[i];
 
   printf("Recieved gait target");
 
@@ -430,7 +430,7 @@ void FSM_State_NeuralLocomotion<T>::_UpdateGaitCommand(Vec3<T> & des_vel) {
   des_vel[0] = target_vel[0];
   des_vel[1] = target_vel[1];
 
-  std::cout << "gait update" << des_vel << offsets << durations;
+  std::cout << "gait update" << des_vel;
   std::cout << "Recieved velocity command" << des_vel;
 
   des_vel[0] = fminf(fmaxf(des_vel[0], -1.), 1.);

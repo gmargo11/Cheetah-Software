@@ -415,6 +415,67 @@ template <typename T>
 void FSM_State_NeuralLocomotion<T>::_UpdateGaitCommand(Vec3<T> & des_vel, Vec4<int> & des_offsets, Vec4<int> & des_durations) {
   des_vel.setZero();
 
+  Vec3<T> target_pos, curr_pos, curr_ori_rpy;
+
+  target_pos.setZero();
+  
+  for(int i = 0; i < 4; i++) {
+    target_p_foot[i].setZero();
+  } 
+  target_vel.setZero();
+  target_contacts.setZero();
+  target_translation.setZero();
+  target_rotation = 0.0;
+  target_t_E = 0.0;
+  target_t_S = 0.0;
+
+  T moving_time = 25.0;
+  T curr_time = (T)iter * 0.002;
+  //if(curr_time > moving_time){
+    //curr_time = moving_time;
+  //}
+  //target_pos[0] += 2.0 * curr_time/moving_time;
+  //target_pos[0] += 2.5 * curr_time/moving_time;
+  //target_pos[0] = 0.7 * (1-cos(2*M_PI*curr_time/moving_time));
+  target_pos[0] = 1.0 * (1-cos(2*M_PI*curr_time/moving_time));
+
+  if(_b_localization_data){
+    curr_pos = _global_robot_loc;
+    curr_pos -= _ini_body_pos;
+    curr_ori_rpy = _robot_rpy;
+  }else{
+    curr_pos = (this->_data->_stateEstimator->getResult()).position;
+    curr_pos -= _ini_body_pos;
+    curr_ori_rpy = (this->_data->_stateEstimator->getResult()).rpy;
+
+  }
+  target_pos = rpyToRotMat(_ini_body_ori_rpy).transpose() * target_pos;
+  des_vel[0] = 0.7 * (target_pos[0] - curr_pos[0]);
+  des_vel[1] = 0.7 * (target_pos[1] - curr_pos[1]);
+  des_vel[2] = 0.7 * (_ini_body_ori_rpy[2] - curr_ori_rpy[2]);
+
+  //des_vel[0] = 0.5;
+  T inerproduct;
+  T x, y, x_obs, y_obs;
+  T vel_x, vel_y;
+  T sigma(0.15);
+  T h(0.5);
+  for(size_t i(0); i<_obs_list.size(); ++i){
+    x = curr_pos[0];
+    y = curr_pos[1];
+    x_obs = _obs_list[i][0];
+    y_obs = _obs_list[i][1];
+    h = _obs_list[i][2];
+
+    inerproduct = (x-x_obs)*(x-x_obs) + (y-y_obs)*(y-y_obs);
+    vel_x = h*((x-x_obs)/ sigma/sigma)*exp(-inerproduct/(2*sigma*sigma));
+    vel_y = h*((y-y_obs)/ sigma/sigma)*exp(-inerproduct/(2*sigma*sigma));
+    //printf("vel_x, y: %f, %f\n", vel_x, vel_y);
+
+    des_vel[0] += vel_x;
+    des_vel[1] += vel_y;
+  }
+
   // Get phase from python
   velocity_visual_t vel_visual;
   for(size_t i(0); i<3; ++i){
@@ -432,8 +493,8 @@ void FSM_State_NeuralLocomotion<T>::_UpdateGaitCommand(Vec3<T> & des_vel, Vec4<i
     printf("Waiting for a gait response from python...");
   }
 
-  des_vel[0] = target_vel[0];
-  des_vel[1] = target_vel[1];
+  //des_vel[0] = target_vel[0];
+  //des_vel[1] = target_vel[1];
 
   for(int i=0; i<4; i++){
     des_offsets[i] = offsets_cmd[i];

@@ -272,6 +272,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   
   // Can modify
   gait = &custom; // set custom gait
+  gait->setIterations(iterationsBetweenMPC, iterationCounter);
 
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];

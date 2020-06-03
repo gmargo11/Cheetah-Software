@@ -271,7 +271,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   NeuralGait custom(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8),"Cyclic Walk");
   
   // Can modify
-  gait = &cyclic; // set cyclic gait for now
+  gait = &custom; // set custom gait
 
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];

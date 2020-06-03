@@ -233,7 +233,7 @@ void NeuralMPCLocomotion::_IdxMapChecking(int x_idx, int y_idx, int & x_idx_sele
 
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data, 
-    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float> & contact_cmd, const float & swing_time_cmd, 
+    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, 
     const DMat<float> & height_map, const DMat<int> & idx_map) {
   (void)idx_map;
     
@@ -260,13 +260,15 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
 
   // pick gait
-  NeuralGait* gait = &trotting;
-  if(gaitNumber == 1)         gait = &bounding;
-  else if(gaitNumber == 2)    gait = &pronking;
-  else if(gaitNumber == 3)    gait = &galloping;
-  else if(gaitNumber == 4)    gait = &standing;
-  else if(gaitNumber == 5)    gait = &trotRunning;
+  //NeuralGait* gait = &trotting;
+  //if(gaitNumber == 1)         gait = &bounding;
+  //else if(gaitNumber == 2)    gait = &pronking;
+  //else if(gaitNumber == 3)    gait = &galloping;
+  //else if(gaitNumber == 4)    gait = &standing;
+  //else if(gaitNumber == 5)    gait = &trotRunning;
   current_gait = gaitNumber;
+  custom(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8),"Custom");
+  NeuralGait* gait = &custom;
   
   // Can modify
   gait = &cyclic; // set cyclic gait for now

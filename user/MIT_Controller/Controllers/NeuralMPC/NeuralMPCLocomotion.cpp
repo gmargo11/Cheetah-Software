@@ -268,11 +268,11 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   else if(gaitNumber == 5)    gait = &trotRunning;
   current_gait = gaitNumber;
 
-  NeuralGait custom(horizonLength, offsets_cmd, durations_cmd,"Cyclic Walk");
+  NeuralGait custom(horizonLength, offsets_cmd, durations_cmd,"Custom");
   
   // Can modify
   gait = &custom; // set custom gait
-  gait->setIterations(iterationsBetweenMPC, iterationCounter);
+  //gait->setIterations(iterationsBetweenMPC, iterationCounter);
 
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];

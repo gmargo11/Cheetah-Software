@@ -8,7 +8,7 @@ ground-plane:
     checkers: [40,40]     # how many checkers are on the plane
 
 
-stairs-1:
+#stairs-1:
     type: "stairs"
     steps: 5
     rise: 0.1778 #0.05 #0.1778 # 7 inches

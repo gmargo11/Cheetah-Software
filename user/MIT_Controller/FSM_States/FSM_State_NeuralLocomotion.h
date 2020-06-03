@@ -12,6 +12,7 @@
 #include "obstacle_visual_t.hpp"
 #include "localization_lcmt.hpp"
 #include "phase_target_lcmt.hpp"
+#include "gait_target_lcmt.hpp"
 
 template<typename T> class WBC_Ctrl;
 template<typename T> class LocomotionCtrlData;
@@ -78,7 +79,7 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   void handleIndexmapLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const traversability_map_t* msg);
   void handleLocalization(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const localization_lcmt* msg);
   void handlePhaseTargetLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const phase_target_lcmt* msg);
-  void handleGaitTargetLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const phase_target_lcmt* msg);
+  void handleGaitTargetLCM(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const gait_target_lcmt* msg);
   bool _b_localization_data = false;
   void neuralLCMThread() { while (true) { _neuralLCM.handle(); } }
 

@@ -36,6 +36,7 @@ NeuralGait::~NeuralGait() {
   delete[] _mpc_table;
 }
 
+
 Vec4<float> NeuralGait::getContactState() {
   Array4f progress = _phase - _offsetsFloat;
 
@@ -232,11 +233,11 @@ void NeuralMPCLocomotion::_IdxMapChecking(int x_idx, int y_idx, int & x_idx_sele
 
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data, 
-    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], Vec4<int> & offsets, Vec4<int> & durations, 
+    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float> & contact_cmd, const float & swing_time_cmd, 
     const DMat<float> & height_map, const DMat<int> & idx_map) {
   (void)idx_map;
     
-  std::cout << "NeuralMPCLocomotion::run" << fp_rel_cmd << offsets << durations;
+  std::cout << "NeuralMPCLocomotion::run" << fp_rel_cmd << contact_cmd << swing_time_cmd;
 
   if(data.controlParameters->use_rc ){
     data.userParameters->cmpc_gait = data._desiredStateCommand->rcCommand->variable[0];
@@ -259,17 +260,16 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
 
   // pick gait
-  custom(horizonLength, offsets, durations, "Custom");
-  //NeuralGait* gait = &trotting;
-  //if(gaitNumber == 1)         gait = &bounding;
-  //else if(gaitNumber == 2)    gait = &pronking;
-  //else if(gaitNumber == 3)    gait = &galloping;
-  //else if(gaitNumber == 4)    gait = &standing;
-  //else if(gaitNumber == 5)    gait = &trotRunning;
+  NeuralGait* gait = &trotting;
+  if(gaitNumber == 1)         gait = &bounding;
+  else if(gaitNumber == 2)    gait = &pronking;
+  else if(gaitNumber == 3)    gait = &galloping;
+  else if(gaitNumber == 4)    gait = &standing;
+  else if(gaitNumber == 5)    gait = &trotRunning;
   current_gait = gaitNumber;
   
   // Can modify
-  NeuralGait* gait = &custom; // set cyclic gait for now
+  gait = &cyclic; // set cyclic gait for now
 
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];

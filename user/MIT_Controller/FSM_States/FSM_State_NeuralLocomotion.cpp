@@ -171,7 +171,7 @@ void FSM_State_NeuralLocomotion<T>::run() {
   Vec3<T> des_vel; // x,y, yaw
   Vec2<T> des_fp_rel[4]; // x,y, yaw
   Vec4<T> des_contact; // x,y, yaw
-  float des_swing_time; // x,y, yaw
+  //float des_swing_time; // x,y, yaw
   Vec4<int> des_offsets;
   Vec4<int> des_durations;
 

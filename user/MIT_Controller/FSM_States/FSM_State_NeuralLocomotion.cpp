@@ -46,6 +46,7 @@ FSM_State_NeuralLocomotion<T>::FSM_State_NeuralLocomotion(
   _neuralLCM.subscribe("traversability", &FSM_State_NeuralLocomotion<T>::handleIndexmapLCM, this);
   _neuralLCM.subscribe("global_to_robot", &FSM_State_NeuralLocomotion<T>::handleLocalization, this);
   _neuralLCM.subscribe("phase_target_pybridge", &FSM_State_NeuralLocomotion<T>::handlePhaseTargetLCM, this);
+  _neuralLCM.subscribe("gait_target_pybridge", &FSM_State_NeuralLocomotion<T>::handleGaitTargetLCM, this);
   _neuralLCMThread = std::thread(&FSM_State_NeuralLocomotion<T>::neuralLCMThread, this);
 
   _height_map = DMat<T>::Zero(x_size, y_size);

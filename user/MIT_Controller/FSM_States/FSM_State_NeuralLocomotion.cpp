@@ -172,11 +172,14 @@ void FSM_State_NeuralLocomotion<T>::run() {
   Vec2<T> des_fp_rel[4]; // x,y, yaw
   Vec4<T> des_contact; // x,y, yaw
   float des_swing_time; // x,y, yaw
+  Vec4<int> des_offsets;
+  Vec4<int> des_durations;
+
   _UpdateObstacle();
 
   // Neural Walking
-  _UpdatePhaseCommand(des_vel, des_fp_rel, des_contact, des_swing_time);
-  _LocomotionControlStep(des_vel, des_fp_rel, des_contact, des_swing_time);
+  _UpdateGaitCommand(des_vel, des_offsets, des_durations)
+  _LocomotionControlStep(des_vel, des_fp_rel, des_offsets, des_durations);
 
   // Convex Locomotion
   //_RCLocomotionControl();
@@ -408,7 +411,7 @@ void FSM_State_NeuralLocomotion<T>::_UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<
  
 
 template <typename T>
-void FSM_State_NeuralLocomotion<T>::_UpdateGaitCommand(Vec3<T> & des_vel) {
+void FSM_State_NeuralLocomotion<T>::_UpdateGaitCommand(Vec3<T> & des_vel, Vec4<int> & des_offsets, Vec4<int> & des_durations) {
   des_vel.setZero();
 
   // Get phase from python
@@ -430,6 +433,11 @@ void FSM_State_NeuralLocomotion<T>::_UpdateGaitCommand(Vec3<T> & des_vel) {
 
   des_vel[0] = target_vel[0];
   des_vel[1] = target_vel[1];
+
+  for(int i=0; i<4; i++){
+    des_offsets[i] = offsets_cmd[i];
+    des_durations[i] = durations_cmd[i];
+  }
 
   std::cout << "gait update" << des_vel;
   std::cout << "Recieved velocity command" << des_vel;
@@ -556,11 +564,11 @@ void FSM_State_NeuralLocomotion<T>::onExit() {
  * each stance or swing leg.
  */
 template <typename T>
-void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> & des_contact, const float & des_swing_time) {
+void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> (& des_fp_rel)[4], const Vec4<int> & des_offsets, const Vec4<int> & des_durations) {
   // StateEstimate<T> stateEstimate = this->_data->_stateEstimator->getResult();
 
   // Contact state logic
-  neural_MPC.run<T>(*this->_data, des_vel, des_fp_rel, des_contact, des_swing_time, _height_map, _idx_map);
+  neural_MPC.run<T>(*this->_data, des_vel, des_fp_rel, des_offsets, des_durations, _height_map, _idx_map);
 
   if(this->_data->userParameters->use_wbc > 0.9){
     _wbc_data->pBody_des = neural_MPC.pBody_des;

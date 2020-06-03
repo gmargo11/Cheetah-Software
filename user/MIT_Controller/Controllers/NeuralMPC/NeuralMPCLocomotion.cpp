@@ -237,7 +237,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     const DMat<float> & height_map, const DMat<int> & idx_map) {
   (void)idx_map;
     
-  std::cout << "NeuralMPCLocomotion::run" << fp_rel_cmd << contact_cmd << swing_time_cmd;
+  std::cout << "NeuralMPCLocomotion::run" << fp_rel_cmd << offsets_cmd << durations_cmd;
 
   if(data.controlParameters->use_rc ){
     data.userParameters->cmpc_gait = data._desiredStateCommand->rcCommand->variable[0];

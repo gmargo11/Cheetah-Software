@@ -36,7 +36,14 @@ PYBIND11_MODULE(pycheetah, m) {
 		//.def("addBody", &FloatingBaseModel<float>::addBody)
 		//.def("addGroundContactPoint", &FloatingBaseModel<float>::addGroundContactPoint);
 		//.def("setState", &FloatingBaseModel::addBase)
-	
+       
+        py::class_<Quadruped<float>> quadruped(m, "Quadruped");
+	quadruped.def("buildModel", py::overload_cast<>(&Quadruped<float>::buildModel), "");
+
+
+	m.def("buildMiniCheetah", &buildMiniCheetah<float>);//, py::return_value_policy::reference);
+
+
         py::class_<LocomotionCtrlData<float>>(m, "LocomotionCtrlData")
 		.def(py::init<>())
 	        .def_readwrite("pBody_des", &LocomotionCtrlData<float>::pBody_des)

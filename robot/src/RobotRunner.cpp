@@ -45,12 +45,14 @@ void RobotRunner::init() {
   _model = _quadruped.buildModel();
   _jpos_initializer = new JPosInitializer<float>(3., controlParameters->controller_dt);
 
+  printf("initialized model!");
   // Always initialize the leg controller and state entimator
   _legController = new LegController<float>(_quadruped);
   _stateEstimator = new StateEstimatorContainer<float>(
       cheaterState, vectorNavData, _legController->datas,
       &_stateEstimate, controlParameters);
   initializeStateEstimator(false);
+  printf("initialized state estimation!");
 
   memset(&rc_control, 0, sizeof(rc_control_settings));
   // Initialize the DesiredStateCommand object

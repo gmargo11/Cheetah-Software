@@ -55,15 +55,18 @@ include_directories(${OPENGL_INCLUDE_DIR})
 add_subdirectory(pybind11)
 pybind11_add_module(pycheetah bindings.cpp)
 
+target_link_libraries(pycheetah PRIVATE biomimetics
+	    Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Gamepad ${QT_LIBRARIES} ${OPENGL_LIBRARIES})
+
 install (TARGETS pycheetah DESTINATION lib)
 
 #target_link_libraries(pycheetah biomimetics pthread lcm inih dynacore_param_handler 
 #    Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Gamepad ${QT_LIBRARIES} ${OPENGL_LIBRARIES})
 
-#if (CMAKE_SYSTEM_NAME MATCHES Linux)
-#  target_link_libraries(pycheetah rt ${GLUT_glut_LIBRARIES})
-#  include (CheckIncludeFileCXX)
-#endif (CMAKE_SYSTEM_NAME MATCHES Linux)
+if (CMAKE_SYSTEM_NAME MATCHES Linux)
+	target_link_libraries(pycheetah PRIVATE rt ${GLUT_glut_LIBRARIES})
+  include (CheckIncludeFileCXX)
+endif (CMAKE_SYSTEM_NAME MATCHES Linux)
 
 #if (APPLE)
 #  target_link_libraries(sim "-framework GLUT")

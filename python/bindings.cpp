@@ -25,6 +25,9 @@ namespace py = pybind11;
 #include "robot/include/RobotRunner.h"
 #include "Utilities/PeriodicTask.h"
 
+#include "Controllers/StateEstimatorContainer.h"
+#include "Controllers/DummyStateEstimatorContainer.h"
+
 
 PYBIND11_MODULE(pycheetah, m) {
 
@@ -60,9 +63,11 @@ PYBIND11_MODULE(pycheetah, m) {
 	py::class_<LocomotionCtrl<float>> locomotionctrl(m, "LocomotionCtrl");
 	locomotionctrl.def(py::init<FloatingBaseModel<float>>());
 	locomotionctrl.def("run", py::overload_cast<void *, ControlFSMData<float> &>(&LocomotionCtrl<float>::run), "", py::arg("input"), py::arg("data"));
+	locomotionctrl.def("run_stateless", py::overload_cast<void *, ControlFSMData<float> &>(&LocomotionCtrl<float>::run_stateless), "", py::arg("input"), py::arg("data"));
 
         py::class_<ControlFSMData<float>> fsmdata(m, "ControlFSMData");
 	fsmdata.def(py::init<>(), "Initialize the Control FSM Data");
+
 
         py::class_<RobotController> robotctrl(m, "RobotController");
 
@@ -79,5 +84,15 @@ PYBIND11_MODULE(pycheetah, m) {
 	robotrunner.def(py::init<RobotController*, PeriodicTaskManager*, float, std::string>());
         robotrunner.def("init", py::overload_cast<>(&RobotRunner::init), "");	
         robotrunner.def("run", py::overload_cast<>(&RobotRunner::run), "");
+
+	py::class_<StateEstimate<float>> se(m, "StateEstimate");
+
+	
+	//py::class_<StateEstimatorContainer<float>> secontainer(m, "StateEstimatorContainer");
+	//secontainer.def(py::init<CheaterState<double>*, VectorNavData*. LegControllerData<float>*. StateEstimate<float>*, RobotControlParameters*>(), "");
+	//secontainer.def_readwrite("_data", _data);	
+	
+	py::class_<DummyStateEstimatorContainer<float>> dsecontainer(m, "DummyStateEstimatorContainer");
+	dsecontainer.def(py::init<StateEstimate<float>>(), "");, 
 
 }

@@ -98,11 +98,12 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
 }
 
 
+template<typename T>
 void WBC_Ctrl<T>::run_stateless(void* input, ControlFSMData<T> & data){
   ++_iter;
 
   // Update Model
-  _UpdateModel(data._stateEstimate, data._legController->datas);
+  _UpdateModel(data._stateEstimator->getResult(), data._legController->datas);
 
   // Task & Contact Update
   _ContactTaskUpdate(input, data);

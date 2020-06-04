@@ -53,3 +53,4 @@ endif(CMAKE_SYSTEM_NAME MATCHES Linux)
 # Our libraries
 add_subdirectory(FootstepPlanner)
 
+install (TARGETS biomimetics DESTINATION lib)

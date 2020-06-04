@@ -62,4 +62,3 @@ if (APPLE)
   target_link_libraries(sim "-framework GLUT")
 endif (APPLE)
 
-

@@ -25,8 +25,8 @@ find_package(Qt5Gui CONFIG REQUIRED)
 set(QOBJECT_HEADERS
         include/Graphics3D.h
         include/GameController.h
-        include/SimControlPanel.h)
-#        include/JoystickTest.h)
+        include/SimControlPanel.h
+        include/JoystickTest.h)
 #        include/main_window.h
 #        include/gamepad_monitor.h
 #        include/spi_debug.h)

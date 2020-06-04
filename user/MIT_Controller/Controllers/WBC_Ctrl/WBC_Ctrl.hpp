@@ -22,6 +22,7 @@ class WBC_Ctrl{
     virtual ~WBC_Ctrl();
 
     void run(void * input, ControlFSMData<T> & data);
+    void run_stateless(void * input, ControlFSMData<T> & data);
     void setFloatingBaseWeight(const T & weight){
       _wbic_data->_W_floating = DVec<T>::Constant(6, weight);
     }

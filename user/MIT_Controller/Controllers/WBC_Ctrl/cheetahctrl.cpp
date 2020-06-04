@@ -1,9 +1,10 @@
 #include <pybind11/pybind11.h>
 namespace py = pybind11;
 
-//#include <LocomotionCtrl/LocomotionCtrl.hpp>
-#include <Dynamics/FloatingBaseModel.h>
-#include <FSM_States/ControlFSMData.h>
+//#include <user/MIT_Controller/Controllers/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
+#include <>
+#include "common/include/Dynamics/FloatingBaseModel.h"
+//#include "FSM_States/ControlFSMData.h"
 
 
 PYBIND11_MODULE(cheetahctrl, m) {

@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
+
 #execute_process(COMMAND ${CMAKE_SOURCE_DIR}/scripts/find_qt_path.sh OUTPUT_VARIABLE CMAKE_PREFIX_PATH_1)
 #SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH_1})
 message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
@@ -52,7 +53,6 @@ include_directories("/usr/local/include/eigen3")   # lcm includes
 include_directories("..")
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
-
 
 
 find_package(Qt5Core COMPONENTS QtGamepad REQUIRED)

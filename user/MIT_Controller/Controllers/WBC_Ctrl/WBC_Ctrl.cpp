@@ -98,6 +98,36 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
 }
 
 
+void WBC_Ctrl<T>::run_stateless(void* input, ControlFSMData<T> & data){
+  ++_iter;
+
+  // Update Model
+  _UpdateModel(data._stateEstimate, data._legController->datas);
+
+  // Task & Contact Update
+  _ContactTaskUpdate(input, data);
+
+  // WBC Computation
+  _ComputeWBC();
+  
+  // TEST
+  //T dt(0.002);
+  //for(size_t i(0); i<12; ++i){
+    //_des_jpos[i] = _state.q[i] + _state.qd[i] * dt + 0.5 * _wbic_data->_qddot[i+6] * dt * dt;
+    //_des_jvel[i] = _state.qd[i] + _wbic_data->_qddot[i+6]*dt;
+  //}
+
+  //_ContactTaskUpdateTEST(input, data);
+  //_ComputeWBC();
+  // END of TEST
+
+  // Update Leg Command
+  //_UpdateLegCMD(data);
+
+  // LCM publish
+  //_LCM_PublishData();
+}
+
 
 template<typename T>
 void WBC_Ctrl<T>::_UpdateLegCMD(ControlFSMData<T> & data){

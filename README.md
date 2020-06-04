@@ -2,6 +2,28 @@
 
 This repository is forked from mit-biomimetics/Cheetah-Software.
 
+### Building
+
+```bash
+cd Cheetah-Software
+mkdir mc-build && cd mc-build
+cmake -DPYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3.6 ..
+make -j4
+make install
+```
+
+### Using the python interface
+
+```bash
+export PYTHONPATH=$PYTHONPATH:$LOCAL_BUILD/lib
+ldconfig -v
+```
+
+Then, in python:
+```python
+import pycheetah
+```
+
 ### Running the Simulator and Controller
 The first order of business was to make the simulator run headless so we can use it more easily via docker + ssh. 
 

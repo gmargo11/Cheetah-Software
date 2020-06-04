@@ -57,3 +57,5 @@ set(SOURCES
         include/vn/math/vector.h)
 
 add_library(libvnc SHARED ${SOURCES})
+
+install(TARGETS libvnc DESTINATION lib)

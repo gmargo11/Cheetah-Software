@@ -31,3 +31,13 @@ target_link_libraries(mit_ctrl Goldfarb_Optimizer osqp)
 target_link_libraries(mit_ctrl WBC_Ctrl)
 target_link_libraries(mit_ctrl VisionMPC)
 target_link_libraries(mit_ctrl NeuralMPC)
+
+add_library(mit_ctrl_lib SHARED ${sources} MIT_Controller.hpp MIT_UserParameters.h)
+target_link_libraries(mit_ctrl_lib robot biomimetics)
+target_link_libraries(mit_ctrl_lib dynacore_param_handler qpOASES)
+target_link_libraries(mit_ctrl_lib Goldfarb_Optimizer osqp)
+target_link_libraries(mit_ctrl_lib WBC_Ctrl)
+target_link_libraries(mit_ctrl_lib VisionMPC)
+target_link_libraries(mit_ctrl_lib NeuralMPC)
+
+install(TARGETS mit_ctrl_lib DESTINATION lib)

@@ -17,3 +17,5 @@ add_library(soem SHARED
         soem/ethercatprint.c
         soem/ethercatsoe.c
         )
+
+install(TARGETS soem DESTINATION lib)

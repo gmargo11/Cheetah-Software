@@ -25,3 +25,5 @@ add_library(JCQP SHARED
 
 #target_link_libraries(JCQP OsqpEigen::OsqpEigen osqp::osqp qpOASES pthread)
 target_link_libraries(JCQP pthread)
+
+install (TARGETS JCQP DESTINATION lib)

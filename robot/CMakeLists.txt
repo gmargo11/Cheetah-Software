@@ -24,3 +24,5 @@ target_link_libraries(robot biomimetics pthread lcm inih dynacore_param_handler 
 if(CMAKE_SYSTEM_NAME MATCHES Linux)
 target_link_libraries(robot libvnc rt)
 endif()
+
+install(TARGETS robot DESTINATION lib)

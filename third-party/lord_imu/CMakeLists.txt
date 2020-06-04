@@ -21,3 +21,5 @@ add_library(lord_imu SHARED
 add_executable(test_imu test/lord_test.cpp)
 
 target_link_libraries(test_imu lord_imu)
+
+install(TARGETS test_imu lord_imu DESTINATION lib)

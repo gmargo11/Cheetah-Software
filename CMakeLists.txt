@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
+project(cheetahctrl)
+
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 
@@ -66,3 +68,7 @@ endif()
 
 add_subdirectory(user)
 add_subdirectory(rc_test)
+
+add_subdirectory(pybind11)
+add_subdirectory(python)
+#pybind11_add_module(cheetahctrl cheetahctrl.cpp)

@@ -8,8 +8,24 @@ from pycheetah import * #FloatingBaseModel, ControlFSMData, LocomotionCtrl, Loco
 #fb.addBase(1.0, np.ones(3), np.eye(3))
 #print(fb)
 
+# define parameters
+robotparams = RobotControlParameters()
+userparams = MIT_UserParameters()
+print("ok")
+# make model
 cheetah = buildMiniCheetah()
 model = cheetah.buildModel()
+# make state estimator
+
+cheaterState = CheaterState()
+print("ok1.5")
+vnavData = VectorNavData()
+print("ok1.5")
+legControllerData = LegControllerData()
+print("ok1.5")
+stateEstimate = StateEstimate()
+print("ok2")
+stateEstimator = StateEstimatorContainer(cheaterState, vnavData, legControllerData, stateEstimate, robotparams)
 
 
 # test WBC
@@ -31,12 +47,22 @@ lc_data.setContactState(contact_state)
 
 #fsm_data = ControlFSMData()
 #print(fsm_data)
-fsm = ControlFSM(model, StateEstimatorContainer(), LegController(), GaitScheduler(), DesiredStateCommand(), RobotControlParameters(), VisualizationData(), MIT_UserParameters())
 
-#lc.run(lc_data, fsm_data)
+# set command
+gamepadCmd = GamepadCommand()
+rc_command = rc_control_settings()
+# make control FSM
+legController = LegController(cheetah)
+dt = 0.025
+gaitScheduler = GaitScheduler(userparams, dt)
+desiredStateCmd = DesiredStateCommand(gamepadCmd, rc_command, robotparams, stateEstimate, dt)
+vizData = VisualizationData()
+fsm = ControlFSM(cheetah, stateEstimator, legController, gaitScheduler, desiredStateCmd, robotparams, vizData, userparams)
+
+lc.run(lc_data, fsm.data)
 
 # RobotRunner
-
+'''
 ctrl = MIT_Controller()
 task_manager = PeriodicTaskManager()
 
@@ -68,4 +94,4 @@ print("two runs!")
 
 #runner.init()
 #runner.run()
-
+'''

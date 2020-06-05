@@ -161,10 +161,10 @@ PYBIND11_MODULE(pycheetah, m) {
 			});		
 
 	py::class_<StateEstimate<float>> se(m, "StateEstimate");
-
+	se.def(py::init<>(), "");
 	
 	py::class_<StateEstimatorContainer<float>> secontainer(m, "StateEstimatorContainer");
-	//secontainer.def(py::init<CheaterState<double>*, VectorNavData*. LegControllerData<float>*. StateEstimate<float>*, RobotControlParameters*>(), "");
+	secontainer.def(py::init<CheaterState<double>*, VectorNavData*, LegControllerData<float>*, StateEstimate<float>*, RobotControlParameters*>(), "");
 	//secontainer.def_readwrite("_data", _data);	
 	
 	//py::class_<DummyStateEstimatorContainer<float>> dsecontainer(m, "DummyStateEstimatorContainer");
@@ -174,22 +174,48 @@ PYBIND11_MODULE(pycheetah, m) {
 	py::class_<GamepadCommand> gamepadcmd(m, "GamepadCommand");
 	gamepadcmd.def(py::init<>(), "");
 	
+	py::class_<rc_control_settings> rccmd(m, "rc_control_settings");
+	rccmd.def(py::init<>(), "");
+	
 	py::class_<RobotType> robottype(m, "RobotType");
+	robottype.def(py::init<>(), "");
 
 	py::class_<VectorNavData> vnavdata(m, "VectorNavData");
+	vnavdata.def(py::init<>(), "");
 	
 	py::class_<CheaterState<double>> cheaterstate(m, "CheaterState");
+	cheaterstate.def(py::init<>(), "");
 	
 	py::class_<SpiData> spidata(m, "SpiData");
+	spidata.def(py::init<>(), "");
 	
 	py::class_<TiBoardData>tidata(m, "TiBoardData");
+	tidata.def(py::init<>(), "");
 	
 	py::class_<ControlParameterRequest> cpreq(m, "ControlParameterRequest");
+	cpreq.def(py::init<>(), "");
 	
 	py::class_<RobotControlParameters> robotctrlparams(m, "RobotControlParameters");
+	robotctrlparams.def(py::init<>(), "");
+
+	py::class_<MIT_UserParameters> mitctrlparams(m, "MIT_UserParameters");
+	mitctrlparams.def(py::init<>(), "");
 	
 	py::class_<VisualizationData> visdata(m, "VisualizationData");
+	visdata.def(py::init<>(), "");
 	
-
+	py::class_<DesiredStateCommand<float>> desiredstatecmd(m, "DesiredStateCommand");
+	desiredstatecmd.def(py::init<GamepadCommand*, rc_control_settings*, RobotControlParameters*, StateEstimate<float>*, float>(), "");
+		
+	
+	py::class_<GaitScheduler<float>> gaitscheduler(m, "GaitScheduler");
+	gaitscheduler.def(py::init<MIT_UserParameters*, float>(), "");
+	
+	py::class_<LegController<float>> legctrl(m, "LegController");
+	legctrl.def(py::init<Quadruped<float>&>(), "");
+	
+	py::class_<LegControllerData<float>> lcdata(m, "LegControllerData");
+	lcdata.def(py::init<>(), "");
+	
 
 }

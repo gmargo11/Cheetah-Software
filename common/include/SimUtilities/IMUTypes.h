@@ -14,6 +14,8 @@ struct VectorNavData {
   Vec3<float> accelerometer;
   Vec3<float> gyro;
   Quat<float> quat;
+  public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   // todo is there status for the vectornav?
 };
 
@@ -27,6 +29,8 @@ struct CheaterState {
   Vec3<T> omegaBody;
   Vec3<T> vBody;
   Vec3<T> acceleration;
+  public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif  // PROJECT_IMUTYPES_H

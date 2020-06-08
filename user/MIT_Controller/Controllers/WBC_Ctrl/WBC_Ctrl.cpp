@@ -82,7 +82,7 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
 
   std::cout << "[WBC_Ctrl] Compute WBC\n";
   // WBC Computation
-  //_ComputeWBC();
+  _ComputeWBC();
   
   // TEST
   //T dt(0.002);
@@ -97,11 +97,11 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
 
   // Update Leg Command
   std::cout << "[WBC_Ctrl] Update Leg Cmd\n";
-  //_UpdateLegCMD(data);
+  _UpdateLegCMD(data);
 
   // LCM publish
   std::cout << "[WBC_Ctrl] Publish Result\n";
-  //_LCM_PublishData();
+  _LCM_PublishData();
 }
 
 

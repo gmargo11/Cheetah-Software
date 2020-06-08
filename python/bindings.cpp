@@ -255,6 +255,24 @@ PYBIND11_MODULE(pycheetah, m) {
 	
 	py::class_<LegController<float>> legctrl(m, "LegController");
 	legctrl.def(py::init<Quadruped<float>&>(), "");
+	//legctrl.def("getCommands", [](LegController<float> &self){
+	//		return self.commands;
+	//		});
+	legctrl.def_readonly("commands", &LegController<float>::commands);
+	
+	py::class_<LegControllerCommand<float>> legcmd(m, "LegControllerCommand");
+	legcmd.def(py::init<>(), "");
+	legcmd.def_readwrite("tauFeedForward", &LegControllerCommand<float>::tauFeedForward);
+	legcmd.def_readwrite("forceFeedForward", &LegControllerCommand<float>::forceFeedForward);
+	legcmd.def_readwrite("qDes", &LegControllerCommand<float>::qDes);
+	legcmd.def_readwrite("qdDes", &LegControllerCommand<float>::qdDes);
+	legcmd.def_readwrite("pDes", &LegControllerCommand<float>::pDes);
+	legcmd.def_readwrite("vDes", &LegControllerCommand<float>::vDes);
+	legcmd.def_readwrite("kpCartesian", &LegControllerCommand<float>::kpCartesian);
+	legcmd.def_readwrite("kdCartesian", &LegControllerCommand<float>::kdCartesian);
+	legcmd.def_readwrite("kpJoint", &LegControllerCommand<float>::kpJoint);
+	legcmd.def_readwrite("kdJoint", &LegControllerCommand<float>::kdJoint);
+
 	
 	py::class_<LegControllerData<float>> lcdata(m, "LegControllerData");
 	lcdata.def(py::init<>(), "");

@@ -76,13 +76,21 @@ fsm = ControlFSM(cheetah, stateEstimator, legController, gaitScheduler, desiredS
 fsm.initialize()
 fsm.runFSM()
 fsm.printInfo(1)
+
+# check initial leg controller state
+command = legController.commands#getCommands()
+print(command.tauFeedForward)
+
+# run wbc
 print("[python] Run WBC")
-print(fsm.data)
-print(lc_data)
-print(lc.run)
 #lc.run()
 #lc.run(lc_data, fsm.data)
 lc.run2(lc_data, fsm.data)
+
+# check final leg command
+command = legController.commands#getCommands()
+#for command in commands:
+print(command.tauFeedForward)
 
 # RobotRunner
 '''

@@ -60,10 +60,10 @@ void LocomotionCtrl<T>::_ContactTaskUpdate(void* input, ControlFSMData<T> & data
 
   std::cout << "[LocomotionCtrl] adding to task list\n";
   WBCtrl::_task_list.push_back(_body_ori_task);
-  //WBCtrl::_task_list.push_back(_body_pos_task);
+  WBCtrl::_task_list.push_back(_body_pos_task);
 
   std::cout << "[LocomotionCtrl] updating foot contacts\n";
-  /*
+  
   for(size_t leg(0); leg<4; ++leg){
     std::cout << leg << "\n";
     if(_input_data->contact_state[leg] > 0.){ // Contact
@@ -79,7 +79,7 @@ void LocomotionCtrl<T>::_ContactTaskUpdate(void* input, ControlFSMData<T> & data
           //zero_vec3);
       WBCtrl::_task_list.push_back(_foot_task[leg]);
     }
-  }*/
+  }
   std::cout << "Successfully updated contact task!\n";
 }
 

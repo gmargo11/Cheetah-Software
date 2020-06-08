@@ -37,26 +37,35 @@ LocomotionCtrl<T>::~LocomotionCtrl(){
 
 template<typename T>
 void LocomotionCtrl<T>::_ContactTaskUpdate(void* input, ControlFSMData<T> & data){
+  std::cout << "[LocomotionCtrl] updating contact task\n";
   _input_data = static_cast<LocomotionCtrlData<T>* >(input);
 
+  std::cout << "[LocomotionCtrl] setting up params\n";
+  
   _ParameterSetup(data.userParameters);
   
   // Wash out the previous setup
   _CleanUp();
-
+ 
+  std::cout << "[LocomotionCtrl] accessing input data\n";
   _quat_des = ori::rpyToQuat(_input_data->pBody_RPY_des);
-
+  
   Vec3<T> zero_vec3; zero_vec3.setZero();
   _body_ori_task->UpdateTask(&_quat_des, _input_data->vBody_Ori_des, zero_vec3);
   _body_pos_task->UpdateTask(
       &(_input_data->pBody_des), 
       _input_data->vBody_des, 
       _input_data->aBody_des);
+  
 
+  std::cout << "[LocomotionCtrl] adding to task list\n";
   WBCtrl::_task_list.push_back(_body_ori_task);
-  WBCtrl::_task_list.push_back(_body_pos_task);
+  //WBCtrl::_task_list.push_back(_body_pos_task);
 
+  std::cout << "[LocomotionCtrl] updating foot contacts\n";
+  /*
   for(size_t leg(0); leg<4; ++leg){
+    std::cout << leg << "\n";
     if(_input_data->contact_state[leg] > 0.){ // Contact
       _foot_contact[leg]->setRFDesired((DVec<T>)(_input_data->Fr_des[leg]));
       _foot_contact[leg]->UpdateContactSpec();
@@ -70,7 +79,8 @@ void LocomotionCtrl<T>::_ContactTaskUpdate(void* input, ControlFSMData<T> & data
           //zero_vec3);
       WBCtrl::_task_list.push_back(_foot_task[leg]);
     }
-  }
+  }*/
+  std::cout << "Successfully updated contact task!\n";
 }
 
 template<typename T>

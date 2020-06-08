@@ -10,21 +10,35 @@ from pycheetah import * #FloatingBaseModel, ControlFSMData, LocomotionCtrl, Loco
 
 # define parameters
 robotparams = RobotControlParameters()
+robotparams.initializeFromYamlFile("../config/mini-cheetah-defaults.yaml")
 userparams = MIT_UserParameters()
+userparams.initializeFromYamlFile("../config/mc-mit-ctrl-user-parameters.yaml")
+print(userparams.printToYamlString())
 print("ok")
+
+# set current state
+position = np.array([0.0, 0.0, 0.29])
+orientation = np.array([1.0, 0.0, 0.0, 0.0])
+vBody = np.array([0.0, 0.0, 0.0])
+omegaBody = np.array([0.0, 0.0, 0.0])
+acceleration = np.array([0.0, 0.0, 0.0])
+
+# sensor data
+accelerometer = np.array([0.0, 0.0, 0.0])
+gyro = np.array([0.0, 0.0, 0.0])
+quat = orientation
+
 # make model
 cheetah = buildMiniCheetah()
 model = cheetah.buildModel()
-# make state estimator
 
+# make state estimator
 cheaterState = CheaterState()
-print("ok1.5")
+cheaterState.orientation, cheaterState.position, cheaterState.omegaBody, cheaterState.vBody, cheaterState.acceleration = orientation, position, omegaBody, vBody, acceleration
 vnavData = VectorNavData()
-print("ok1.5")
+vnavData.accelerometer, vnavData.gyro, vnavData.quat = accelerometer, gyro, quat
 legControllerData = LegControllerData()
-print("ok1.5")
 stateEstimate = StateEstimate()
-print("ok2")
 stateEstimator = StateEstimatorContainer(cheaterState, vnavData, legControllerData, stateEstimate, robotparams)
 
 
@@ -57,9 +71,18 @@ dt = 0.025
 gaitScheduler = GaitScheduler(userparams, dt)
 desiredStateCmd = DesiredStateCommand(gamepadCmd, rc_command, robotparams, stateEstimate, dt)
 vizData = VisualizationData()
+print("[python] Make FSM")
 fsm = ControlFSM(cheetah, stateEstimator, legController, gaitScheduler, desiredStateCmd, robotparams, vizData, userparams)
-
-lc.run(lc_data, fsm.data)
+fsm.initialize()
+fsm.runFSM()
+fsm.printInfo(1)
+print("[python] Run WBC")
+print(fsm.data)
+print(lc_data)
+print(lc.run)
+#lc.run()
+#lc.run(lc_data, fsm.data)
+lc.run2(lc_data, fsm.data)
 
 # RobotRunner
 '''

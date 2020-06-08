@@ -42,18 +42,19 @@ WBC_Ctrl<T>::~WBC_Ctrl(){
 
   typename std::vector<Task<T> *>::iterator iter = _task_list.begin();
   while (iter < _task_list.end()) {
-    delete (*iter);
+    //delete (*iter);
     ++iter;
   }
   _task_list.clear();
 
   typename std::vector<ContactSpec<T> *>::iterator iter2 = _contact_list.begin();
   while (iter2 < _contact_list.end()) {
-    delete (*iter2);
+    //delete (*iter2);
     ++iter2;
   }
   _contact_list.clear();
 }
+
 
 template <typename T>
 void WBC_Ctrl<T>::_ComputeWBC() {
@@ -68,16 +69,20 @@ void WBC_Ctrl<T>::_ComputeWBC() {
 
 template<typename T>
 void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
-  ++_iter;
-
+  printf("[WBC_Ctrl] Enter WBC Run");
+  std::cout << input << data.userParameters->collection.printToYamlString();
+  //++_iter;
+  printf("[WBC_Ctrl] Update Model");
   // Update Model
   _UpdateModel(data._stateEstimator->getResult(), data._legController->datas);
 
+  printf("[WBC_Ctrl] Update Contact Task");
   // Task & Contact Update
   _ContactTaskUpdate(input, data);
 
+  std::cout << "[WBC_Ctrl] Compute WBC\n";
   // WBC Computation
-  _ComputeWBC();
+  //_ComputeWBC();
   
   // TEST
   //T dt(0.002);
@@ -91,10 +96,12 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
   // END of TEST
 
   // Update Leg Command
-  _UpdateLegCMD(data);
+  std::cout << "[WBC_Ctrl] Update Leg Cmd\n";
+  //_UpdateLegCMD(data);
 
   // LCM publish
-  _LCM_PublishData();
+  std::cout << "[WBC_Ctrl] Publish Result\n";
+  //_LCM_PublishData();
 }
 
 

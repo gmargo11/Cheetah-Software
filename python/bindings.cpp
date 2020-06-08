@@ -88,7 +88,21 @@ PYBIND11_MODULE(pycheetah, m) {
 
 	py::class_<LocomotionCtrl<float>> locomotionctrl(m, "LocomotionCtrl");
 	locomotionctrl.def(py::init<FloatingBaseModel<float>>());
-	locomotionctrl.def("run", py::overload_cast<void *, ControlFSMData<float> &>(&LocomotionCtrl<float>::run), "", py::arg("input"), py::arg("data"));
+	//locomotionctrl.def("run", py::overload_cast<void *, ControlFSMData<float> &>(&LocomotionCtrl<float>::run), "", py::arg("input"), py::arg("data"));
+	locomotionctrl.def("run", [](LocomotionCtrl<float> &self, LocomotionCtrlData<float> lc_data, ControlFSMData<float> fsm_data){
+			printf("Enter LocomotionCtrl run binding!");
+			self.setFloatingBaseWeight(10.0);
+			std::cout << lc_data.pBody_des << fsm_data.userParameters->collection.printToYamlString();
+			///self.run(&lc_data, fsm_data);
+			}, "");
+	locomotionctrl.def("run2", [](LocomotionCtrl<float> &self, LocomotionCtrlData<float> lc_data, ControlFSMData<float> fsm_data){
+			printf("Enter LocomotionCtrl run binding!");
+			self.setFloatingBaseWeight(10.0);
+			std::cout << lc_data.pBody_des << fsm_data.userParameters->collection.printToYamlString();
+			LocomotionCtrlData<float> * _wbc_data;
+			_wbc_data = new LocomotionCtrlData<float>();
+			self.run(_wbc_data, fsm_data);
+			}, "");
 	locomotionctrl.def("run_stateless", py::overload_cast<void *, ControlFSMData<float> &>(&LocomotionCtrl<float>::run_stateless), "", py::arg("input"), py::arg("data"));
 
         py::class_<ControlFSMData<float>> fsmdata(m, "ControlFSMData");
@@ -105,6 +119,9 @@ PYBIND11_MODULE(pycheetah, m) {
 //			self.userParameters = userParameters;
 //			self.visualizationData = visualizationData;
 //			})
+        controlFSM.def("initialize", py::overload_cast<>(&ControlFSM<float>::initialize), "");
+	controlFSM.def("runFSM", py::overload_cast<>(&ControlFSM<float>::runFSM), "");
+	controlFSM.def("printInfo", py::overload_cast<int>(&ControlFSM<float>::printInfo), "");
 
 
         py::class_<RobotController> robotctrl(m, "RobotController");
@@ -176,15 +193,30 @@ PYBIND11_MODULE(pycheetah, m) {
 	
 	py::class_<rc_control_settings> rccmd(m, "rc_control_settings");
 	rccmd.def(py::init<>(), "");
+	rccmd.def_readwrite("mode", &rc_control_settings::mode);
+	//rccmd.def_readwrite("p_des", &rc_control_settings::p_des);
+	rccmd.def_readwrite("height_variation", &rc_control_settings::height_variation);
+	//rccmd.def_readwrite("v_des", &rc_control_settings::v_des);
+	//rccmd.def_readwrite("rpy_des", &rc_control_settings::rpy_des);
+	//rccmd.def_readwrite("omega_des", &rc_control_settings::omega_des);
+	//rccmd.def_readwrite("variable", &rc_control_settings::variable);
 	
 	py::class_<RobotType> robottype(m, "RobotType");
 	robottype.def(py::init<>(), "");
 
 	py::class_<VectorNavData> vnavdata(m, "VectorNavData");
 	vnavdata.def(py::init<>(), "");
+	vnavdata.def_readwrite("accelerometer", &VectorNavData::accelerometer);
+	vnavdata.def_readwrite("gyro", &VectorNavData::gyro);
+	vnavdata.def_readwrite("quat", &VectorNavData::quat);
 	
 	py::class_<CheaterState<double>> cheaterstate(m, "CheaterState");
 	cheaterstate.def(py::init<>(), "");
+	cheaterstate.def_readwrite("orientation", &CheaterState<double>::orientation);
+	cheaterstate.def_readwrite("position", &CheaterState<double>::position);
+	cheaterstate.def_readwrite("omegaBody", &CheaterState<double>::omegaBody);
+	cheaterstate.def_readwrite("vBody", &CheaterState<double>::vBody);
+	cheaterstate.def_readwrite("acceleration", &CheaterState<double>::acceleration);
 	
 	py::class_<SpiData> spidata(m, "SpiData");
 	spidata.def(py::init<>(), "");
@@ -197,9 +229,19 @@ PYBIND11_MODULE(pycheetah, m) {
 	
 	py::class_<RobotControlParameters> robotctrlparams(m, "RobotControlParameters");
 	robotctrlparams.def(py::init<>(), "");
+	robotctrlparams.def("defineAndInitializeFromYamlFile", py::overload_cast<const string& >(&MIT_UserParameters::defineAndInitializeFromYamlFile), "", py::arg("filename"));
+	robotctrlparams.def("initializeFromYamlFile", py::overload_cast<const string& >(&MIT_UserParameters::initializeFromYamlFile), "", py::arg("filename"));
+	robotctrlparams.def("printToYamlString", [](RobotControlParameters &self) {
+			return self.collection.printToYamlString();
+			}, "");
 
 	py::class_<MIT_UserParameters> mitctrlparams(m, "MIT_UserParameters");
 	mitctrlparams.def(py::init<>(), "");
+	mitctrlparams.def("defineAndInitializeFromYamlFile", py::overload_cast<const string& >(&MIT_UserParameters::defineAndInitializeFromYamlFile), "", py::arg("filename"));
+	mitctrlparams.def("initializeFromYamlFile", py::overload_cast<const string& >(&MIT_UserParameters::initializeFromYamlFile), "", py::arg("filename"));
+	mitctrlparams.def("printToYamlString", [](MIT_UserParameters &self) {
+			return self.collection.printToYamlString();
+			}, "");
 	
 	py::class_<VisualizationData> visdata(m, "VisualizationData");
 	visdata.def(py::init<>(), "");

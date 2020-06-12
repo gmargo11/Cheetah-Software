@@ -11,99 +11,116 @@ from pycheetah import * #FloatingBaseModel, ControlFSMData, LocomotionCtrl, Loco
 
 class Cheetah:
 
-    def __init__(self):
+    def __init__(self, robot_filename, user_filename, model='m'):
 
+        # define structs
+        self.robotparams, self.userparams = None, None
+        self.cheetah, self.model = None, None
+        self.cheaterState, self.vnavData, self.legControllerData, self.stateEstimate, self.stateEstimator = None, None, None, None, None
+        self.gamepadCmd, self.rc_command, self.legController, self.gaitScheduler, self.desiredStateCmd = None, None, None, None, None
+        self.fsm, self.vizData = None, None
 
-def load_params(robot_filename, user_filename):
-    # define parameters
-    robotparams = RobotControlParameters()
-    robotparams.initializeFromYamlFile(robot_filename)
-    userparams = MIT_UserParameters()
-    userparams.initializeFromYamlFile(user_filename)
-    #print(userparams.printToYamlString())
-    #print("ok")
-    return robotparams, userparams
+        self.dt = 0.025
 
-# set current state
-position = np.array([0.0, 0.0, 0.29])
-orientation = np.array([1.0, 0.0, 0.0, 0.0])
-vBody = np.array([0.0, 0.0, 0.0])
-omegaBody = np.array([0.0, 0.0, 0.0])
-acceleration = np.array([0.0, 0.0, 0.0])
+        # load params
+        self.load_params()
 
-# sensor data
-#accelerometer = np.array([0.0, 0.0, 0.0])
-#gyro = np.array([0.0, 0.0, 0.0])
-#quat = orientation
+        # make model
+        self.make_model(model=model)
 
-def make_model():
-    # make model
-    cheetah = buildMiniCheetah()
-    model = cheetah.buildModel()
-    return cheetah, model
+        # make state estimator
+        self.make_state_estimator()
 
-def make_state_estimator(robotparams):
-    # make state estimator
-    cheaterState = CheaterState()
-    # cheaterState.orientation, cheaterState.position, cheaterState.omegaBody, cheaterState.vBody, cheaterState.acceleration = orientation, position, omegaBody, vBody, acceleration
-    vnavData = VectorNavData()
-#vnavData.accelerometer, vnavData.gyro, vnavData.quat = accelerometer, gyro, quat
-    legControllerData = LegControllerData() # MIGHT NEED TO MAKE THIS NULLPOINTER (?)
+        # make fsm
+        self.make_fsm()
 
-    stateEstimate = StateEstimate()
-    stateEstimator = StateEstimatorContainer(cheaterState, vnavData, legControllerData, stateEstimate, robotparams)
-    stateEstimator.initializeCheater()
+         # set current state
+        position = np.array([0.0, 0.0, 0.29])
+        orientation = np.array([1.0, 0.0, 0.0, 0.0])
+        vBody = np.array([0.0, 0.0, 0.0])
+        omegaBody = np.array([0.0, 0.0, 0.0])
+        acceleration = np.array([0.0, 0.0, 0.0])
 
-    return stateEstimator, cheaterState, legControllerData
+    def load_params(self, robot_filename, user_filename):
 
-def set_cheater_state(state, cheaterState):
-    cheaterState.orientation = state[0:4]
-    cheaterState.position = state[4:7]
-    cheaterState.omegaBody = state[7:10]
-    cheaterState.vBody = state[10:13]
-    cheaterState.acceleration = state[13:16]
+        self.robotparams = RobotControlParameters()
+        self.userparams = MIT_UserParameters()
+        
+        # load parameters
+        self.robotparams.initializeFromYamlFile(robot_filename)
+        self.userparams.initializeFromYamlFile(user_filename)
+        #print(userparams.printToYamlString())
 
+    def make_model(self, model):
+        # make model
+        if model == 'm':
+            self.cheetah = buildMiniCheetah()
+        else:
+            raise ValueError("Only mini cheetah is currently supported by pycheetah!")
 
-# test MPC
+        self.model = cheetah.buildModel()
 
-# test WBC
+    def make_state_estimator(self):
+        assert self.cheetah is not None, "self.cheetah not initialized! you should call make_model before make_state_estimator"
+        assert self.robotparams is not None, "self.robotparams is not initialized! you should call load_params before make_state_estimator."
 
-#lc = LocomotionCtrl(model)
-#lc_data = LocomotionCtrlData()
-#print(lc_data.vBody_des)i
-#pBody_des = np.array([0.0, 0.0, 0.29])
-#vBody_des, aBody_des, pBody_RPY_des, vBody_Ori_des = np.zeros(3), np.zeros(3), np.zeros(3) , np.zeros(3) 
+        self.cheaterState, self.vnavData, self.legControllerData, self.stateEstimate = CheaterState(), VectorNavData(), LegControllerData(), StateEstimate()
+        # cheaterState.orientation, cheaterState.position, cheaterState.omegaBody, cheaterState.vBody, cheaterState.acceleration = orientation, position, omegaBody, vBody, acceleration
+        self.stateEstimator = StateEstimatorContainer(self.cheaterState, self.vnavData, self.legControllerData, self.stateEstimate, self.robotparams)
+        self.stateEstimator.initializeCheater()
 
-#pFoot_des = np.array([[0.2, -0.15, 0.], [0.2, 0.15, 0.], [-0.2, -0.15, 0.], [-0.2, 0.15, 0.]])
-#vFoot_des, aFoot_des, Fr_des = np.zeros((4, 3)), np.zeros((4, 3)), np.zeros((4, 3))
-#contact_state = np.array([1, 1, 1, 1])
+    def make_fsm(self):
+        assert self.cheetah is not None, "self.cheetah not initialized! you should call make_model before make_fsm"
+        assert self.robotparams is not None, "self.robotparams is not initialized! you should call load_params before make_fsm."
+        assert self.userparams is not None, "self.userparams is not initialized! you should call load_params before make_fsm."
+        assert self.stateEstimate is not None, "self.stateEstimate is not initialized! you should call make_state_estimator before make_fsm."
+        assert self.stateEstimator is not None, "self.stateEstimate is not initialized! you should call make_state_estimator before make_fsm."
 
-#lc_data.setBodyDes(pBody_des, vBody_des, aBody_des, pBody_RPY_des, vBody_Ori_des)
-#for i in range(4):
-#    lc_data.setFootDes(i, pFoot_des[i], vFoot_des[i], aFoot_des[i], Fr_des[i])
-#lc_data.setContactState(contact_state)
+        self.gamepadCmd, self.rc_command = GamepadCommand(), rc_control_settings()
+        self.desiredStateCmd = DesiredStateCommand(self.gamepadCmd, self.rc_command, self.robotparams, self.stateEstimate, self.dt)
+        
+        self.gaitScheduler = GaitScheduler(self.userparams, self.dt)
+        self.legController = LegController(self.cheetah)
 
-#fsm_data = ControlFSMData()
-#print(fsm_data)
+        self.vizData = VisualizationData()
+        self.fsm = ControlFSM(self.cheetah, self.stateEstimator, self.legController, self.gaitScheduler, self.desiredStateCmd, self.robotparams, self.vizData, self.userparams)
+        self.fsm.initialize()
+        self.fsm.runFSM()
+        #self.fsm.printInfo(1)
 
-def make_fsm(cheetah, userparams, robotparams):
+    def set_cartesian_state(self, cartesian_state):
+        self.cheaterState.orientation = state[0:4]
+        self.cheaterState.position = state[4:7]
+        self.cheaterState.omegaBody = state[7:10]
+        self.cheaterState.vBody = state[10:13]
+        self.cheaterState.acceleration = state[13:16]
 
-    # set command
-    dt = 0.025
-    gamepadCmd = GamepadCommand()
-    rc_command = rc_control_settings()
-    # make control FSM
-    legController = LegController(cheetah)
-    gaitScheduler = GaitScheduler(userparams, dt)
-    desiredStateCmd = DesiredStateCommand(gamepadCmd, rc_command, robotparams, stateEstimate, dt)
-    vizData = VisualizationData()
-    print("[python] Make FSM")
-    fsm = ControlFSM(cheetah, stateEstimator, legController, gaitScheduler, desiredStateCmd, robotparams, vizData, userparams)
-    fsm.initialize()
-    fsm.runFSM()
-    fsm.printInfo(1)
+        self.stateEstimator.run()
 
-    return fsm, rc_command, legController
+    def set_joint_state(self, joint_state. d_joint_state):
+        spiData = SpiData()
+        for idx in range(4):
+            q_abad, q_hip, q_knee = joint_state[3 * idx], joint_state[3 * idx + 1], joint_state[3 * idx + 2]
+            qd_abad, qd_hip, qd_knee = d_joint_state[3 * idx], d_joint_state[3 * idx + 1], d_joint_state[3 * idx + 2]
+            spiData.setLegData(idx, q_abad, q_hip, q_knee, qd_abad, qd_hip, qd_knee)
+        self.legController.updateData(spiData)
+
+    def get_joint_commands(self):
+        commands = [legController.getCommands(i) for i in range(4)]
+
+        tauff = np.concatenate(([cmd.tauFeedForward for cmd in commands]))
+        forceff = np.concatenate(([cmd.forceFeedForward for cmd in commands]))
+        qDes = np.concatenate(([cmd.qDes for cmd in commands]))
+        qdDes = np.concatenate(([cmd.qdDes for cmd in commands]))
+        pDes = np.concatenate(([cmd.pDes for cmd in commands]))
+        vDes = np.concatenate(([cmd.vDes for cmd in commands]))
+
+        kpCartesian = np.concatenate(([cmd.kpCartesian for cmd in commands]))
+        kdCartesian = np.concatenate(([cmd.kdCartesian for cmd in commands]))
+        kpJoint = np.concatenate(([cmd.kpJoint for cmd in commands]))
+        kdJoint = np.concatenate(([cmd.kdJoint for cmd in commands]))
+
+        return tauff, forceff, qDes, qdDes, pDes, vDes, kpCartesian, kdCartesian, kpJoint, kdJoint
 
 
 #######################
@@ -113,16 +130,15 @@ def make_fsm(cheetah, userparams, robotparams):
 
 # initialization
 
-userparams, robotparams = load_params(robot_filename = "../config/mini-cheetah-defaults.yaml",
-                                      user_filename = "../config/mc-mit-ctrl-user-parameters.yaml")
-cheetah, model = make_model()
-stateEstimator, cheaterState, legControllerData = make_state_estimator(robotparams)
-fsm, rc_command, legController = make_fsm(cheetah, userparams, robotparams)
+dt = 0.025
+cheetah_ctrl = Cheetah( robot_filename = "../config/mini-cheetah-defaults.yaml",
+                        user_filename = "../config/mc-mit-ctrl-user-parameters.yaml",
+                        dt = dt )
 
 # initialize controllers
 
-cmpc = ConvexMPCLocomotion(dt, (int)(30 / (1000 * dt)), userparams)
-wbc = LocomotionCtrl(model)
+cmpc = ConvexMPCLocomotion(dt, (int)(30 / (1000 * dt)), cheetah_ctrl.userparams)
+wbc = LocomotionCtrl(cheetah_ctrl.model)
 wbc_data = LocomotionCtrlData()
 
 # control loop!
@@ -135,20 +151,15 @@ for i in range(iterations):
     # update joint state
     q = np.zeros(12) 
     qd = np.zeros(12)
-    spidata = make_spidata(q, qd)
-    legController.updateCommand(spidata)
+    cheetah_ctrl.set_joint_state(q, qd)
 
     # update cheater state
     state = np.zeros(16) # [orientation(4), pos(3), omegaBody(3), vBody(3), accel(3)]
-    set_cheater_state(cheaterState, state)
-
-
-    # run state estimator
-    stateEstimator.run()
+    cheetah_ctrl.set_cartesian_state(state)
 
 
     # run MPC
-    cmpc.run(fsm.data)
+    cmpc.run(cheetah_ctrl.fsm.data)
 
     
     wbc_data.setBodyDes(cmpc.pBody_des, cmpc.vBody_des, cmpc.aBody_des, cmpc.pBody_RPY_des, cmpc.vBody_Ori_des)
@@ -157,12 +168,11 @@ for i in range(iterations):
     wbc_data.setContactState(cmpc.contact_state)
 
     # run WBC
-    wbc.run(wbc_data, fsm.data)
+    wbc.run(wbc_data, cheetah_ctrl.fsm.data)
 
-    # check final leg command
-    commands = [legController.getCommands(i) for i in range(4)]#getCommands()
-    #for command in commands:
-    print([command.tauFeedForward for command in commands])
+    # get control output
+    tauff, forceff, qDes, qdDes, pDes, vDes, kpCartesian, kdCartesian, kpJoint, kdJoint = cheetah_ctrl.get_joint_commands()
+    print(tauff)
 
 print("control frequency: ", iterations/(time.time()-tstart))
 print("required frequency: ", 1/dt)

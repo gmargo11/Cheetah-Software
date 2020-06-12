@@ -285,10 +285,10 @@ PYBIND11_MODULE(pycheetah, m) {
 	//legctrl.def("getCommands", [](LegController<float> &self){
 	//		return self.commands;
 	//		});
-	legctrl.def("getCommands", [](LegController<float> &self, int idx){
-			return self.commands[idx];
-			}, "");
+	legctrl.def("getCommands", [](LegController<float> &self, int idx){ return self.commands[idx]; }, "");
 	legctrl.def_readonly("commands", &LegController<float>::commands);
+	legctrl.def("updateData", py::overload_cast<const SpiData*>(&LegController<float>::updateData), "");
+	legctrl.def("getData", [](LegController<float> &self, int idx){ return self.datas[idx]; }, "");
 	
 	py::class_<LegControllerCommand<float>> legcmd(m, "LegControllerCommand");
 	legcmd.def(py::init<>(), "");

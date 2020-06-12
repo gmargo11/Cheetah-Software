@@ -69,18 +69,18 @@ void WBC_Ctrl<T>::_ComputeWBC() {
 
 template<typename T>
 void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
-  printf("[WBC_Ctrl] Enter WBC Run");
-  std::cout << input << data.userParameters->collection.printToYamlString();
+  //printf("[WBC_Ctrl] Enter WBC Run");
+  //std::cout << input << data.userParameters->collection.printToYamlString();
   //++_iter;
-  printf("[WBC_Ctrl] Update Model");
+  //printf("[WBC_Ctrl] Update Model");
   // Update Model
   _UpdateModel(data._stateEstimator->getResult(), data._legController->datas);
 
-  printf("[WBC_Ctrl] Update Contact Task");
+  //printf("[WBC_Ctrl] Update Contact Task");
   // Task & Contact Update
   _ContactTaskUpdate(input, data);
 
-  std::cout << "[WBC_Ctrl] Compute WBC\n";
+  //std::cout << "[WBC_Ctrl] Compute WBC\n";
   // WBC Computation
   _ComputeWBC();
   
@@ -96,11 +96,11 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
   // END of TEST
 
   // Update Leg Command
-  std::cout << "[WBC_Ctrl] Update Leg Cmd\n";
+  //std::cout << "[WBC_Ctrl] Update Leg Cmd\n";
   _UpdateLegCMD(data);
 
   // LCM publish
-  std::cout << "[WBC_Ctrl] Publish Result\n";
+  //std::cout << "[WBC_Ctrl] Publish Result\n";
   _LCM_PublishData();
 }
 

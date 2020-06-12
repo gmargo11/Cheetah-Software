@@ -9,6 +9,10 @@ from pycheetah import * #FloatingBaseModel, ControlFSMData, LocomotionCtrl, Loco
 #fb.addBase(1.0, np.ones(3), np.eye(3))
 #print(fb)
 
+class Cheetah:
+
+    def __init__(self):
+
 
 def load_params(robot_filename, user_filename):
     # define parameters
@@ -52,7 +56,12 @@ def make_state_estimator(robotparams):
 
     return stateEstimator, cheaterState, legControllerData
 
-def set_cheater_state(state):
+def set_cheater_state(state, cheaterState):
+    cheaterState.orientation = state[0:4]
+    cheaterState.position = state[4:7]
+    cheaterState.omegaBody = state[7:10]
+    cheaterState.vBody = state[10:13]
+    cheaterState.acceleration = state[13:16]
 
 
 # test MPC
@@ -131,7 +140,7 @@ for i in range(iterations):
 
     # update cheater state
     state = np.zeros(16) # [orientation(4), pos(3), omegaBody(3), vBody(3), accel(3)]
-    cheaterState = update_cheaterstate(cheaterState, state)
+    set_cheater_state(cheaterState, state)
 
 
     # run state estimator

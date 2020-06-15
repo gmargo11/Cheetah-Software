@@ -189,6 +189,17 @@ PYBIND11_MODULE(pycheetah, m) {
 
 	py::class_<StateEstimate<float>> se(m, "StateEstimate");
 	se.def(py::init<>(), "");
+	se.def_readwrite("contactEstimate", &StateEstimate<float>::contactEstimate);
+	se.def_readwrite("position", &StateEstimate<float>::position);
+	se.def_readwrite("vBody", &StateEstimate<float>::vBody);
+	se.def_readwrite("orientation", &StateEstimate<float>::orientation);
+	se.def_readwrite("omegaBody", &StateEstimate<float>::omegaBody);
+	se.def_readwrite("rBody", &StateEstimate<float>::rBody);
+	se.def_readwrite("rpy", &StateEstimate<float>::rpy);
+	se.def_readwrite("omegaWorld", &StateEstimate<float>::omegaWorld);
+	se.def_readwrite("vWorld", &StateEstimate<float>::vWorld);
+	se.def_readwrite("aBody", &StateEstimate<float>::aBody);
+	se.def_readwrite("aWorld", &StateEstimate<float>::aWorld);
 	
 	py::class_<StateEstimatorContainer<float>> secontainer(m, "StateEstimatorContainer");
 	secontainer.def(py::init<CheaterState<double>*, VectorNavData*, LegControllerData<float>*, StateEstimate<float>*, RobotControlParameters*>(), "");
@@ -202,7 +213,7 @@ PYBIND11_MODULE(pycheetah, m) {
 	secontainer.def("run", [](StateEstimatorContainer<float> &self){
 				self.run(nullptr);
 			}, "");
-
+	secontainer.def("getResult", py::overload_cast<>(&StateEstimatorContainer<float>::getResult), "");
 
 	
 	// Simulator to robot messages

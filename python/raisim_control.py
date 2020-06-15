@@ -88,6 +88,7 @@ class Cheetah:
         self.vizData = VisualizationData()
         self.fsm = ControlFSM(self.cheetah, self.stateEstimator, self.legController, self.gaitScheduler, self.desiredStateCmd, self.robotparams, self.vizData, self.userparams)
         self.fsm.initialize()
+        print("Run FSM...")
         self.fsm.runFSM()
         #self.fsm.printInfo(1)
 
@@ -242,15 +243,15 @@ class WBC_MPC_Controller:
 
     def __call__(self):
         self.control_decimation += 1
-        if self.control_decimation % 2500 == 0:
-            print("stopped recording")
+        if self.control_decimation % 500 == 0:
+            print("############## stopped recording ##############")
             self.vis.stop_recording_video_and_save()
 
 
         # update joint state
         q, qd = self.cheetah_sim.get_states()
-        q = np.zeros(12) 
-        qd = np.zeros(12)
+        #q = np.zeros(12) 
+        #qd = np.zeros(12)
         self.cheetah_ctrl.set_joint_state(q, qd)
 
         # update cheater state
@@ -262,11 +263,15 @@ class WBC_MPC_Controller:
         state = np.concatenate((base_orientation, base_pos, base_omega, base_vel, base_accel)) # [orientation(4), pos(3), omegaBody(3), vBody(3), accel(3)]
         self.cheetah_ctrl.set_cartesian_state(state)
         
-        print('base position:', base_pos)
+        #print('base position:', base_pos)
 
         # run MPC
         self.cmpc.run(self.cheetah_ctrl.fsm.data)
 
+        #print('desired base position:', self.cmpc.pBody_des, 'desired contact state:', self.cmpc.contact_state)
+        print('desired config', self.cmpc.pBody_des, [self.cmpc.get_pFoot_des(i) for i in range(4)])
+        print('estimated base position:', self.cheetah_ctrl.stateEstimator.getResult().position)
+        
     
         self.wbc_data.setBodyDes(self.cmpc.pBody_des, self.cmpc.vBody_des, self.cmpc.aBody_des, self.cmpc.pBody_RPY_des, self.cmpc.vBody_Ori_des)
         for i in range(4):
@@ -278,12 +283,21 @@ class WBC_MPC_Controller:
 
         # get control output
         tauff, forceff, qDes, qdDes, pDes, vDes, kpCartesian, kdCartesian, kpJoint, kdJoint = self.cheetah_ctrl.get_joint_commands()
-        print(tauff, forceff, qDes, qdDes, kpJoint, kdJoint)
+        
+        p_targets = np.pad(qDes, (7, 0))
+        d_targets = np.pad(qdDes, (6, 0))
+        p_gains = np.pad(np.ones(12)*300, (6, 0))
+        d_gains = np.pad(np.ones(12)*10, (6, 0))
+        generalized_feedforward_forces = np.pad(tauff, (6, 0))
 
-        self.cheetah_sim.set_pd_targets(np.pad(qDes, (7, 0)), np.pad(qdDes, (6, 0)))
+        print('q_cur', q)
+        print('q_des', p_targets)
+
+        self.cheetah_sim.set_pd_targets(p_targets, d_targets)
         #print(np.pad(kpJoint, (6, 0)))
-        self.cheetah_sim.set_pd_gains(np.pad(np.ones(12)*3, (6, 0)), np.pad(np.ones(12), (6, 0)))
+        self.cheetah_sim.set_pd_gains(p_gains, d_gains)
         #self.cheetah_sim.set_pd_gains(np.pad(kpJoint, (6, 0)), np.pad(kdJoint, (6, 0)))
+        #self.cheetah_sim.set_generalized_forces(generalized_feedforward_forces)
 
 
 
@@ -291,7 +305,7 @@ class WBC_MPC_Controller:
 # Run everything
 #########################
 dt = 0.025#
-initial_coordinates = [0.0, 0.0, 0.29, 1.0, 0.0, 0.0, 0.0, -0.06, -0.9, 1.57, -0.06, -0.9, 1.57, -0.06, -0.9, 1.57, -0.06, -0.95, 1.57]
+initial_coordinates = [0.0, 0.0, -0.18, 1.0, 0.0, 0.0, 0.0, -0.03, -0.79, 1.715, -0.03, -0.79, 1.715, -0.03, -0.72, 1.715, -0.03, -0.72, 1.715]
 
 print("Initializing simulator...")
 simulator = CheetahSimulator(dt, initial_coordinates)

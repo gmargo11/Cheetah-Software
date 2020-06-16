@@ -108,6 +108,8 @@ class Cheetah:
             qd_abad, qd_hip, qd_knee = d_joint_state[3 * idx], d_joint_state[3 * idx + 1], d_joint_state[3 * idx + 2]
             spiData.setLegData(idx, q_abad, q_hip, q_knee, qd_abad, qd_hip, qd_knee)
         self.legController.updateData(spiData)
+        #print('joint angles: ', self.legController.getData(0).q)
+        #print('foot position: ', self.legController.getData(0).p)
 
     def get_joint_commands(self):
         commands = [self.legController.getCommands(i) for i in range(4)]
@@ -241,15 +243,21 @@ class WBC_MPC_Controller:
         self.wbc = LocomotionCtrl(self.cheetah_ctrl.model)
         self.wbc_data = LocomotionCtrlData()
 
+        # initialize cheetah sim control mode
+        self.cheetah_sim.set_control_mode(raisim.ControlMode.PD_PLUS_FEEDFORWARD_TORQUE)
+
     def __call__(self):
         self.control_decimation += 1
-        if self.control_decimation % 500 == 0:
+        if self.control_decimation % 25000 == 0:
             print("############## stopped recording ##############")
             self.vis.stop_recording_video_and_save()
 
+        if self.control_decimation % 100 != 0:
+            return
 
         # update joint state
-        q, qd = self.cheetah_sim.get_states()
+        p, v = self.cheetah_sim.get_states()
+        q, qd = p[-12:], v[-12:]
         #q = np.zeros(12) 
         #qd = np.zeros(12)
         self.cheetah_ctrl.set_joint_state(q, qd)
@@ -269,8 +277,8 @@ class WBC_MPC_Controller:
         self.cmpc.run(self.cheetah_ctrl.fsm.data)
 
         #print('desired base position:', self.cmpc.pBody_des, 'desired contact state:', self.cmpc.contact_state)
-        print('desired config', self.cmpc.pBody_des, [self.cmpc.get_pFoot_des(i) for i in range(4)])
-        print('estimated base position:', self.cheetah_ctrl.stateEstimator.getResult().position)
+        #print('desired config', self.cmpc.pBody_des, [self.cmpc.get_pFoot_des(i) for i in range(4)], self.cmpc.pBody_RPY_des)
+        print('estimated base position:', self.cheetah_ctrl.stateEstimator.getResult().position, self.cheetah_ctrl.stateEstimator.getResult().rpy)
         
     
         self.wbc_data.setBodyDes(self.cmpc.pBody_des, self.cmpc.vBody_des, self.cmpc.aBody_des, self.cmpc.pBody_RPY_des, self.cmpc.vBody_Ori_des)
@@ -283,15 +291,20 @@ class WBC_MPC_Controller:
 
         # get control output
         tauff, forceff, qDes, qdDes, pDes, vDes, kpCartesian, kdCartesian, kpJoint, kdJoint = self.cheetah_ctrl.get_joint_commands()
-        
+       
+        #qDes = np.concatenate((qDes[9:], qDes[:9]))
+
+        #p_targets = np.pad(q, (7, 0))
         p_targets = np.pad(qDes, (7, 0))
         d_targets = np.pad(qdDes, (6, 0))
-        p_gains = np.pad(np.ones(12)*300, (6, 0))
-        d_gains = np.pad(np.ones(12)*10, (6, 0))
-        generalized_feedforward_forces = np.pad(tauff, (6, 0))
+        p_gains = np.pad(np.ones(12)*10, (6, 0))
+        d_gains = np.pad(np.ones(12)*1, (6, 0))
+        #p_gains = np.zeros(18)
+        #d_gains = np.zeros(18)
+        generalized_feedforward_forces = np.pad(tauff, (6, 0)) / 10
 
-        print('q_cur', q)
-        print('q_des', p_targets)
+        #print('q_cur', q)
+        #print('q_des', p_targets, 'qd_des', d_targets)
 
         self.cheetah_sim.set_pd_targets(p_targets, d_targets)
         #print(np.pad(kpJoint, (6, 0)))
@@ -305,10 +318,12 @@ class WBC_MPC_Controller:
 # Run everything
 #########################
 dt = 0.025#
-initial_coordinates = [0.0, 0.0, -0.18, 1.0, 0.0, 0.0, 0.0, -0.03, -0.79, 1.715, -0.03, -0.79, 1.715, -0.03, -0.72, 1.715, -0.03, -0.72, 1.715]
+#initial_coordinates = [0.0, 0.0, 0.2067, 1.0, 0.0, 0.0, 0.0, -0.21, -0.78, 1.875, 0.21, -0.78, 1.875, -0.275, -0.805, 1.954, 0.275, -0.805, 1.954]
+
+initial_coordinates = [0.0, 0.0, 0.31, 1.0, 0.0, 0.0, 0.0, 0.05694567, -0.7950611, 1.6200384, 0.13700844, -0.6039231, 1.406022, -0.17433, -0.64971113, 1.5169326, -0.09441409, -0.82649213, 1.673078]
 
 print("Initializing simulator...")
-simulator = CheetahSimulator(dt, initial_coordinates)
+simulator = CheetahSimulator(dt/100, initial_coordinates)
 print("Simulator ready!")
 
 print("Initializing controller...")

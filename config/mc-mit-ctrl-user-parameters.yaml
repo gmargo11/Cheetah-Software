@@ -29,7 +29,7 @@ Kd_foot           : [10, 10, 10]
 Kp_ori            : [100, 100, 100]
 Kd_ori            : [10, 10, 10]
 
-cmpc_gait         : 9 # standing
+cmpc_gait         : 3 # standing
 cmpc_x_drag       : 3
 cmpc_use_sparse   : 0
 cmpc_bonus_swing  : 0

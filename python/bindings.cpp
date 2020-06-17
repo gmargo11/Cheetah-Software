@@ -204,6 +204,8 @@ PYBIND11_MODULE(pycheetah, m) {
 	py::class_<StateEstimatorContainer<float>> secontainer(m, "StateEstimatorContainer");
 	secontainer.def(py::init<CheaterState<double>*, VectorNavData*, LegControllerData<float>*, StateEstimate<float>*, RobotControlParameters*>(), "");
 	secontainer.def("initializeCheater", [](StateEstimatorContainer<float> &self){
+			self.removeAllEstimators();
+			self.addEstimator<ContactEstimator<float>>();
 			Vec4<float> contactDefault;
 			contactDefault << 0.5, 0.5, 0.5, 0.5;
 			self.setContactPhase(contactDefault);
@@ -223,10 +225,10 @@ PYBIND11_MODULE(pycheetah, m) {
 	py::class_<rc_control_settings> rccmd(m, "rc_control_settings");
 	rccmd.def(py::init<>(), "");
 	rccmd.def_readwrite("mode", &rc_control_settings::mode);
-	//rccmd.def_readwrite("p_des", &rc_control_settings::p_des);
+	rccmd.def_readonly("p_des", &rc_control_settings::p_des);
 	rccmd.def_readwrite("height_variation", &rc_control_settings::height_variation);
-	//rccmd.def_readwrite("v_des", &rc_control_settings::v_des);
-	//rccmd.def_readwrite("rpy_des", &rc_control_settings::rpy_des);
+	rccmd.def_readonly("v_des", &rc_control_settings::v_des);
+	rccmd.def_readonly("rpy_des", &rc_control_settings::rpy_des);
 	//rccmd.def_readwrite("omega_des", &rc_control_settings::omega_des);
 	//rccmd.def_readwrite("variable", &rc_control_settings::variable);
 	
@@ -300,6 +302,8 @@ PYBIND11_MODULE(pycheetah, m) {
 	legctrl.def_readonly("commands", &LegController<float>::commands);
 	legctrl.def("updateData", py::overload_cast<const SpiData*>(&LegController<float>::updateData), "");
 	legctrl.def("getData", [](LegController<float> &self, int idx){ return self.datas[idx]; }, "");
+	legctrl.def("zeroCommand", py::overload_cast<>(&LegController<float>::zeroCommand), "");
+	legctrl.def("setEnabled", py::overload_cast<bool>(&LegController<float>::setEnabled), "");
 	
 	py::class_<LegControllerCommand<float>> legcmd(m, "LegControllerCommand");
 	legcmd.def(py::init<>(), "");

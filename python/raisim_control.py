@@ -206,6 +206,7 @@ class CheetahSimulator:
         manager.set_shadow_far_distance(10)
         # size of contact points and contact forces
         self.vis.set_contact_visual_object_size(0.03, 0.6)
+        #self.vis.show_contacts = True
         # speed of camera motion in freelook mode
         self.vis.get_camera_man().set_top_speed(5)
 
@@ -215,7 +216,7 @@ class CheetahSimulator:
     def add_terrain(self):
         terrain_properties = raisim.TerrainProperties()
         terrain_properties.frequency = 0.2
-        terrain_properties.z_scale = 0.0
+        terrain_properties.z_scale = 0.4
         terrain_properties.x_size = 20.0
         terrain_properties.y_size = 20.0
         terrain_properties.x_samples = 50
@@ -225,6 +226,18 @@ class CheetahSimulator:
         terrain_properties.fractal_gain = 0.25
         heightmap = self.world.add_heightmap(x_center=0., y_center=0., terrain_properties=terrain_properties)
         self.vis.create_graphical_object(heightmap, name="terrain", material="checkerboard_green")
+
+    def add_heightmap_rand(self):
+        heightmap = self.world.add_heightmap(x_samples=50,
+                                             y_samples=50,
+                                             x_scale=20.0,
+                                             y_scale=20.0,
+                                             x_center=0.0,
+                                             y_center=0.0,
+                                             heights=np.random.rand(50*50) * 0.1,
+                                             material="checkerboard_green")
+        self.vis.create_graphical_object(heightmap, name="terrain", material="checkerboard_green")
+
 
     def run_control(self, controller):
         self.vis.set_control_callback(controller)
@@ -277,15 +290,18 @@ class WBC_MPC_Controller:
         if self.control_decimation % (2.0 / self.dt * self.pd_iters) == 0:
             print("############## stopped recording ##############")
             self.vis.stop_recording_video_and_save()
-
+        
+        #if self.control_decimation < 80 :
+        #self.cheetah_ctrl.legController.zeroCommand()
+        
         if self.control_decimation % self.pd_iters != 0:
             return
 
         # update joint state
         p, v = self.cheetah_sim.get_states()
         q, qd = p[-12:], v[-12:]
-        #q = np.concatenate((q[3:6], q[0:3], q[9:12], q[6:9]))
-        #qd = np.concatenate((qd[3:6], qd[0:3], qd[9:12], qd[6:9]))
+        q = np.concatenate((q[3:6], q[0:3], q[9:12], q[6:9]))
+        qd = np.concatenate((qd[3:6], qd[0:3], qd[9:12], qd[6:9]))
         #q = np.zeros(12) 
         #qd = np.zeros(12)
         self.cheetah_ctrl.set_joint_state(q, qd)
@@ -313,15 +329,15 @@ class WBC_MPC_Controller:
 
         #print('desired base position:', self.cmpc.pBody_des, 'desired contact state:', self.cmpc.contact_state)
         #print('desired config', self.cmpc.pBody_des, [self.cmpc.get_pFoot_des(i) for i in range(4)], self.cmpc.pBody_RPY_des)
-        #print('cheater state:', base_pos, base_orientation)
+        print('cheater state:', base_pos, base_orientation)
         #print('estimated base position:', self.cheetah_ctrl.stateEstimator.getResult().position, self.cheetah_ctrl.stateEstimator.getResult().rpy)
         #print('desired base position:', self.cmpc.pBody_des, self.cmpc.pBody_RPY_des)
         
     
-        #self.wbc_data.setBodyDes(self.cmpc.pBody_des, self.cmpc.vBody_des, self.cmpc.aBody_des, self.cmpc.pBody_RPY_des, self.cmpc.vBody_Ori_des)
+        self.wbc_data.setBodyDes(self.cmpc.pBody_des, self.cmpc.vBody_des, self.cmpc.aBody_des, self.cmpc.pBody_RPY_des, self.cmpc.vBody_Ori_des)
         #print("wbc inputs", self.cmpc.pBody_des, self.cmpc.vBody_des, self.cmpc.aBody_des, self.cmpc.pBody_RPY_des, self.cmpc.vBody_Ori_des)
 
-        self.wbc_data.setBodyDes(self.cmpc.pBody_des, self.cmpc.vBody_des, self.cmpc.aBody_des, np.zeros(3), np.zeros(3))
+        #self.wbc_data.setBodyDes(self.cmpc.pBody_des, self.cmpc.vBody_des, self.cmpc.aBody_des, np.zeros(3), np.zeros(3))
         for i in range(4):
            #print("wbc inputs (foot {})".format(i), self.cmpc.get_pFoot_des(i), self.cmpc.get_vFoot_des(i), self.cmpc.get_aFoot_des(i), self.cmpc.get_Fr_des(i))
            self.wbc_data.setFootDes(i, self.cmpc.get_pFoot_des(i), self.cmpc.get_vFoot_des(i), self.cmpc.get_aFoot_des(i), self.cmpc.get_Fr_des(i))
@@ -336,7 +352,15 @@ class WBC_MPC_Controller:
        
         #qDes = np.concatenate((qDes[6:9], qDes[:6]))
         #qdDes = np.concatenate((qdDes[6:], qdDes[:6]))
-        #tauff = np.concatenate((tauff[6:], tauff[:6]))
+        qDes = np.concatenate((qDes[3:6], qDes[0:3], qDes[9:12], qDes[6:9]))
+        qdDes = np.concatenate((qdDes[3:6], qdDes[0:3], qdDes[9:12], qdDes[6:9]))
+        tauff = np.concatenate((tauff[3:6], tauff[0:3], tauff[9:12], tauff[6:9]))
+        #qDes = np.concatenate((qDes[9:12], qDes[6:9], qDes[3:6], qDes[0:3]))
+        #qdDes = np.concatenate((qdDes[9:12], qdDes[6:9], qdDes[3:6], qdDes[0:3]))
+        #tauff = np.concatenate((tauff[9:12], tauff[6:9], tauff[3:6], tauff[0:3]))
+        #tauff = np.concatenate((tauff[6:9], tauff[9:12], tauff[0:3], tauff[3:6]))
+        #tauff = np.concatenate((tauff[6:9], tauff[9:12], tauff[0:3], tauff[3:6]))
+        #tauff = np.concatenate((tauff[9:12], tauff[6:9], tauff[3:6], tauff[0:3]))
 
         generalized_feedforward_forces = np.pad(tauff, (6, 0))
         #p_targets = np.pad(q, (7, 0))
@@ -376,11 +400,13 @@ pd_iters = 1
 #initial_coordinates = [0.0, 0.0, 0.2067, 1.0, 0.0, 0.0, 0.0, -0.21, -0.78, 1.875, 0.21, -0.78, 1.875, -0.275, -0.805, 1.954, 0.275, -0.805, 1.954]
 #initial_coordinates = [0.0, 0.0, 0.29, 1.0, 0.0, 0.0, 0.0, 0.05694567, -0.7950611, 1.6200384, 0.13700844, -0.6039231, 1.406022, -0.17433, -0.64971113, 1.5169326, -0.09441409, -0.82649213, 1.673078]
 #initial_coordinates = [0.0, 0.0, 0.30, 1.0, 0.0, 0.0, 0.0, 0.057, -0.80, 1.62, 0.14, -0.60, 1.40, -0.17, -0.65, 1.52, -0.09, -0.83, 1.67]
-initial_coordinates = [0.0, 0.0, 0.30, 1.0, 0.0, 0.0, 0.0, 0.057, -0.80, 1.62, 0.057, -0.80, 1.62, 0.057, -0.80, 1.62, 0.057, -0.80, 1.62,]
+initial_coordinates = [0.0, 0.0, 0.35, 1.0, 0.0, 0.0, 0.0, 0.057, -0.80, 1.62, 0.057, -0.80, 1.62, 0.057, -0.80, 1.62, 0.057, -0.80, 1.62,]
+#initial_coordinates = [0.0, 0.0, 0.40, 1.0, 0.0, 0.0, 0.0, 0.21, -0.78, 1.87, 0.21, -0.78, 1.87, 0.21, -0.78, 1.78, 0.21, -0.78, 1.78,]
 
 print("Initializing simulator...")
 simulator = CheetahSimulator(dt/pd_iters, initial_coordinates)
 #simulator.add_terrain()
+simulator.add_heightmap_rand()
 print("Simulator ready!")
 
 print("Initializing controller...")

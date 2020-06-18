@@ -228,6 +228,12 @@ PYBIND11_MODULE(pycheetah, m) {
 	rccmd.def_readonly("p_des", &rc_control_settings::p_des);
 	rccmd.def_readwrite("height_variation", &rc_control_settings::height_variation);
 	rccmd.def_readonly("v_des", &rc_control_settings::v_des);
+	rccmd.def("set_v_des", [](rc_control_settings & self, Vec3<float> vel_cmd){
+			for(int i=0; i < 3; ++i){
+				self.v_des[i] = vel_cmd[i];
+			}
+		}, "");
+
 	rccmd.def_readonly("rpy_des", &rc_control_settings::rpy_des);
 	//rccmd.def_readwrite("omega_des", &rc_control_settings::omega_des);
 	//rccmd.def_readwrite("variable", &rc_control_settings::variable);
@@ -328,5 +334,21 @@ PYBIND11_MODULE(pycheetah, m) {
 	lcdata.def_readwrite("J", &LegControllerData<float>::J);
 	lcdata.def_readwrite("tauEstimate", &LegControllerData<float>::tauEstimate);
 	lcdata.def("setQuadruped", py::overload_cast<Quadruped<float> &>(&LegControllerData<float>::setQuadruped), "");
+
+
+	// Simulation
+	//
+	py::class_<DynamicsSimulator<double>> simulator(m, "DynamicsSimulator");
+	simulator.def(py::init<FloatingBaseModel<double>& , bool>(), "");
+	simulator.def("step", py::overload_cast<double, const DVec<double>&, double, double>(&DynamicsSimulator<double>::step), "");
+	simulator.def("setState", py::overload_cast<const FBModelState<double>&>(&DynamicsSimulator<double>::setState), "");
+	simulator.def("getState", [](DynamicsSimulator<double> &self){
+			return self.getState();
+			}, "");
+	//simulator.def("getDState", py::overload_cast<>(&DynamicsSimulator<double>::getDState), "");
+	simulator.def("addCollisionPlane", py::overload_cast<double, double, double>(&DynamicsSimulator<double>::addCollisionPlane), "");
+	simulator.def("getModel", py::overload_cast<>(&DynamicsSimulator<double>::getModel), "");
+	simulator.def("getContactForce", py::overload_cast<size_t>(&DynamicsSimulator<double>::getContactForce), "");
+	
 
 }

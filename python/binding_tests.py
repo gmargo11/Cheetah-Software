@@ -177,6 +177,15 @@ for i in range(iterations):
 print("control frequency: ", iterations/(time.time()-tstart))
 print("required frequency: ", 1/dt)
 
+
+# Built-in Simulator
+
+simulator = DynamicsSimulator(cheetah_ctrl.model, False)
+#actuatorModels = cheetah_ctrl.cheetah.buildActuatorModels();
+#spineBoards = getSpineBoards()
+
+
+
 # RobotRunner
 '''
 ctrl = MIT_Controller()

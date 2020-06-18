@@ -98,6 +98,9 @@ class Cheetah:
         self.stateEstimator.run()
 
     def set_joint_state(self, joint_state, d_joint_state):
+        joint_state = np.concatenate((joint_state[3:6], joint_state[0:3], joint_state[9:12], joint_state[6:9]))
+        d_joint_state = np.concatenate((d_joint_state[3:6], d_joint_state[0:3], d_joint_state[9:12], d_joint_state[6:9]))
+
         spiData = SpiData()
         for idx in range(4):
             q_abad, q_hip, q_knee = joint_state[3 * idx], joint_state[3 * idx + 1], joint_state[3 * idx + 2]
@@ -120,6 +123,10 @@ class Cheetah:
         kpJoint = np.concatenate(([cmd.kpJoint for cmd in commands]))
         kdJoint = np.concatenate(([cmd.kdJoint for cmd in commands]))
 
+        qDes = np.concatenate((qDes[3:6], qDes[0:3], qDes[9:12], qDes[6:9]))
+        qdDes = np.concatenate((qdDes[3:6], qdDes[0:3], qdDes[9:12], qdDes[6:9]))
+        tauff = np.concatenate((tauff[3:6], tauff[0:3], tauff[9:12], tauff[6:9]))
+
         return tauff, forceff, qDes, qdDes, pDes, vDes, kpCartesian, kdCartesian, kpJoint, kdJoint
 
 
@@ -130,7 +137,7 @@ class Cheetah:
 
 # initialization
 
-dt = 0.025
+dt = 0.002
 cheetah_ctrl = Cheetah( robot_filename = "../config/mini-cheetah-defaults.yaml",
                         user_filename = "../config/mc-mit-ctrl-user-parameters.yaml",
                         dt = dt )
@@ -172,15 +179,19 @@ for i in range(iterations):
 
     # get control output
     tauff, forceff, qDes, qdDes, pDes, vDes, kpCartesian, kdCartesian, kpJoint, kdJoint = cheetah_ctrl.get_joint_commands()
-    print(tauff, forceff, qDes, qdDes)
+    #print(tauff, forceff, qDes, qdDes)
+
+
 
 print("control frequency: ", iterations/(time.time()-tstart))
 print("required frequency: ", 1/dt)
 
+print("############################# \n All Tests Successful! \n############################# ")
+
 
 # Built-in Simulator
 
-simulator = DynamicsSimulator(cheetah_ctrl.model, False)
+#simulator = DynamicsSimulator(cheetah_ctrl.model, False)
 #actuatorModels = cheetah_ctrl.cheetah.buildActuatorModels();
 #spineBoards = getSpineBoards()
 

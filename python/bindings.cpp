@@ -125,7 +125,44 @@ PYBIND11_MODULE(pycheetah, m) {
 			});
 	cmpc.def_readwrite("contact_state", &ConvexMPCLocomotion::contact_state);
 
-        py::class_<ControlFSMData<float>> fsmdata(m, "ControlFSMData");
+        py::class_<NeuralMPCLocomotion> nmpc(m, "NeuralMPCLocomotion");
+	nmpc.def(py::init<float, int, MIT_UserParameters*>());
+	nmpc.def("initialize", py::overload_cast<>(&NeuralMPCLocomotion::initialize), "");
+	nmpc.def("run", [](NeuralMPCLocomotion& self, ControlFSMData<float>& data, const Vec3<float>& vel_cmd, const DMat<float>& fp_rel, const Vec4<int>& offsets_cmd, const Vec4<int>& durations_cmd, const DMat<float> & height_map, const DMat<int> idx_map){
+	    
+			Vec2<float> fp_rel_cmd[4];
+			//for(int i=0; i<4; i++){
+			//    Vec2<float> fp_rel_cmd_i;
+			//    fp_rel_cmd_i[0] = fp_rel[0];
+			//    fp_rel_cmd_i[1] = fp_rel[1];
+			//    fp_rel_cmd[i] = fp_rel_cmd_i;
+			//}
+			std::cout << fp_rel;
+			// populate fp_rel_cmd (?)
+			self.run(data, vel_cmd, fp_rel_cmd, offsets_cmd, durations_cmd, height_map, idx_map);
+
+	 }, "");
+
+	nmpc.def_readwrite("pBody_des", &NeuralMPCLocomotion::pBody_des);
+	nmpc.def_readwrite("vBody_des", &NeuralMPCLocomotion::vBody_des);
+	nmpc.def_readwrite("aBody_des", &NeuralMPCLocomotion::aBody_des);
+	nmpc.def_readwrite("pBody_RPY_des", &NeuralMPCLocomotion::pBody_RPY_des);
+	nmpc.def_readwrite("vBody_Ori_des", &NeuralMPCLocomotion::vBody_Ori_des);
+	nmpc.def("get_pFoot_des", [](NeuralMPCLocomotion &self, int idx){
+			return self.pFoot_des[idx];
+			});
+	nmpc.def("get_vFoot_des", [](NeuralMPCLocomotion &self, int idx){
+			return self.vFoot_des[idx];
+			});
+	nmpc.def("get_aFoot_des", [](NeuralMPCLocomotion &self, int idx){
+			return self.aFoot_des[idx];
+			});
+	nmpc.def("get_Fr_des", [](NeuralMPCLocomotion &self, int idx){
+			return self.Fr_des[idx];
+			});
+	nmpc.def_readwrite("contact_state", &NeuralMPCLocomotion::contact_state);
+
+	py::class_<ControlFSMData<float>> fsmdata(m, "ControlFSMData");
 	fsmdata.def(py::init<>(), "Initialize the Control FSM Data");
 
 	py::class_<ControlFSM<float>> controlFSM(m, "ControlFSM");
@@ -338,6 +375,7 @@ PYBIND11_MODULE(pycheetah, m) {
 
 	// Simulation
 	//
+	/*
 	py::class_<DynamicsSimulator<double>> simulator(m, "DynamicsSimulator");
 	simulator.def(py::init<FloatingBaseModel<double>& , bool>(), "");
 	simulator.def("step", py::overload_cast<double, const DVec<double>&, double, double>(&DynamicsSimulator<double>::step), "");
@@ -350,5 +388,5 @@ PYBIND11_MODULE(pycheetah, m) {
 	simulator.def("getModel", py::overload_cast<>(&DynamicsSimulator<double>::getModel), "");
 	simulator.def("getContactForce", py::overload_cast<size_t>(&DynamicsSimulator<double>::getContactForce), "");
 	
-
+*/
 }

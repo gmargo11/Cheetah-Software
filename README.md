@@ -15,8 +15,8 @@ make install
 ### Python Binding Usage
 
 ```bash
-export PYTHONPATH=$PYTHONPATH:$LOCAL_BUILD/lib
 ldconfig -v
+export PYTHONPATH=$PYTHONPATH:$LOCAL_BUILD/lib
 ```
 
 Then, in python:

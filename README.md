@@ -34,6 +34,8 @@ You will need to install RaiSim and the Raisimpy python bindings (https://github
 
 Then, run the python script `python/raisim_control.py` which executes the MIT Controller on the mini cheetah in RaiSim. The video is saved as `video/raisim.mp4`.
 
+If you are running on a remote server, you may want to use xvfb: `xvfb-run -a --server-args="-screen 0, 1280x1024x24" python3 raisim_control.py`
+
 In RaiSim, you can easily generate custom terrains, simulate objects, adjust surface properties, and more.
 
 ### Adjusting the Gait Parameters

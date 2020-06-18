@@ -40,4 +40,4 @@ In RaiSim, you can easily generate custom terrains, simulate objects, adjust sur
 
 ### Adjusting the Gait Parameters
 
-The NeuralGaitMPC controller is under construction. Currently, it accepts the gait parameters (offset, duration, velocity) as an argument to its `run` function. You can see an example in `python/raisim_control_adaptive_gait.py`.
+The NeuralGaitMPC controller is under construction. Currently, it accepts the gait parameters (offset, duration, velocity) as an argument to its `run` function. You can see an example usage of the python bindings in `python/raisim_control_adaptive_gait.py`.

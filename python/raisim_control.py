@@ -133,6 +133,9 @@ class Cheetah:
 
         return tauff, forceff, qDes, qdDes, pDes, vDes, kpCartesian, kdCartesian, kpJoint, kdJoint
 
+    def set_vel_des(self, vel_des):
+        self.rc_command.set_v_des(vel_des)
+
 
 class CheetahSimulator:
     def __init__(self, dt, initial_coordinates):
@@ -234,10 +237,12 @@ class CheetahSimulator:
                                              y_scale=20.0,
                                              x_center=0.0,
                                              y_center=0.0,
-                                             heights=np.random.rand(50*50) * 0.1,
+                                             heights=np.random.rand(50*50) * 0.2,
                                              material="checkerboard_green")
         self.vis.create_graphical_object(heightmap, name="terrain", material="checkerboard_green")
 
+    def set_friction(self, mu):
+        self.world.set_material_pair_properties("checkerboard_green", "checkerboard_green", mu, 0.2, 1.0)
 
     def run_control(self, controller):
         self.vis.set_control_callback(controller)
@@ -247,6 +252,7 @@ class CheetahSimulator:
         self.vis.run()
         self.vis.stop_recording_video_and_save()
         self.vis.close_app()
+
 
 #######################
 # Setup RaiSim Simulator
@@ -269,6 +275,7 @@ class WBC_MPC_Controller:
         self.cheetah_ctrl = Cheetah( robot_filename = "../config/mini-cheetah-defaults.yaml",
                                      user_filename = "../config/mc-mit-ctrl-user-parameters.yaml",
                                      dt = self.dt )
+        self.cheetah_ctrl.set_vel_des([0.5, 0.0, 0.0])
         self.cheetah_sim = cheetah_sim
         self.vis = vis
 
@@ -407,6 +414,7 @@ print("Initializing simulator...")
 simulator = CheetahSimulator(dt/pd_iters, initial_coordinates)
 #simulator.add_terrain()
 simulator.add_heightmap_rand()
+simulator.set_friction(0.0)
 print("Simulator ready!")
 
 print("Initializing controller...")

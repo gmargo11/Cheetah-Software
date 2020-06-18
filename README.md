@@ -28,7 +28,7 @@ import pycheetah
 
 There are simple tests for the python bindings in `python/binding_tests.py`.
 
-### Running the Controller with RaiSim
+### Interfacing the Controller with RaiSim
 
 You will need to install RaiSim and the Raisimpy python bindings (https://github.com/robotlearn/raisimpy).
 

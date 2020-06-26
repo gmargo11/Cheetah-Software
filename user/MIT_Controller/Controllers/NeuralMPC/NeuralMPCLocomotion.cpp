@@ -18,14 +18,15 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
 
   _offsetsFloat = offsets.cast<float>() / (float) nMPC_segments;
   _durationsFloat = durations.cast<float>() / (float) nMPC_segments;
-  std::cout << "NeuralGait " << name << "\n";
+  /*std::cout << "NeuralGait " << name << "\n";
   std::cout << "nMPC_segments    : " << _nIterations << "\n";
   std::cout << "offsets (int)    : " << _offsets.transpose() << "\n";
   std::cout << "durations (int)  : " << _durations.transpose() << "\n";
   std::cout << "offsets (float)  : " << _offsetsFloat.transpose() << "\n";
   std::cout << "durations (float): " << _durationsFloat.transpose() << "\n";
   std::cout << "\n\n";
-
+  */
+  (void)name;
   _stance = durations[0];
   _swing = nMPC_segments - durations[0];
 
@@ -234,10 +235,13 @@ void NeuralMPCLocomotion::_IdxMapChecking(int x_idx, int y_idx, int & x_idx_sele
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data, 
     const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, 
-    const DMat<float> & height_map, const DMat<int> & idx_map) {
+    const DMat<float> & height_map, const DMat<int> & idx_map, const float footswing_height) {
   (void)idx_map;
     
-  std::cout << "NeuralMPCLocomotion::run" << fp_rel_cmd << offsets_cmd << durations_cmd;
+  //std::cout << "NeuralMPCLocomotion::run" << fp_rel_cmd << offsets_cmd << durations_cmd;
+  (void)fp_rel_cmd;
+  (void)offsets_cmd;
+  (void)durations_cmd;
 
   if(data.controlParameters->use_rc ){
     data.userParameters->cmpc_gait = data._desiredStateCommand->rcCommand->variable[0];
@@ -342,7 +346,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     }
 
     // Swing Height
-    footSwingTrajectories[i].setHeight(.06);
+    footSwingTrajectories[i].setHeight(footswing_height);
     Vec3<float> offset(0, side_sign[i] * .065, 0);
 
     Vec3<float> pRobotFrame = (data._quadruped->getHipLocation(i) + offset);
@@ -415,7 +419,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
         firstSwing[foot] = false;
         footSwingTrajectories[foot].setInitialPosition(pFoot[foot]);
       }
-      footSwingTrajectories[foot].setHeight(_fin_foot_loc[foot][2]+0.04);
+      footSwingTrajectories[foot].setHeight(_fin_foot_loc[foot][2]+footswing_height);
       footSwingTrajectories[foot].computeSwingTrajectoryBezier(swingState, swingTimes[foot]);
 
       Vec3<float> pDesFootWorld = footSwingTrajectories[foot].getPosition();

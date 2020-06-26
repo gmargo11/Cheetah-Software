@@ -45,7 +45,7 @@ public:
   template<typename T>
   void run(ControlFSMData<T>& data, 
       const Vec3<T> & vel_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, 
-      const DMat<T> & height_map, const DMat<int> & idx_map);
+      const DMat<T> & height_map, const DMat<int> & idx_map, const float footswing_height);
 
   Vec3<float> pBody_des;
   Vec3<float> vBody_des;

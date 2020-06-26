@@ -330,12 +330,14 @@ class WBC_MPC_Controller:
         #print('base position:', base_pos)
 
         # run MPC
-        if self.control_decimation < (1.0 / self.dt * self.pd_iters):
+        if (1.0 / self.dt * self.pd_iters) < self.control_decimation:
+            vel_cmd = np.array([1.0, 0.0, 0.0])
+            offsets_cmd, durations_cmd = np.array([0, 5, 5, 0]), np.array([5, 5, 5, 5]) # pronking
+            footswing_height = 0.20
+        else:
             vel_cmd = np.array([1.0, 0.0, 0.0])
             offsets_cmd, durations_cmd = np.array([0, 5, 5, 0]), np.array([5, 5, 5, 5]) # trotting
-        else:
-            vel_cmd = np.array([1.2, 0.0, 0.0])
-            offsets_cmd, durations_cmd = np.array([5, 5, 0, 0]), np.array([2, 2, 2, 2]) # pronking
+            footswing_height = 0.04
         #offsets_cmd, durations_cmd = np.array([0, 0, 0, 0]), np.array([2, 2, 2, 2]) # jumping
 
         # dummy parameters for now
@@ -343,7 +345,7 @@ class WBC_MPC_Controller:
         height_map = np.zeros((100, 100))
         idx_map = np.zeros((100, 100)).astype(int)
         
-        self.nmpc.run(self.cheetah_ctrl.fsm.data, vel_cmd, fp_rel_cmd, offsets_cmd, durations_cmd, height_map, idx_map) 
+        self.nmpc.run(self.cheetah_ctrl.fsm.data, vel_cmd, fp_rel_cmd, offsets_cmd, durations_cmd, height_map, idx_map, footswing_height) 
 
         #vdes_backup = self.cheetah_ctrl.get_joint_commands[6]
 
@@ -425,7 +427,7 @@ initial_coordinates = [0.0, 0.0, 0.35, 1.0, 0.0, 0.0, 0.0, 0.057, -0.80, 1.62, 0
 print("Initializing simulator...")
 simulator = CheetahSimulator(dt/pd_iters, initial_coordinates)
 #simulator.add_terrain()
-simulator.add_heightmap_rand()
+#simulator.add_heightmap_rand()
 #simulator.set_friction(0.0)
 print("Simulator ready!")
 

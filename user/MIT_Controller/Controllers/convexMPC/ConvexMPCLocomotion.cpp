@@ -764,7 +764,7 @@ void ConvexMPCLocomotion::handleFootstepHeightCmd(
 
 void ConvexMPCLocomotion::lcmHandler() {
   while (true) {
-    printf("[ConvexMPCLocomotion] Monitoring for incoming LCM messages!");
+    //printf("[ConvexMPCLocomotion] Monitoring for incoming LCM messages!");
     _lcm->handleTimeout(1000);
   }
 }

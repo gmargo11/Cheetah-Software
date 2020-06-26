@@ -376,9 +376,11 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     pfy_rel = fminf(fmaxf(pfy_rel, -p_rel_max), p_rel_max);
     Pf[0] +=  pfx_rel;
     Pf[1] +=  pfy_rel;
+    Pf[2] = 0;
 
-
-    _UpdateFoothold(Pf, seResult.position, height_map, idx_map);
+    //_UpdateFoothold(Pf, seResult.position, height_map, idx_map);
+    (void)height_map;
+    (void)idx_map;
     _fin_foot_loc[i] = Pf;
     //Pf[2] -= 0.003;
     //printf("%d, %d) foot: %f, %f, %f \n", x_idx, y_idx, local_pf[0], local_pf[1], Pf[2]);

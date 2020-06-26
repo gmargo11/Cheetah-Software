@@ -137,7 +137,8 @@ PYBIND11_MODULE(pycheetah, m) {
 			//    fp_rel_cmd_i[1] = fp_rel[1];
 			//    fp_rel_cmd[i] = fp_rel_cmd_i;
 			//}
-			std::cout << fp_rel;
+			//std::cout << fp_rel;
+			(void)fp_rel;
 			// populate fp_rel_cmd (?)
 			self.run(data, vel_cmd, fp_rel_cmd, offsets_cmd, durations_cmd, height_map, idx_map, footswing_height);
 

@@ -162,6 +162,8 @@ PYBIND11_MODULE(pycheetah, m) {
 			return self.Fr_des[idx];
 			});
 	nmpc.def_readwrite("contact_state", &NeuralMPCLocomotion::contact_state);
+	nmpc.def_readwrite("iterationCounter", &NeuralMPCLocomotion::iterationCounter);
+	nmpc.def_readwrite("iterationsBetweenMPC", &NeuralMPCLocomotion::iterationsBetweenMPC);
 
 	py::class_<ControlFSMData<float>> fsmdata(m, "ControlFSMData");
 	fsmdata.def(py::init<>(), "Initialize the Control FSM Data");

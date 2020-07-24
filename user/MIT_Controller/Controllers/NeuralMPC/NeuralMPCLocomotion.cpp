@@ -244,7 +244,7 @@ void NeuralMPCLocomotion::_IdxMapChecking(int x_idx, int y_idx, int & x_idx_sele
 
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data, 
-    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float> fh_rel_cmd, const Vec4<int> & offsets_cmd, 
+    const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd, 
     const Vec4<int> & durations_cmd, const float footswing_height, const DMat<float> & height_map) {
     
   //std::cout << "NeuralMPCLocomotion::run";
@@ -291,9 +291,13 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];
   v_des_world[1] = vel_cmd[1];
-  v_des_world[2] = 0.;
+  v_des_world[2] = vel_cmd[2];
+  rpy_des[0] = seResult.rpy[0];
+  rpy_des[1] = seResult.rpy[1];
   rpy_des[2] = seResult.rpy[2];
-  v_rpy_des[2] = vel_cmd[2];
+  v_rpy_des[0] = vel_rpy_cmd[0];
+  v_rpy_des[1] = vel_rpy_cmd[1]; // Pitch not yet accounted for in MPC
+  v_rpy_des[2] = vel_rpy_cmd[2];
   Vec3<float> v_robot = seResult.vWorld;
 
   //pretty_print(v_des_world, std::cout, "v des world");
@@ -387,7 +391,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     Pf[0] +=  pfx_rel;
     Pf[1] +=  pfy_rel;
 
-    std::cout << fp_rel_cmd[i][0] << ", " << fp_rel_cmd[i][1] << " == " << Pf[0] << ", " << Pf[1] << "\n";
+    //std::cout << fp_rel_cmd[i][0] << ", " << fp_rel_cmd[i][1] << " == " << Pf[0] << ", " << Pf[1] << "\n";
     Pf[2] = fh_rel_cmd[i];
 
     _UpdateFoothold(Pf, seResult.position, height_map);

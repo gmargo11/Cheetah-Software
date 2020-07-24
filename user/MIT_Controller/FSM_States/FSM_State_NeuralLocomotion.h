@@ -93,7 +93,7 @@ class FSM_State_NeuralLocomotion : public FSM_State<T> {
   void _updateStateEstimator();
   void _JPosStand();
   void _UpdateObstacle();
-  void _LocomotionControlStep(const Vec3<T> & vel_cmd, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> des_fh_rel, const Vec4<int> & des_offsets, const Vec4<int> & des_durations);
+  void _LocomotionControlStep(const Vec3<T> & vel_cmd, const Vec3<T> & vel_rpy_cmd, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> des_fh_rel, const Vec4<int> & des_offsets, const Vec4<int> & des_durations);
   void _UpdatePhaseCommand(Vec3<T> & des_vel, Vec2<T> (& des_fp_rel)[4], Vec4<T> & des_contact, float & des_swing_time);
   void _UpdateGaitCommand(Vec3<T> & des_vel, Vec4<int> & des_offsets, Vec4<int> & des_durations);
   void _RCLocomotionControl();

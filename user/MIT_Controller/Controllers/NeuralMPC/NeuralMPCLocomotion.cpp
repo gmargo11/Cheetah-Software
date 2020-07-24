@@ -144,12 +144,12 @@ void NeuralMPCLocomotion::initialize(){
   v_rpy_des.setZero();
 }
 void NeuralMPCLocomotion::_UpdateFoothold(Vec3<float> & foot, const Vec3<float> & body_pos,
-    const DMat<float> & height_map, const DMat<int> & idx_map){
+    const DMat<float> & height_map){
 
     Vec3<float> local_pf = foot - body_pos;
 
     int row_idx_half = height_map.rows()/2;
-    int col_idx_half = height_map.rows()/2;
+    int col_idx_half = height_map.cols()/2;
 
     int x_idx = floor(local_pf[0]/grid_size) + row_idx_half;
     int y_idx = floor(local_pf[1]/grid_size) + col_idx_half;
@@ -157,15 +157,25 @@ void NeuralMPCLocomotion::_UpdateFoothold(Vec3<float> & foot, const Vec3<float> 
     int x_idx_selected = x_idx;
     int y_idx_selected = y_idx;
 
-    _IdxMapChecking(x_idx, y_idx, x_idx_selected, y_idx_selected, idx_map);
+    //std::cout << local_pf[0] << " " << local_pf[1];
+    //std::cout << " " << x_idx << " " << y_idx << "\n";
 
-    // Get foot position from neural planner
+    if(0 > x_idx or x_idx >= height_map.rows() or 0 > y_idx or y_idx >= height_map.cols()){
+    	foot[2] = 0;
+	//std::cout << "step planned beyond heightmap! \n";
+    }
+    else{
+    	//_IdxMapChecking(x_idx, y_idx, x_idx_selected, y_idx_selected, idx_map);
+
+    	// Get foot position from neural planner
 
 
 
-    foot[0] = (x_idx_selected - row_idx_half)*grid_size + body_pos[0];
-    foot[1] = (y_idx_selected - col_idx_half)*grid_size + body_pos[1];
-    foot[2] = height_map(x_idx_selected, y_idx_selected);
+    	//foot[0] = (x_idx_selected - row_idx_half)*grid_size + body_pos[0];
+    	//foot[1] = (y_idx_selected - col_idx_half)*grid_size + body_pos[1];
+    	foot[2] = height_map(x_idx_selected, y_idx_selected);
+    	//std::cout << " " << foot[2] << "\n";
+    }
 
 }
 
@@ -234,11 +244,11 @@ void NeuralMPCLocomotion::_IdxMapChecking(int x_idx, int y_idx, int & x_idx_sele
 
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data, 
-    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, 
-    const DMat<float> & height_map, const DMat<int> & idx_map, const float footswing_height) {
-  (void)idx_map;
+    const Vec3<float> & vel_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float> fh_rel_cmd, const Vec4<int> & offsets_cmd, 
+    const Vec4<int> & durations_cmd, const float footswing_height, const DMat<float> & height_map) {
     
-  //std::cout << "NeuralMPCLocomotion::run" << fp_rel_cmd << offsets_cmd << durations_cmd;
+  //std::cout << "NeuralMPCLocomotion::run";
+  
   (void)fp_rel_cmd;
   (void)offsets_cmd;
   (void)durations_cmd;
@@ -376,11 +386,12 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     pfy_rel = fminf(fmaxf(pfy_rel, -p_rel_max), p_rel_max);
     Pf[0] +=  pfx_rel;
     Pf[1] +=  pfy_rel;
-    Pf[2] = 0;
 
-    //_UpdateFoothold(Pf, seResult.position, height_map, idx_map);
+    std::cout << fp_rel_cmd[i][0] << ", " << fp_rel_cmd[i][1] << " == " << Pf[0] << ", " << Pf[1] << "\n";
+    Pf[2] = fh_rel_cmd[i];
+
+    _UpdateFoothold(Pf, seResult.position, height_map);
     (void)height_map;
-    (void)idx_map;
     _fin_foot_loc[i] = Pf;
     //Pf[2] -= 0.003;
     //printf("%d, %d) foot: %f, %f, %f \n", x_idx, y_idx, local_pf[0], local_pf[1], Pf[2]);

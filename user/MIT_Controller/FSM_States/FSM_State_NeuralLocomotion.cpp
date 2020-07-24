@@ -170,9 +170,10 @@ void FSM_State_NeuralLocomotion<T>::run() {
   }
   // Call the locomotion control logic for this iteration
   Vec3<T> des_vel; // x,y, yaw
-  Vec2<T> des_fp_rel[4]; // x,y, yaw
-  Vec4<T> des_contact; // x,y, yaw
-  //float des_swing_time; // x,y, yaw
+  Vec2<T> des_fp_rel[4];
+  Vec4<T> des_fh_rel;
+  Vec4<T> des_contact;
+  //float des_swing_time;
   Vec4<int> des_offsets;
   Vec4<int> des_durations;
 
@@ -180,7 +181,7 @@ void FSM_State_NeuralLocomotion<T>::run() {
 
   // Neural Walking
   _UpdateGaitCommand(des_vel, des_offsets, des_durations);
-  _LocomotionControlStep(des_vel, des_fp_rel, des_offsets, des_durations);
+  _LocomotionControlStep(des_vel, des_fp_rel, des_fh_rel, des_offsets, des_durations);
 
   // Convex Locomotion
   //_RCLocomotionControl();
@@ -626,11 +627,11 @@ void FSM_State_NeuralLocomotion<T>::onExit() {
  * each stance or swing leg.
  */
 template <typename T>
-void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> (& des_fp_rel)[4], const Vec4<int> & des_offsets, const Vec4<int> & des_durations) {
+void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_vel, const Vec2<T> (& des_fp_rel)[4], const Vec4<T> des_fh_rel, const Vec4<int> & des_offsets, const Vec4<int> & des_durations) {
   // StateEstimate<T> stateEstimate = this->_data->_stateEstimator->getResult();
 
   // Contact state logic
-  neural_MPC.run<T>(*this->_data, des_vel, des_fp_rel, des_offsets, des_durations, _height_map, _idx_map, 0.06);
+  neural_MPC.run<T>(*this->_data, des_vel, des_fp_rel, des_fh_rel, des_offsets, des_durations, 0.06, _height_map);
 
   if(this->_data->userParameters->use_wbc > 0.9){
     _wbc_data->pBody_des = neural_MPC.pBody_des;

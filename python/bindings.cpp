@@ -128,19 +128,18 @@ PYBIND11_MODULE(pycheetah, m) {
         py::class_<NeuralMPCLocomotion> nmpc(m, "NeuralMPCLocomotion");
 	nmpc.def(py::init<float, int, MIT_UserParameters*>());
 	nmpc.def("initialize", py::overload_cast<>(&NeuralMPCLocomotion::initialize), "");
-	nmpc.def("run", [](NeuralMPCLocomotion& self, ControlFSMData<float>& data, const Vec3<float>& vel_cmd, const DMat<float>& fp_rel, const Vec4<int>& offsets_cmd, const Vec4<int>& durations_cmd, const DMat<float> & height_map, const DMat<int> idx_map, const float footswing_height){
+	nmpc.def("run", [](NeuralMPCLocomotion& self, ControlFSMData<float>& data, const Vec3<float>& vel_cmd, const DMat<float>& fp_rel, const Vec4<float>& fh_rel_cmd, const Vec4<int>& offsets_cmd, const Vec4<int>& durations_cmd, const float footswing_height, const DMat<float> & height_map){
 	    
 			Vec2<float> fp_rel_cmd[4];
-			//for(int i=0; i<4; i++){
+			for(int i=0; i<4; i++){
 			//    Vec2<float> fp_rel_cmd_i;
-			//    fp_rel_cmd_i[0] = fp_rel[0];
-			//    fp_rel_cmd_i[1] = fp_rel[1];
+			    fp_rel_cmd[i][0] = fp_rel(0 + 2*i);
+			    fp_rel_cmd[i][1] = fp_rel(1 + 2*i);
 			//    fp_rel_cmd[i] = fp_rel_cmd_i;
-			//}
-			//std::cout << fp_rel;
-			(void)fp_rel;
+			}
+			//(void)fp_rel;
 			// populate fp_rel_cmd (?)
-			self.run(data, vel_cmd, fp_rel_cmd, offsets_cmd, durations_cmd, height_map, idx_map, footswing_height);
+			self.run(data, vel_cmd, fp_rel_cmd, fh_rel_cmd, offsets_cmd, durations_cmd, footswing_height, height_map);
 
 	 }, "");
 

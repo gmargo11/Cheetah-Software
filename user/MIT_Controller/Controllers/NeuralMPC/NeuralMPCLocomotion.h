@@ -44,8 +44,8 @@ public:
 
   template<typename T>
   void run(ControlFSMData<T>& data, 
-      const Vec3<T> & vel_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, 
-      const DMat<T> & height_map, const DMat<int> & idx_map, const float footswing_height);
+      const Vec3<T> & vel_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<float> fh_rel_cmd,
+      const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, const float footswing_height, const DMat<float> & height_map);
 
   Vec3<float> pBody_des;
   Vec3<float> vBody_des;
@@ -67,12 +67,12 @@ public:
 
 private:
   void _UpdateFoothold(Vec3<float> & foot, const Vec3<float> & body_pos,
-      const DMat<float> & height_map, const DMat<int> & idx_map);
+      const DMat<float> & height_map);
   void _IdxMapChecking(int x_idx, int y_idx, int & x_idx_selected, int & y_idx_selected, 
       const DMat<int> & idx_map);
 
   Vec3<float> _fin_foot_loc[4];
-  float grid_size = 0.015;
+  float grid_size = 1.0/30.0; //0.015;
 
   Vec3<float> v_des_world;
   Vec3<float> rpy_des;

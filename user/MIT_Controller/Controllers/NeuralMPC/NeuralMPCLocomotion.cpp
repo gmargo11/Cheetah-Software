@@ -27,8 +27,9 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
   std::cout << "\n\n";
   */
   (void)name;
-  _stance = durations[0];
-  _swing = nMPC_segments - durations[0];
+  _stance = durations;
+  Vec4<int> segments_list(nMPC_segments, nMPC_segments, nMPC_segments, nMPC_segments);
+  _swing = segments_list - durations;
 
 }
 
@@ -162,7 +163,7 @@ void NeuralMPCLocomotion::_UpdateFoothold(Vec3<float> & foot, const Vec3<float> 
 
     if(0 > x_idx or x_idx >= height_map.rows() or 0 > y_idx or y_idx >= height_map.cols()){
     	foot[2] = 0;
-	//std::cout << "step planned beyond heightmap! \n";
+	std::cout << "step planned beyond heightmap! \n";
     }
     else{
     	//_IdxMapChecking(x_idx, y_idx, x_idx_selected, y_idx_selected, idx_map);
@@ -174,7 +175,7 @@ void NeuralMPCLocomotion::_UpdateFoothold(Vec3<float> & foot, const Vec3<float> 
     	//foot[0] = (x_idx_selected - row_idx_half)*grid_size + body_pos[0];
     	//foot[1] = (y_idx_selected - col_idx_half)*grid_size + body_pos[1];
     	foot[2] = height_map(x_idx_selected, y_idx_selected);
-    	//std::cout << " " << foot[2] << "\n";
+    	std::cout << "Target height:" << foot[2] << "\n";
     }
 
 }
@@ -292,8 +293,8 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   v_des_world[0] = vel_cmd[0];
   v_des_world[1] = vel_cmd[1];
   v_des_world[2] = vel_cmd[2];
-  rpy_des[0] = seResult.rpy[0];
-  rpy_des[1] = seResult.rpy[1];
+  //rpy_des[0] = seResult.rpy[0];
+  //rpy_des[1] = seResult.rpy[1];
   rpy_des[2] = seResult.rpy[2];
   v_rpy_des[0] = vel_rpy_cmd[0];
   v_rpy_des[1] = vel_rpy_cmd[1]; // Pitch not yet accounted for in MPC
@@ -344,10 +345,10 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
   
   // foot placement
-  swingTimes[0] = dtMPC * gait->_swing; // swing_time_cmd;
-  swingTimes[1] = dtMPC * gait->_swing; // swing_time_cmd;
-  swingTimes[2] = dtMPC * gait->_swing; // swing_time_cmd;
-  swingTimes[3] = dtMPC * gait->_swing; // swing_time_cmd;
+  swingTimes[0] = dtMPC * gait->_swing[0]; // swing_time_cmd;
+  swingTimes[1] = dtMPC * gait->_swing[1]; // swing_time_cmd;
+  swingTimes[2] = dtMPC * gait->_swing[2]; // swing_time_cmd;
+  swingTimes[3] = dtMPC * gait->_swing[3]; // swing_time_cmd;
 
   float side_sign[4] = {-1, 1, -1, 1};
 
@@ -366,7 +367,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     Vec3<float> pRobotFrame = (data._quadruped->getHipLocation(i) + offset);
     Vec3<float> pYawCorrected = 
       coordinateRotation(CoordinateAxis::Z, 
-          -v_rpy_des[2] * gait->_stance * dtMPC / 2) * pRobotFrame;
+          -v_rpy_des[2] * gait->_stance[i] * dtMPC / 2) * pRobotFrame;
 
     // Estimate the future robot position at foot touchdown
     Vec3<float> des_vel = seResult.rBody * v_des_world;
@@ -376,11 +377,13 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     float p_rel_max = 0.3f;
 
     // Set the foot target positions in relative frame
-    float pfx_rel = seResult.vWorld[0] * .5 * gait->_stance * dtMPC +
+    std::cout << "stance: " << gait->_stance[i] << "\n";
+
+    float pfx_rel = seResult.vWorld[0] * .5 * gait->_stance[i] * dtMPC +
       .03f*(seResult.vWorld[0]-v_des_world[0]) +
       (0.5f*seResult.position[2]/9.81f) * (seResult.vWorld[1]*v_rpy_des[2]);
 
-    float pfy_rel = seResult.vWorld[1] * .5 * gait->_stance * dtMPC +
+    float pfy_rel = seResult.vWorld[1] * .5 * gait->_stance[i] * dtMPC +
       .03f*(seResult.vWorld[1]-v_des_world[1]) +
       (0.5f*seResult.position[2]/9.81f) * (-seResult.vWorld[0]*v_rpy_des[2]);
     //float pfx_rel = fp_rel_cmd[i][0];
@@ -391,11 +394,14 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     Pf[0] +=  pfx_rel;
     Pf[1] +=  pfy_rel;
 
+
+    Pf[0] = Pf[0] + fp_rel_cmd[i][0];
+    Pf[1] = Pf[1] + fp_rel_cmd[i][1];
     //std::cout << fp_rel_cmd[i][0] << ", " << fp_rel_cmd[i][1] << " == " << Pf[0] << ", " << Pf[1] << "\n";
-    Pf[2] = fh_rel_cmd[i];
 
     _UpdateFoothold(Pf, seResult.position, height_map);
-    (void)height_map;
+    Pf[2] = Pf[2] + fh_rel_cmd[i];
+    //(void)height_map;
     _fin_foot_loc[i] = Pf;
     //Pf[2] -= 0.003;
     //printf("%d, %d) foot: %f, %f, %f \n", x_idx, y_idx, local_pf[0], local_pf[1], Pf[2]);

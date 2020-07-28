@@ -18,8 +18,8 @@ public:
   Vec4<float> getSwingState();
   int* mpc_gait();
   void setIterations(int iterationsPerMPC, int currentIteration);
-  int _stance;
-  int _swing;
+  Vec4<int> _stance;
+  Vec4<int> _swing;
 
 
 private:

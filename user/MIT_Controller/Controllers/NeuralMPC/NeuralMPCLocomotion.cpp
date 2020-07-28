@@ -163,7 +163,7 @@ void NeuralMPCLocomotion::_UpdateFoothold(Vec3<float> & foot, const Vec3<float> 
 
     if(0 > x_idx or x_idx >= height_map.rows() or 0 > y_idx or y_idx >= height_map.cols()){
     	foot[2] = 0;
-	std::cout << "step planned beyond heightmap! \n";
+	//std::cout << "step planned beyond heightmap! \n";
     }
     else{
     	//_IdxMapChecking(x_idx, y_idx, x_idx_selected, y_idx_selected, idx_map);
@@ -175,7 +175,7 @@ void NeuralMPCLocomotion::_UpdateFoothold(Vec3<float> & foot, const Vec3<float> 
     	//foot[0] = (x_idx_selected - row_idx_half)*grid_size + body_pos[0];
     	//foot[1] = (y_idx_selected - col_idx_half)*grid_size + body_pos[1];
     	foot[2] = height_map(x_idx_selected, y_idx_selected);
-    	std::cout << "Target height:" << foot[2] << "\n";
+    	//std::cout << "Target height:" << foot[2] << "\n";
     }
 
 }
@@ -377,7 +377,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     float p_rel_max = 0.3f;
 
     // Set the foot target positions in relative frame
-    std::cout << "stance: " << gait->_stance[i] << "\n";
+    //std::cout << "stance: " << gait->_stance[i] << "\n";
 
     float pfx_rel = seResult.vWorld[0] * .5 * gait->_stance[i] * dtMPC +
       .03f*(seResult.vWorld[0]-v_des_world[0]) +

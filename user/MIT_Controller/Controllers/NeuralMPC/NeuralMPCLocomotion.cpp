@@ -295,7 +295,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   v_des_world[2] = vel_cmd[2];
   //rpy_des[0] = seResult.rpy[0];
   //rpy_des[1] = seResult.rpy[1];
-  rpy_des[2] = seResult.rpy[2];
+  rpy_des[2] = seResult.rpy[2] + dt * vel_rpy_cmd[2];
   v_rpy_des[0] = vel_rpy_cmd[0];
   v_rpy_des[1] = vel_rpy_cmd[1]; // Pitch not yet accounted for in MPC
   v_rpy_des[2] = vel_rpy_cmd[2];
@@ -324,7 +324,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
 
   if(gait != &standing) {
-    world_position_desired += dt * Vec3<float>(v_des_world[0], v_des_world[1], 0);
+    world_position_desired += dt * Vec3<float>(v_des_world[0], v_des_world[1], v_des_world[2]);
   }
 
   // some first time initialization
@@ -332,7 +332,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   {
     world_position_desired[0] = seResult.position[0];
     world_position_desired[1] = seResult.position[1];
-    world_position_desired[2] = seResult.rpy[2];
+    world_position_desired[2] = seResult.position[2];
 
     for(int i = 0; i < 4; i++)
     {
@@ -442,7 +442,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
         firstSwing[foot] = false;
         footSwingTrajectories[foot].setInitialPosition(pFoot[foot]);
       }
-      footSwingTrajectories[foot].setHeight(_fin_foot_loc[foot][2]+footswing_height);
+      footSwingTrajectories[foot].setHeight(footswing_height);
       footSwingTrajectories[foot].computeSwingTrajectoryBezier(swingState, swingTimes[foot]);
 
       Vec3<float> pDesFootWorld = footSwingTrajectories[foot].getPosition();
@@ -497,18 +497,18 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   // Update For WBC
   pBody_des[0] = world_position_desired[0];
   pBody_des[1] = world_position_desired[1];
-  pBody_des[2] = _body_height;
+  pBody_des[2] = world_position_desired[2];
 
   vBody_des[0] = v_des_world[0];
   vBody_des[1] = v_des_world[1];
-  vBody_des[2] = 0.;
+  vBody_des[2] = v_des_world[2];
 
-  pBody_RPY_des[0] = 0.;
-  pBody_RPY_des[1] = 0.; 
+  pBody_RPY_des[0] = rpy_des[0];
+  pBody_RPY_des[1] = rpy_des[1]; 
   pBody_RPY_des[2] = rpy_des[2];
 
-  vBody_Ori_des[0] = 0.;
-  vBody_Ori_des[1] = 0.;
+  vBody_Ori_des[0] = v_rpy_des[0];
+  vBody_Ori_des[1] = v_rpy_des[1];
   vBody_Ori_des[2] = v_rpy_des[2];
 
   //contact_state = gait->getContactState();

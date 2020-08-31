@@ -246,7 +246,7 @@ void NeuralMPCLocomotion::_IdxMapChecking(int x_idx, int y_idx, int & x_idx_sele
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data, 
     const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd, 
-    const Vec4<int> & durations_cmd, const float footswing_height, const DMat<float> & height_map) {
+    const Vec4<int> & durations_cmd, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map) {
     
   //std::cout << "NeuralMPCLocomotion::run";
   
@@ -283,6 +283,16 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   else if(gaitNumber == 5)    gait = &trotRunning;
   current_gait = gaitNumber;
 
+  int _iteration = (iterationCounter / iterationsBetweenMPC) % horizonLength;
+  float _phase = (float)(iterationCounter % (iterationsBetweenMPC * horizonLength)) / (float) (iterationsBetweenMPC * horizonLength);
+  iterationCounter = _phase * iterationsBetweenMPC_cmd * horizonLength + _iteration * iterationsBetweenMPC_cmd;
+  std::cout << "iteration " << _iteration << " phase " << _phase << "\n";
+
+  iterationsBetweenMPC = iterationsBetweenMPC_cmd;
+  dtMPC = dt * iterationsBetweenMPC;
+  printf("[Neural MPC] dt: %.3f iterations: %d, dtMPC: %.3f\n",
+      dt, iterationsBetweenMPC, dtMPC);
+  
   NeuralGait custom(horizonLength, offsets_cmd, durations_cmd,"Cyclic Walk");
   
   // Can modify

@@ -286,12 +286,12 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   int _iteration = (iterationCounter / iterationsBetweenMPC) % horizonLength;
   float _phase = (float)(iterationCounter % (iterationsBetweenMPC * horizonLength)) / (float) (iterationsBetweenMPC * horizonLength);
   iterationCounter = _phase * iterationsBetweenMPC_cmd * horizonLength + _iteration * iterationsBetweenMPC_cmd;
-  std::cout << "iteration " << _iteration << " phase " << _phase << "\n";
+  //std::cout << "iteration " << _iteration << " phase " << _phase << "\n";
 
   iterationsBetweenMPC = iterationsBetweenMPC_cmd;
   dtMPC = dt * iterationsBetweenMPC;
-  printf("[Neural MPC] dt: %.3f iterations: %d, dtMPC: %.3f\n",
-      dt, iterationsBetweenMPC, dtMPC);
+  //printf("[Neural MPC] dt: %.3f iterations: %d, dtMPC: %.3f\n",
+  //    dt, iterationsBetweenMPC, dtMPC);
   
   NeuralGait custom(horizonLength, offsets_cmd, durations_cmd,"Cyclic Walk");
   

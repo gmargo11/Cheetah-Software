@@ -283,15 +283,24 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   else if(gaitNumber == 5)    gait = &trotRunning;
   current_gait = gaitNumber;
 
-  int _iteration = (iterationCounter / iterationsBetweenMPC) % horizonLength;
-  float _phase = (float)(iterationCounter % (iterationsBetweenMPC * horizonLength)) / (float) (iterationsBetweenMPC * horizonLength);
-  iterationCounter = _phase * iterationsBetweenMPC_cmd * horizonLength + _iteration * iterationsBetweenMPC_cmd;
-  //std::cout << "iteration " << _iteration << " phase " << _phase << "\n";
+  
+  //std::cout << "ibm " << iterationsBetweenMPC << " ibmcmd " << iterationsBetweenMPC_cmd;
+  //std::cout << (iterationsBetweenMPC != iterationsBetweenMPC_cmd);
 
-  iterationsBetweenMPC = iterationsBetweenMPC_cmd;
-  dtMPC = dt * iterationsBetweenMPC;
-  //printf("[Neural MPC] dt: %.3f iterations: %d, dtMPC: %.3f\n",
-  //    dt, iterationsBetweenMPC, dtMPC);
+  if(iterationsBetweenMPC != iterationsBetweenMPC_cmd){
+    int iteration = (iterationCounter / iterationsBetweenMPC) % horizonLength;
+    float phase = (float)(iterationCounter % (iterationsBetweenMPC * horizonLength)) / (float) (iterationsBetweenMPC * horizonLength);
+    iterationCounter = phase * iterationsBetweenMPC_cmd * horizonLength + iteration * iterationsBetweenMPC_cmd;
+    //std::cout << "iteration " << iteration << " phase " << phase << "Iteration counter" << iterationCounter << "\n";
+  
+    iterationsBetweenMPC = iterationsBetweenMPC_cmd;
+    dtMPC = dt * iterationsBetweenMPC;
+    //printf("[Neural MPC] dt: %.3f iterations: %d, dtMPC: %.3f\n",
+    //   dt, iterationsBetweenMPC, dtMPC);
+  }
+  
+  //(void)iterationsBetweenMPC_cmd;
+
   
   NeuralGait custom(horizonLength, offsets_cmd, durations_cmd,"Cyclic Walk");
   

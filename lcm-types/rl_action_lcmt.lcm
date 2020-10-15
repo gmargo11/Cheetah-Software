@@ -1,0 +1,11 @@
+struct rl_action_lcmt
+{
+    double vel_act[3];
+    double vel_rpy_act[3];
+    double fp_rel_act[8];
+    double fh_rel_act[4];
+    double footswing_height_act;
+    int32_t offsets_act[4];
+    int32_t durations_act[4];
+    int32_t iterationsBetweenMPC_act;
+}

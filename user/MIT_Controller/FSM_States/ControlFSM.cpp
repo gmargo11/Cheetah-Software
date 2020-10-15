@@ -43,15 +43,15 @@ ControlFSM<T>::ControlFSM(Quadruped<T>* _quadruped,
   // Initialize and add all of the FSM States to the state list
   statesList.invalid = nullptr;
   statesList.passive = new FSM_State_Passive<T>(&data);
-  statesList.jointPD = new FSM_State_JointPD<T>(&data);
-  statesList.impedanceControl = new FSM_State_ImpedanceControl<T>(&data);
+  //statesList.jointPD = new FSM_State_JointPD<T>(&data);
+  //statesList.impedanceControl = new FSM_State_ImpedanceControl<T>(&data);
   statesList.standUp = new FSM_State_StandUp<T>(&data);
   statesList.balanceStand = new FSM_State_BalanceStand<T>(&data);
   statesList.locomotion = new FSM_State_Locomotion<T>(&data);
-  statesList.recoveryStand = new FSM_State_RecoveryStand<T>(&data);
-  statesList.vision = new FSM_State_Vision<T>(&data);
-  statesList.backflip = new FSM_State_BackFlip<T>(&data);
-  statesList.frontJump = new FSM_State_FrontJump<T>(&data);
+  //statesList.recoveryStand = new FSM_State_RecoveryStand<T>(&data);
+  //statesList.vision = new FSM_State_Vision<T>(&data);
+  //statesList.backflip = new FSM_State_BackFlip<T>(&data);
+  //statesList.frontJump = new FSM_State_FrontJump<T>(&data);
   statesList.neuralLocomotion = new FSM_State_NeuralLocomotion<T>(&data);
 
   safetyChecker = new SafetyChecker<T>(&data);

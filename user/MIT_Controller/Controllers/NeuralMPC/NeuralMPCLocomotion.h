@@ -18,7 +18,7 @@ using Eigen::Array4i;
 class NeuralGait
 {
 public:
-  NeuralGait(int nMPC_segments, Vec4<int> offsets, Vec4<int>  durations, const std::string& name="");
+  NeuralGait(int nMPC_segments, Vec4<int> offsets, Vec4<int>  durations, Vec4<int> offsets_next, Vec4<int>  durations_next, const std::string& name="");
   ~NeuralGait();
   Vec4<float> getContactState();
   Vec4<float> getSwingState();
@@ -33,8 +33,12 @@ private:
   int* _mpc_table;
   Array4i _offsets; // offset in mpc segments
   Array4i _durations; // duration of step in mpc segments
+  Array4i _offsets_next; // offset in mpc segments
+  Array4i _durations_next; // duration of step in mpc segments
   Array4f _offsetsFloat; // offsets in phase (0 to 1)
   Array4f _durationsFloat; // durations in phase (0 to 1)
+  Array4f _offsetsNextFloat; // offsets in phase (0 to 1)
+  Array4f _durationsNextFloat; // durations in phase (0 to 1)
   int _iteration;
   int _nIterations;
   float _phase;
@@ -49,13 +53,13 @@ public:
 
   template<typename T>
   void run(ControlFSMData<T>& data,
-    const Vec3<T> & vel_act, const Vec3<T> & vel_rpy_act, const Vec2<T> (& fp_rel_act)[4], const Vec4<float>  & fh_rel_act, const Vec4<int> & offsets_act,
-    const Vec4<int> & durations_act, const float footswing_height_act, const int iterationsBetweenMPC_act, const DMat<float> & height_map);
+    const Vec3<T> & vel_cmd, const Vec3<T> & vel_rpy_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd,
+    const Vec4<int> & durations_cmd, const float footswing_height_cmd, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map);
 
   template<typename T>
   void runParamsFixed(ControlFSMData<T>& data, 
       const Vec3<T> & vel_cmd, const Vec3<T> & vel_rpy_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<float> & fh_rel_cmd,
-      const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map);
+      const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, const Vec4<int> & offsets_next_cmd, const Vec4<int> & durations_next_cmd, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map);
 
 
   Vec3<float> pBody_des;

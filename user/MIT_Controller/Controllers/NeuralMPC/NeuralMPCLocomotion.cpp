@@ -11,16 +11,20 @@
 ///////////////
 // GAIT
 ///////////////
-NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets, 
-    Vec4<int> durations, const std::string &name) :
+NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
+    Vec4<int> durations, Vec4<int> offsets_next, Vec4<int> durations_next, const std::string &name) :
   _offsets(offsets.array()),
   _durations(durations.array()),
+  _offsets_next(offsets_next.array()),
+  _durations_next(durations_next.array()),
   _nIterations(nMPC_segments)
 {
   _mpc_table = new int[nMPC_segments * 4];
 
   _offsetsFloat = offsets.cast<float>() / (float) nMPC_segments;
   _durationsFloat = durations.cast<float>() / (float) nMPC_segments;
+  _offsetsNextFloat = offsets.cast<float>() / (float) nMPC_segments;
+  _durationsNextFloat = durations.cast<float>() / (float) nMPC_segments;
   /*
   std::cout << "NeuralGait " << name << "\n";
   std::cout << "nMPC_segments    : " << _nIterations << "\n";
@@ -33,7 +37,19 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
   (void)name;
   _stance = durations;
   Vec4<int> segments_list(nMPC_segments, nMPC_segments, nMPC_segments, nMPC_segments);
-  _swing = segments_list - durations;
+  //_swing = segments_list - durations;
+  //_swing = _offsets_next - ((offsets + durations) % nMPC_segments)
+  for(int i = 0; i < 4; i++){
+    if(offsets[i] + durations[i] >= nMPC_segments){ // compute swing time from current to next gait
+        _swing[i] = offsets_next[i] - ((offsets[i] + durations[i]) % nMPC_segments);
+    } else{
+        _swing[i] = offsets_next[i] + (nMPC_segments - (offsets[i] + durations[i]));
+    }
+    if(_swing[i] <= 0){ // current stance phase overlaps next stance phase...
+        _swing[i] = nMPC_segments - durations_next[i];
+        _stance[i] = durations[i] + durations_next[i];
+    }
+  }
 
 }
 
@@ -74,6 +90,7 @@ Vec4<float> NeuralGait::getSwingState() {
   {
     if(progress[i] < 0) progress[i] += 1.f;
     if(progress[i] > swing_duration[i])
+
     {
       progress[i] = 0.;
     }
@@ -87,7 +104,22 @@ Vec4<float> NeuralGait::getSwingState() {
 }
 
 int* NeuralGait::mpc_gait() {
-  for(int i = 0; i < _nIterations; i++)
+
+  for(int i = 0; i < _iteration; i++)
+  {
+    int iter = (i + _iteration + 1) % _nIterations;
+    Array4i progress = iter - _offsets_next;
+    for(int j = 0; j < 4; j++)
+    {
+      if(progress[j] < 0) progress[j] += _nIterations;
+      if(progress[j] < _durations_next[j])
+        _mpc_table[i*4 + j] = 1;
+      else
+        _mpc_table[i*4 + j] = 0;
+    }
+  }
+
+  for(int i = _iteration; i < _nIterations; i++)
   {
     int iter = (i + _iteration + 1) % _nIterations;
     Array4i progress = iter - _offsets;
@@ -100,7 +132,6 @@ int* NeuralGait::mpc_gait() {
         _mpc_table[i*4 + j] = 0;
     }
   }
-
   return _mpc_table;
 }
 
@@ -119,13 +150,13 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
   iterationsBetweenMPC(_iterations_between_mpc),
   horizonLength(10),
   dt(_dt),
-  trotting(horizonLength, Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5),"Trotting"),
-  bounding(horizonLength, Vec4<int>(5,5,0,0),Vec4<int>(3,3,3,3),"Bounding"),
-  pronking(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(4,4,4,4),"Pronking"),
-  galloping(horizonLength, Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3),"Galloping"),
-  standing(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10),"Standing"),
-  trotRunning(horizonLength, Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3),"Trot Running"),
-  cyclic(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8),"Cyclic Walk"), 
+  trotting(horizonLength, Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), "Trotting"),
+  bounding(horizonLength, Vec4<int>(5,5,0,0),Vec4<int>(3,3,3,3), Vec4<int>(5,5,0,0), Vec4<int>(3,3,3,3),"Bounding"),
+  pronking(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(4,4,4,4), Vec4<int>(0,0,0,0), Vec4<int>(4,4,4,4),"Pronking"),
+  galloping(horizonLength, Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3), Vec4<int>(0,2,7,9), Vec4<int>(3,3,3,3),"Galloping"),
+  standing(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10), Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),"Standing"),
+  trotRunning(horizonLength, Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3), Vec4<int>(0,5,5,0), Vec4<int>(3,3,3,3),"Trot Running"),
+  cyclic(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8), Vec4<int>(0,2,4,6), Vec4<int>(8,8,8,8),"Cyclic Walk"),
   _neuralLCM(getLcmUrl(255))
 {
   _parameters = parameters;
@@ -342,9 +373,9 @@ void NeuralMPCLocomotion::_SetupCommand(ControlFSMData<float> & data){
 	    
 
 template<>
-void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data, 
-    const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd, 
-    const Vec4<int> & durations_cmd, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map) {
+void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
+    const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd,
+    const Vec4<int> & durations_cmd, const Vec4<int> & offsets_next, const Vec4<int> & durations_next, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map) {
     
   
 	
@@ -402,7 +433,7 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
   //    dt, iterationsBetweenMPC, dtMPC);
   //neural_setup_problem(dtMPC, horizonLength, 0.4, 120);
   
-  NeuralGait custom(horizonLength, offsets_cmd, durations_cmd,"Cyclic Walk");
+  NeuralGait custom(horizonLength, offsets_cmd, durations_cmd, offsets_next, durations_next, "Cyclic Walk");
   
   // Can modify
   gait = &custom; // set custom gait
@@ -701,8 +732,8 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
 
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
-    const Vec3<float> & vel_act, const Vec3<float> & vel_rpy_act, const Vec2<float> (& fp_rel_act)[4], const Vec4<float>  & fh_rel_act, const Vec4<int> & offsets_act,
-    const Vec4<int> & durations_act, const float footswing_height_act, const int iterationsBetweenMPC_act, const DMat<float> & height_map){
+    const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd,
+    const Vec4<int> & durations_cmd, const float footswing_height_cmd, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map){
   /*
   if((iterationCounter % (iterationsBetweenMPC * 10)) == 0){
   //auto& seResult = data._stateEstimator->getResult();
@@ -794,14 +825,43 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   
     //std::cout << "vel_act: " << vel_act << "vel_rpy_act" << vel_rpy_act << "fp_rel_act " << fp_rel_act << "fh_rel_act" << fh_rel_act << "footswing_height_act" <<  footswing_height_act << "offsets_act: " << offsets_act << "durations_act" << durations_act << "\n";
   */
-  // smooth velocity transition
-  //float _phase = (float)(iterationCounter % (iterationsBetweenMPC_cmd * horizonLength)) / (float) (iterationsBetweenMPC_cmd * horizonLength);
-  
-  //for(int i=0; i<3; i++){ vel_act[i] = (vel_act_next[i] - vel_act_prev[i]) * _phase + vel_act_prev[i];}
   
   // smooth offsets, durations transition
-  //int _iteration = (iterationCounter / iterationsBetweenMPC_cmd) % horizonLength;
+  int _iteration = (iterationCounter / iterationsBetweenMPC_cmd) % horizonLength;
+ 
+  if(not (vel_act_prev[0] == vel_act[0])){ // updated command!
+     for(int i=0; i<3; i++){ vel_act_prev[i] = vel_act[i];}
+     for(int i=0; i<3; i++){ offsets_act[i] = offsets_act_next[i];}
+     for(int i=0; i<3; i++){ durations_act[i] = durations_act_next[i];}
+  }
+  //for(int i = 0; i < 4; i++){
+  //  if((offsets_act[i] + durations_act[i]) % horizonLength == _iteration){ //foot lifting off
+  //    offsets_act[i] = offsets_act_next[i]; // update offsets, durations on liftoff
   
+  for(int i=0; i<3; i++){ vel_act_next[i] = vel_cmd[i];}
+  for(int i=0; i<3; i++){ vel_rpy_act[i] = vel_rpy_cmd[i];}
+  for(int i=0; i<8; i++){ fp_rel_act[i%4][i/4] = fp_rel_cmd[i%4][i/4];} 
+  for(int i=0; i<4; i++){ fh_rel_act[i] = fh_rel_cmd[i];}
+  footswing_height_act = footswing_height_cmd;
+  for(int i=0; i<4; i++){ offsets_act_next[i] = offsets_cmd[i]; }
+  for(int i=0; i<4; i++){ durations_act_next[i] = durations_cmd[i]; }
+   
+  //iterationCounter += -(iterationCounter %  msg->iterationsBetweenMPC_act) + (iterationCounter % iterationsBetweenMPC_cmd); 
+  
+  float _phase = (float)(iterationCounter % (iterationsBetweenMPC * horizonLength)) / (float) (iterationsBetweenMPC * horizonLength);
+  if(iterationsBetweenMPC_cmd != iterationsBetweenMPC){
+  	iterationCounter = _phase * iterationsBetweenMPC_cmd * horizonLength + _iteration * iterationsBetweenMPC_cmd;
+  	iterationsBetweenMPC = iterationsBetweenMPC_cmd;
+  }
+
+  _phase = (float)(iterationCounter % (iterationsBetweenMPC_cmd * horizonLength)) / (float) (iterationsBetweenMPC_cmd * horizonLength);
+  for(int i=0; i<3; i++){ vel_act[i] = (vel_act_next[i] - vel_act_prev[i]) * _phase + vel_act_prev[i];}  
+
+  // smooth offsets, durations transition
+  //for(int i=0; i<3; i++){ vel_act_prev[i] = vel_act[i];}
+  //for(int i=0; i<3; i++){ offsets_act_prev[i] = offsets_act_next[i];}
+  //for(int i=0; i<3; i++){ durations_act[i] = durations_act_next[i];}
+
   //for(int i = 0; i < 4; i++){
   //  if((offsets_act[i] + durations_act[i]) % horizonLength == _iteration){ //foot lifting off
   //    offsets_act[i] = offsets_act_next[i]; // update offsets, durations on liftoff
@@ -812,8 +872,10 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     //  durations_act[i] = durations_act_next[i];
     //}
   //}
+
+   
   
-  runParamsFixed(data, vel_act, vel_rpy_act, fp_rel_act, fh_rel_act, offsets_act, durations_act, footswing_height_act, iterationsBetweenMPC_act, height_map);
+  runParamsFixed(data, vel_act, vel_rpy_act, fp_rel_act, fh_rel_act, offsets_act, durations_act, offsets_act_next, durations_act_next, footswing_height_act, iterationsBetweenMPC_cmd, height_map);
 }
 
 

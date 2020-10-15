@@ -37,8 +37,9 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
   (void)name;
   _stance = durations;
   Vec4<int> segments_list(nMPC_segments, nMPC_segments, nMPC_segments, nMPC_segments);
-  //_swing = segments_list - durations;
+  _swing = segments_list - durations;
   //_swing = _offsets_next - ((offsets + durations) % nMPC_segments)
+  /*
   for(int i = 0; i < 4; i++){
     if(offsets[i] + durations[i] >= nMPC_segments){ // compute swing time from current to next gait
         _swing[i] = offsets_next[i] - ((offsets[i] + durations[i]) % nMPC_segments);
@@ -50,6 +51,7 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
         _stance[i] = durations[i] + durations_next[i];
     }
   }
+  */
 
 }
 
@@ -105,7 +107,7 @@ Vec4<float> NeuralGait::getSwingState() {
 
 int* NeuralGait::mpc_gait() {
 
-  for(int i = 0; i < _iteration; i++)
+  for(int i = _nIterations - _iteration - 1; i < _nIterations; i++)
   {
     int iter = (i + _iteration + 1) % _nIterations;
     Array4i progress = iter - _offsets_next;
@@ -119,7 +121,7 @@ int* NeuralGait::mpc_gait() {
     }
   }
 
-  for(int i = _iteration; i < _nIterations; i++)
+  for(int i = 0; i < _nIterations - _iteration - 1; i++)
   {
     int iter = (i + _iteration + 1) % _nIterations;
     Array4i progress = iter - _offsets;
@@ -131,6 +133,48 @@ int* NeuralGait::mpc_gait() {
       else
         _mpc_table[i*4 + j] = 0;
     }
+  }
+
+   
+  for(int i = 0; i < 4; i++){
+    // update swing times
+    if(_iteration < _offsets[i]){ //old gait swing time
+      _swing[i] = _old_swings[i];
+    }
+    else{ // new gait swing time
+      if(offsets[i] + _durations[i] >= nMPC_segments){ // no overlap
+        _swing[i] = _offsets_next[i] + (nMPC_segments - (_offsets[i] + durations[i]));
+      } else{ // overlap
+        _swing[i] = offsets_next[i] - ((offsets[i] + durations[i]) % nMPC_segments);
+      }
+    }
+
+    //update stance times
+    if(_offsets_next[i] - (_offsets[i] + _durations[i]) % _nIterations <= 0 and _offsets[i] + _durations[i] >= _nIterations){ // current stance phase overlaps next stance phase...
+      _stance[i] = _durations[i] + _durations_next[i] - (_offsets[i] + _durations[i]) % _nIterations - _offsets_next[i];
+      if(_swing[i] <= 0){
+        _swing[i] = 0;
+      }
+    } else if(_iteration < _offsets[i] + _durations[i]){ // foot hasn't yet finished this phase's stance
+      _stance[i] = _durations[i];
+    } else{ // anytime after this phase's stance
+      _stance[i] = _durations_next[i];
+    }
+
+  }
+  
+
+  std::cout << "offsets: " << _offsets[0] << ", " <<_offsets[1] << ", " << _offsets[2] << ", " << _offsets[3] <<  "\n";
+  std::cout << "durations: " << _durations[0] << ", " <<_durations[1] << ", " << _durations[2] << ", " << _durations[3] <<  "\n";
+  std::cout << "offsets_next: " << _offsets_next[0] << ", " <<_offsets_next[1] << ", " << _offsets_next[2] << ", " << _offsets_next[3] <<  "\n";
+  std::cout << "durations_next: " << _durations_next[0] << ", " <<_durations_next[1] << ", " << _durations_next[2] << ", " << _durations_next[3] <<  "\n";
+  std::cout << "iterations: " << _iteration << "\n";
+  std::cout << "mpc_table: \n ";
+  for(int i=0; i<_nIterations; i++){
+	  for(int j=0; j<4; j++){
+		  std::cout << _mpc_table[i*4+j] << " ";
+	  }
+          std::cout << "\n";
   }
   return _mpc_table;
 }
@@ -438,6 +482,9 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
   // Can modify
   gait = &custom; // set custom gait
   gait->setIterations(iterationsBetweenMPC, iterationCounter);
+  
+  int* mpcTable = gait->mpc_gait();
+  updateMPCIfNeeded(mpcTable, data);
 
   // integrate position setpoint
   v_des_world[0] = vel_cmd[0];
@@ -596,8 +643,8 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
   Vec4<float> contactStates = gait->getContactState();
   Vec4<float> swingStates = gait->getSwingState();
 
-  int* mpcTable = gait->mpc_gait();
-  updateMPCIfNeeded(mpcTable, data);
+  //int* mpcTable = gait->mpc_gait();
+  //updateMPCIfNeeded(mpcTable, data);
 
   Vec4<float> se_contactState(0,0,0,0);
   Vec4<float> se_footHeight(0,0,0,0);
@@ -827,12 +874,12 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   */
   
   // smooth offsets, durations transition
-  int _iteration = (iterationCounter / iterationsBetweenMPC_cmd) % horizonLength;
+  int _iteration = (iterationCounter / iterationsBetweenMPC) % horizonLength;
  
-  if(not (vel_act_prev[0] == vel_act[0])){ // updated command!
-     for(int i=0; i<3; i++){ vel_act_prev[i] = vel_act[i];}
-     for(int i=0; i<3; i++){ offsets_act[i] = offsets_act_next[i];}
-     for(int i=0; i<3; i++){ durations_act[i] = durations_act_next[i];}
+  if(_iteration == 0 and iterationCounter % (iterationsBetweenMPC * 10) == 0){ // updated command!
+     for(int i=0; i<3; i++){ vel_act_prev[i] = vel_act_next[i];}
+     for(int i=0; i<4; i++){ offsets_act[i] = offsets_act_next[i];}
+     for(int i=0; i<4; i++){ durations_act[i] = durations_act_next[i];}
   }
   //for(int i = 0; i < 4; i++){
   //  if((offsets_act[i] + durations_act[i]) % horizonLength == _iteration){ //foot lifting off

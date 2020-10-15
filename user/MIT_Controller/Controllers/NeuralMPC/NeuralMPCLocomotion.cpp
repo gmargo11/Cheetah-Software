@@ -139,13 +139,13 @@ int* NeuralGait::mpc_gait() {
   for(int i = 0; i < 4; i++){
     // update swing times
     if(_iteration < _offsets[i]){ //old gait swing time
-      _swing[i] = _old_swings[i];
+      //_swing[i] = _old_swings[i];
     }
     else{ // new gait swing time
-      if(offsets[i] + _durations[i] >= nMPC_segments){ // no overlap
-        _swing[i] = _offsets_next[i] + (nMPC_segments - (_offsets[i] + durations[i]));
+      if(_offsets[i] + _durations[i] < _nIterations){ // no overlap
+        _swing[i] = _offsets_next[i] + (_nIterations - (_offsets[i] + _durations[i]));
       } else{ // overlap
-        _swing[i] = offsets_next[i] - ((offsets[i] + durations[i]) % nMPC_segments);
+        _swing[i] = _offsets_next[i] - ((_offsets[i] + _durations[i]) % _nIterations);
       }
     }
 
@@ -176,6 +176,8 @@ int* NeuralGait::mpc_gait() {
 	  }
           std::cout << "\n";
   }
+  std::cout << "stances: " << _stance[0] << ", " <<_stance[1] << ", " << _stance[2] << ", " << _stance[3] <<  "\n";
+  std::cout << "swings: " << _swing[0] << ", " <<_swing[1] << ", " << _swing[2] << ", " << _swing[3] <<  "\n";
   return _mpc_table;
 }
 

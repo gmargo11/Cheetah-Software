@@ -251,6 +251,15 @@ PYBIND11_MODULE(pycheetah, m) {
 			self.addEstimator<CheaterOrientationEstimator<float>>();
 			self.addEstimator<CheaterPositionVelocityEstimator<float>>();
 			}, "");
+	secontainer.def("initializeRegular", [](StateEstimatorContainer<float> &self){
+                        self.removeAllEstimators();
+			self.addEstimator<ContactEstimator<float>>();
+                        Vec4<float> contactDefault;
+                        contactDefault << 0.5, 0.5, 0.5, 0.5;
+                        self.setContactPhase(contactDefault);
+                        self.addEstimator<VectorNavOrientationEstimator<float>>();
+                        self.addEstimator<LinearKFPositionVelocityEstimator<float>>();
+                        }, "");
 	secontainer.def("run", [](StateEstimatorContainer<float> &self){
 				self.run(nullptr);
 			}, "");

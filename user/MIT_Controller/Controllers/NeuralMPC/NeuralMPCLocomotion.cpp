@@ -163,7 +163,7 @@ int* NeuralGait::mpc_gait() {
 
   }
   
-
+  /*
   std::cout << "offsets: " << _offsets[0] << ", " <<_offsets[1] << ", " << _offsets[2] << ", " << _offsets[3] <<  "\n";
   std::cout << "durations: " << _durations[0] << ", " <<_durations[1] << ", " << _durations[2] << ", " << _durations[3] <<  "\n";
   std::cout << "offsets_next: " << _offsets_next[0] << ", " <<_offsets_next[1] << ", " << _offsets_next[2] << ", " << _offsets_next[3] <<  "\n";
@@ -178,6 +178,7 @@ int* NeuralGait::mpc_gait() {
   }
   std::cout << "stances: " << _stance[0] << ", " <<_stance[1] << ", " << _stance[2] << ", " << _stance[3] <<  "\n";
   std::cout << "swings: " << _swing[0] << ", " <<_swing[1] << ", " << _swing[2] << ", " << _swing[3] <<  "\n";
+  */
   return _mpc_table;
 }
 
@@ -202,8 +203,8 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
   galloping(horizonLength, Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3), Vec4<int>(0,2,7,9), Vec4<int>(3,3,3,3),"Galloping"),
   standing(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10), Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),"Standing"),
   trotRunning(horizonLength, Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3), Vec4<int>(0,5,5,0), Vec4<int>(3,3,3,3),"Trot Running"),
-  cyclic(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8), Vec4<int>(0,2,4,6), Vec4<int>(8,8,8,8),"Cyclic Walk"),
-  _neuralLCM(getLcmUrl(255))
+  cyclic(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8), Vec4<int>(0,2,4,6), Vec4<int>(8,8,8,8),"Cyclic Walk")
+//  _neuralLCM(getLcmUrl(255))
 {
   _parameters = parameters;
   dtMPC = dt * iterationsBetweenMPC;
@@ -221,8 +222,8 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
     firstSwing[i] = true;
 
   
-  _neuralLCM.subscribe("rl_gait_action", &NeuralMPCLocomotion::handleActionLCM, this);
-  _neuralLCMThread = std::thread(&NeuralMPCLocomotion::neuralLCMThread, this);
+  //_neuralLCM.subscribe("rl_gait_action", &NeuralMPCLocomotion::handleActionLCM, this);
+  //_neuralLCMThread = std::thread(&NeuralMPCLocomotion::neuralLCMThread, this);
 
   iterationsBetweenMPC_cmd = iterationsBetweenMPC;
   // initialization

@@ -163,12 +163,13 @@ int* NeuralGait::mpc_gait() {
 
   }
   
+   
+  //std::cout << "offsets: " << _offsets[0] << ", " <<_offsets[1] << ", " << _offsets[2] << ", " << _offsets[3] <<  "\n";
+  //std::cout << "durations: " << _durations[0] << ", " <<_durations[1] << ", " << _durations[2] << ", " << _durations[3] <<  "\n";
+  //std::cout << "offsets_next: " << _offsets_next[0] << ", " <<_offsets_next[1] << ", " << _offsets_next[2] << ", " << _offsets_next[3] <<  "\n";
+  //std::cout << "durations_next: " << _durations_next[0] << ", " <<_durations_next[1] << ", " << _durations_next[2] << ", " << _durations_next[3] <<  "\n";
+  //std::cout << "iterations: " << _iteration << "\n";
   /*
-  std::cout << "offsets: " << _offsets[0] << ", " <<_offsets[1] << ", " << _offsets[2] << ", " << _offsets[3] <<  "\n";
-  std::cout << "durations: " << _durations[0] << ", " <<_durations[1] << ", " << _durations[2] << ", " << _durations[3] <<  "\n";
-  std::cout << "offsets_next: " << _offsets_next[0] << ", " <<_offsets_next[1] << ", " << _offsets_next[2] << ", " << _offsets_next[3] <<  "\n";
-  std::cout << "durations_next: " << _durations_next[0] << ", " <<_durations_next[1] << ", " << _durations_next[2] << ", " << _durations_next[3] <<  "\n";
-  std::cout << "iterations: " << _iteration << "\n";
   std::cout << "mpc_table: \n ";
   for(int i=0; i<_nIterations; i++){
 	  for(int j=0; j<4; j++){

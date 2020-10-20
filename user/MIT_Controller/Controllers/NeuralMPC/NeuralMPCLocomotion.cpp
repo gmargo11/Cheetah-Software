@@ -11,8 +11,10 @@
 ///////////////
 // GAIT
 ///////////////
-NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
+NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int> durations_prev, Vec4<int> offsets,
     Vec4<int> durations, Vec4<int> offsets_next, Vec4<int> durations_next, const std::string &name) :
+  _offsets_prev(offsets_prev.array()),
+  _durations_prev(durations_prev.array()),
   _offsets(offsets.array()),
   _durations(durations.array()),
   _offsets_next(offsets_next.array()),
@@ -21,10 +23,12 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
 {
   _mpc_table = new int[nMPC_segments * 4];
 
+  _offsetsPrevFloat = offsets_prev.cast<float>() / (float) nMPC_segments;
+  _durationsPrevFloat = durations_prev.cast<float>() / (float) nMPC_segments;
   _offsetsFloat = offsets.cast<float>() / (float) nMPC_segments;
   _durationsFloat = durations.cast<float>() / (float) nMPC_segments;
-  _offsetsNextFloat = offsets.cast<float>() / (float) nMPC_segments;
-  _durationsNextFloat = durations.cast<float>() / (float) nMPC_segments;
+  _offsetsNextFloat = offsets_next.cast<float>() / (float) nMPC_segments;
+  _durationsNextFloat = durations_next.cast<float>() / (float) nMPC_segments;
   /*
   std::cout << "NeuralGait " << name << "\n";
   std::cout << "nMPC_segments    : " << _nIterations << "\n";
@@ -35,23 +39,25 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets,
   std::cout << "\n\n";
   */
   (void)name;
-  _stance = durations;
+  
+  // do not allow wrapping
+  for(int i = 0; i < 4; i++){
+    if(_offsets[i] + _durations[i] > nMPC_segments){ // wrapping
+        _durations[i] = nMPC_segments - _offsets[i];
+        _durationsFloat[i] = 1.0 - _offsetsFloat[i];
+    }
+    if(_offsets_next[i] + _durations_next[i] > nMPC_segments){
+	_durations_next[i] = nMPC_segments - _offsets_next[i];
+	_durationsNextFloat[i] = 1.0 - _offsetsNextFloat[i];
+    }
+  }
+  
+  _stance = _durations;
   Vec4<int> segments_list(nMPC_segments, nMPC_segments, nMPC_segments, nMPC_segments);
   _swing = segments_list - durations;
   //_swing = _offsets_next - ((offsets + durations) % nMPC_segments)
-  /*
-  for(int i = 0; i < 4; i++){
-    if(offsets[i] + durations[i] >= nMPC_segments){ // compute swing time from current to next gait
-        _swing[i] = offsets_next[i] - ((offsets[i] + durations[i]) % nMPC_segments);
-    } else{
-        _swing[i] = offsets_next[i] + (nMPC_segments - (offsets[i] + durations[i]));
-    }
-    if(_swing[i] <= 0){ // current stance phase overlaps next stance phase...
-        _swing[i] = nMPC_segments - durations_next[i];
-        _stance[i] = durations[i] + durations_next[i];
-    }
-  }
-  */
+  
+  
 
 }
 
@@ -66,14 +72,15 @@ Vec4<float> NeuralGait::getContactState() {
 
   for(int i = 0; i < 4; i++)
   {
-    if(progress[i] < 0) progress[i] += 1.;
-    if(progress[i] > _durationsFloat[i])
-    {
-      progress[i] = 0.;
+    if(_phase[i] > _offsetsFloat and _phase[i] <= _durationsFloat[i]){
+        if(_offsets[i] + _durations[i] == _nIterations and _offsets_next[i] == 0){ // overlap
+	  progress[i] = (_phase[i] - _offsetsFloat[i]) / (_durationsFloat[i] + _durationsFloatNext[i]);
+	}
+	else{
+	  progress[i] = (_phase[i] - _offsetsFloat[i]) / _durationsFloat[i];
     }
-    else
-    {
-      progress[i] = progress[i] / _durationsFloat[i];
+    else{
+        progress[i] = 0;
     }
   }
 
@@ -88,6 +95,20 @@ Vec4<float> NeuralGait::getSwingState() {
 
   Array4f progress = _phase - swing_offset;
 
+  for(int i = 0; i < 4; i++)
+  {
+    if(_phase[i] < _offsetsFloat){
+        if(_offsets[i] + _durations[i] == _nIterations and _offsets_next[i] == 0){ // overlap
+	  progress[i] = (_phase[i] - _offsetsFloat[i]) / (_durationsFloat[i] + _durationsFloatNext[i]);
+	}
+	else{
+	  progress[i] = (_phase[i] - _offsetsFloat[i]) / _durationsFloat[i];
+    }
+    else{
+        progress[i] = 0;
+    }
+  }
+  
   for(int i = 0; i < 4; i++)
   {
     if(progress[i] < 0) progress[i] += 1.f;
@@ -142,11 +163,11 @@ int* NeuralGait::mpc_gait() {
       //_swing[i] = _old_swings[i];
     }
     else{ // new gait swing time
-      if(_offsets[i] + _durations[i] < _nIterations){ // no overlap
-        _swing[i] = _offsets_next[i] + (_nIterations - (_offsets[i] + _durations[i]));
-      } else{ // overlap
-        _swing[i] = _offsets_next[i] - ((_offsets[i] + _durations[i]) % _nIterations);
-      }
+      //if(_offsets[i] + _durations[i] < _nIterations){ // no overlap
+      _swing[i] = _offsets_next[i] + (_nIterations - (_offsets[i] + _durations[i]));
+      //} else{ // overlap
+      //  _swing[i] = _offsets_next[i] - ((_offsets[i] + _durations[i]) % _nIterations);
+      //}
     }
 
     //update stance times
@@ -164,12 +185,12 @@ int* NeuralGait::mpc_gait() {
   }
   
    
-  //std::cout << "offsets: " << _offsets[0] << ", " <<_offsets[1] << ", " << _offsets[2] << ", " << _offsets[3] <<  "\n";
-  //std::cout << "durations: " << _durations[0] << ", " <<_durations[1] << ", " << _durations[2] << ", " << _durations[3] <<  "\n";
-  //std::cout << "offsets_next: " << _offsets_next[0] << ", " <<_offsets_next[1] << ", " << _offsets_next[2] << ", " << _offsets_next[3] <<  "\n";
-  //std::cout << "durations_next: " << _durations_next[0] << ", " <<_durations_next[1] << ", " << _durations_next[2] << ", " << _durations_next[3] <<  "\n";
-  //std::cout << "iterations: " << _iteration << "\n";
-  /*
+  std::cout << "offsets: " << _offsets[0] << ", " <<_offsets[1] << ", " << _offsets[2] << ", " << _offsets[3] <<  "\n";
+  std::cout << "durations: " << _durations[0] << ", " <<_durations[1] << ", " << _durations[2] << ", " << _durations[3] <<  "\n";
+  std::cout << "offsets_next: " << _offsets_next[0] << ", " <<_offsets_next[1] << ", " << _offsets_next[2] << ", " << _offsets_next[3] <<  "\n";
+  std::cout << "durations_next: " << _durations_next[0] << ", " <<_durations_next[1] << ", " << _durations_next[2] << ", " << _durations_next[3] <<  "\n";
+  std::cout << "iterations: " << _iteration << "\n";
+  
   std::cout << "mpc_table: \n ";
   for(int i=0; i<_nIterations; i++){
 	  for(int j=0; j<4; j++){
@@ -179,7 +200,7 @@ int* NeuralGait::mpc_gait() {
   }
   std::cout << "stances: " << _stance[0] << ", " <<_stance[1] << ", " << _stance[2] << ", " << _stance[3] <<  "\n";
   std::cout << "swings: " << _swing[0] << ", " <<_swing[1] << ", " << _swing[2] << ", " << _swing[3] <<  "\n";
-  */
+  
   return _mpc_table;
 }
 
@@ -422,7 +443,7 @@ void NeuralMPCLocomotion::_SetupCommand(ControlFSMData<float> & data){
 
 template<>
 void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
-    const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd,
+    const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_prev, const Vec4<int> & durations_prev, const Vec4<int> & offsets_cmd,
     const Vec4<int> & durations_cmd, const Vec4<int> & offsets_next, const Vec4<int> & durations_next, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map) {
     
   
@@ -481,7 +502,7 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
   //    dt, iterationsBetweenMPC, dtMPC);
   //neural_setup_problem(dtMPC, horizonLength, 0.4, 120);
   
-  NeuralGait custom(horizonLength, offsets_cmd, durations_cmd, offsets_next, durations_next, "Cyclic Walk");
+  NeuralGait custom(horizonLength, offsets_prev, durations_prev, offsets_cmd, durations_cmd, offsets_next, durations_next, "Cyclic Walk");
   
   // Can modify
   gait = &custom; // set custom gait
@@ -646,6 +667,8 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
 
   Vec4<float> contactStates = gait->getContactState();
   Vec4<float> swingStates = gait->getSwingState();
+
+  std::cout << "contactStates: " << contactStates << " swingStates: " << swingStates << "\n";
 
   //int* mpcTable = gait->mpc_gait();
   //updateMPCIfNeeded(mpcTable, data);
@@ -882,12 +905,22 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
  
   if(_iteration == 0 and iterationCounter % (iterationsBetweenMPC * 10) == 0){ // updated command!
      for(int i=0; i<3; i++){ vel_act_prev[i] = vel_act_next[i];}
+     for(int i=0; i<4; i++){ offsets_act_prev[i] = offsets_act[i];}
      for(int i=0; i<4; i++){ offsets_act[i] = offsets_act_next[i];}
+     for(int i=0; i<4; i++){ durations_act_prev[i] = durations_act[i];}
      for(int i=0; i<4; i++){ durations_act[i] = durations_act_next[i];}
   }
   //for(int i = 0; i < 4; i++){
   //  if((offsets_act[i] + durations_act[i]) % horizonLength == _iteration){ //foot lifting off
   //    offsets_act[i] = offsets_act_next[i]; // update offsets, durations on liftoff
+  
+  // limit duration commands to not cycle over
+  for(int i = 0; i < 4; i++){
+    if(offsets_cmd[i] + durations_cmd[i] > 10){ // wrapping
+        durations_cmd[i] = 10 - offsets_cmd[i];
+    }
+  }
+  
   
   for(int i=0; i<3; i++){ vel_act_next[i] = vel_cmd[i];}
   for(int i=0; i<3; i++){ vel_rpy_act[i] = vel_rpy_cmd[i];}
@@ -926,7 +959,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
 
    
   
-  runParamsFixed(data, vel_act, vel_rpy_act, fp_rel_act, fh_rel_act, offsets_act, durations_act, offsets_act_next, durations_act_next, footswing_height_act, iterationsBetweenMPC_cmd, height_map);
+  runParamsFixed(data, vel_act, vel_rpy_act, fp_rel_act, fh_rel_act, offsets_act_prev, durations_act_prev, offsets_act, durations_act, offsets_act_next, durations_act_next, footswing_height_act, iterationsBetweenMPC_cmd, height_map);
 }
 
 

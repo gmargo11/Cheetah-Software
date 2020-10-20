@@ -41,6 +41,7 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int> dura
   (void)name;
   
   // do not allow wrapping
+  /*
   for(int i = 0; i < 4; i++){
     if(_offsets[i] + _durations[i] > nMPC_segments){ // wrapping
         _durations[i] = nMPC_segments - _offsets[i];
@@ -51,6 +52,7 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int> dura
 	_durationsNextFloat[i] = 1.0 - _offsetsNextFloat[i];
     }
   }
+  */
   
   _stance = _durations;
   Vec4<int> segments_list(nMPC_segments, nMPC_segments, nMPC_segments, nMPC_segments);
@@ -72,12 +74,16 @@ Vec4<float> NeuralGait::getContactState() {
 
   for(int i = 0; i < 4; i++)
   {
-    if(_phase[i] > _offsetsFloat and _phase[i] <= _durationsFloat[i]){
+    if(_phase > _offsetsFloat[i] and _phase <= _durationsFloat[i]){
         if(_offsets[i] + _durations[i] == _nIterations and _offsets_next[i] == 0){ // overlap
-	  progress[i] = (_phase[i] - _offsetsFloat[i]) / (_durationsFloat[i] + _durationsFloatNext[i]);
+	  progress[i] = (_phase - _offsetsFloat[i]) / (_durationsFloat[i] + _durationsNextFloat[i]);
+	}
+	else if(_offsets[i] == 0 and _offsets_prev[i] + _durations_prev[i] == _nIterations){
+	  progress[i] = 1. - (_durationsFloat[i] - _phase) / (_durationsFloat[i] + _durationsPrevFloat[i]);
 	}
 	else{
-	  progress[i] = (_phase[i] - _offsetsFloat[i]) / _durationsFloat[i];
+	  progress[i] = (_phase - _offsetsFloat[i]) / _durationsFloat[i];
+        }
     }
     else{
         progress[i] = 0;
@@ -97,12 +103,11 @@ Vec4<float> NeuralGait::getSwingState() {
 
   for(int i = 0; i < 4; i++)
   {
-    if(_phase[i] < _offsetsFloat){
-        if(_offsets[i] + _durations[i] == _nIterations and _offsets_next[i] == 0){ // overlap
-	  progress[i] = (_phase[i] - _offsetsFloat[i]) / (_durationsFloat[i] + _durationsFloatNext[i]);
-	}
-	else{
-	  progress[i] = (_phase[i] - _offsetsFloat[i]) / _durationsFloat[i];
+    if(_phase < _offsetsFloat[i]){
+	  progress[i] = 1. - ((_offsetsFloat[i] - _phase) / (_offsetsFloat[i] + (1 - _durationsPrevFloat[i] - _offsetsPrevFloat[i])));
+    }
+    else if(_phase > _offsetsFloat[i] + _durationsFloat[i]){
+        progress[i] = (_phase - _offsetsFloat[i] - _durationsFloat[i]) / (1 - _offsetsFloat[i] - _durationsFloat[i] + _offsetsNextFloat[i]);
     }
     else{
         progress[i] = 0;
@@ -219,13 +224,13 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
   iterationsBetweenMPC(_iterations_between_mpc),
   horizonLength(10),
   dt(_dt),
-  trotting(horizonLength, Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), "Trotting"),
-  bounding(horizonLength, Vec4<int>(5,5,0,0),Vec4<int>(3,3,3,3), Vec4<int>(5,5,0,0), Vec4<int>(3,3,3,3),"Bounding"),
-  pronking(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(4,4,4,4), Vec4<int>(0,0,0,0), Vec4<int>(4,4,4,4),"Pronking"),
-  galloping(horizonLength, Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3), Vec4<int>(0,2,7,9), Vec4<int>(3,3,3,3),"Galloping"),
-  standing(horizonLength, Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10), Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),"Standing"),
-  trotRunning(horizonLength, Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3), Vec4<int>(0,5,5,0), Vec4<int>(3,3,3,3),"Trot Running"),
-  cyclic(horizonLength, Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8), Vec4<int>(0,2,4,6), Vec4<int>(8,8,8,8),"Cyclic Walk")
+  trotting(horizonLength, Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10), Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), "Trotting"),
+  bounding(horizonLength, Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10), Vec4<int>(5,5,0,0),Vec4<int>(3,3,3,3), Vec4<int>(5,5,0,0), Vec4<int>(3,3,3,3),"Bounding"),
+  pronking(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,0,0,0),Vec4<int>(4,4,4,4), Vec4<int>(0,0,0,0), Vec4<int>(4,4,4,4),"Pronking"),
+  galloping(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3), Vec4<int>(0,2,7,9), Vec4<int>(3,3,3,3),"Galloping"),
+  standing(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10), Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),"Standing"),
+  trotRunning(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3), Vec4<int>(0,5,5,0), Vec4<int>(3,3,3,3),"Trot Running"),
+  cyclic(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8), Vec4<int>(0,2,4,6), Vec4<int>(8,8,8,8),"Cyclic Walk")
 //  _neuralLCM(getLcmUrl(255))
 {
   _parameters = parameters;
@@ -256,6 +261,8 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
   for(int i=0; i<8; i++){ fp_rel_act[i%4][i/4] = 0.0;} 
   for(int i=0; i<4; i++){ fh_rel_act[i] = 0.0;}
   footswing_height_act = 0.06;
+  offsets_act_prev[0] = 0; offsets_act_prev[1] = 0; offsets_act_prev[2] = 0; offsets_act_prev[3] = 0;
+  for(int i=0; i<4; i++){ durations_act_prev[i] = 10; }
   offsets_act[0] = 0; offsets_act[1] = 5; offsets_act[2] = 5; offsets_act[3] = 0;
   for(int i=0; i<4; i++){ durations_act[i] = 5; }
   offsets_act_next[0] = 0; offsets_act_next[1] = 5; offsets_act_next[2] = 5; offsets_act_next[3] = 0;
@@ -914,13 +921,6 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   //  if((offsets_act[i] + durations_act[i]) % horizonLength == _iteration){ //foot lifting off
   //    offsets_act[i] = offsets_act_next[i]; // update offsets, durations on liftoff
   
-  // limit duration commands to not cycle over
-  for(int i = 0; i < 4; i++){
-    if(offsets_cmd[i] + durations_cmd[i] > 10){ // wrapping
-        durations_cmd[i] = 10 - offsets_cmd[i];
-    }
-  }
-  
   
   for(int i=0; i<3; i++){ vel_act_next[i] = vel_cmd[i];}
   for(int i=0; i<3; i++){ vel_rpy_act[i] = vel_rpy_cmd[i];}
@@ -929,6 +929,13 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   footswing_height_act = footswing_height_cmd;
   for(int i=0; i<4; i++){ offsets_act_next[i] = offsets_cmd[i]; }
   for(int i=0; i<4; i++){ durations_act_next[i] = durations_cmd[i]; }
+  
+  // limit duration commands to not cycle over
+  for(int i = 0; i < 4; i++){
+    if(offsets_act_next[i] + durations_act_next[i] > 10){ // wrapping
+        durations_act_next[i] = 10 - offsets_act_next[i];
+    }
+  }
    
   //iterationCounter += -(iterationCounter %  msg->iterationsBetweenMPC_act) + (iterationCounter % iterationsBetweenMPC_cmd); 
   

@@ -18,7 +18,7 @@ using Eigen::Array4i;
 class NeuralGait
 {
 public:
-  NeuralGait(int nMPC_segments, Vec4<int> offsets, Vec4<int>  durations, Vec4<int> offsets_next, Vec4<int>  durations_next, const std::string& name="");
+  NeuralGait(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int>  durations_prev, Vec4<int> offsets, Vec4<int>  durations, Vec4<int> offsets_next, Vec4<int>  durations_next, const std::string& name="");
   ~NeuralGait();
   Vec4<float> getContactState();
   Vec4<float> getSwingState();
@@ -31,10 +31,14 @@ public:
 private:
   int _nMPC_segments;
   int* _mpc_table;
+  Array4i _offsets_prev; // offset in mpc segments
+  Array4i _durations_prev; // duration of step in mpc segments
   Array4i _offsets; // offset in mpc segments
   Array4i _durations; // duration of step in mpc segments
   Array4i _offsets_next; // offset in mpc segments
   Array4i _durations_next; // duration of step in mpc segments
+  Array4f _offsetsPrevFloat; // offsets in phase (0 to 1)
+  Array4f _durationsPrevFloat; // durations in phase (0 to 1)
   Array4f _offsetsFloat; // offsets in phase (0 to 1)
   Array4f _durationsFloat; // durations in phase (0 to 1)
   Array4f _offsetsNextFloat; // offsets in phase (0 to 1)
@@ -59,7 +63,7 @@ public:
   template<typename T>
   void runParamsFixed(ControlFSMData<T>& data, 
       const Vec3<T> & vel_cmd, const Vec3<T> & vel_rpy_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<float> & fh_rel_cmd,
-      const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, const Vec4<int> & offsets_next_cmd, const Vec4<int> & durations_next_cmd, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map);
+      const Vec4<int> & offsets_prev_cmd, const Vec4<int> & durations_prev_cmd, const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, const Vec4<int> & offsets_next_cmd, const Vec4<int> & durations_next_cmd, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map);
 
 
   Vec3<float> pBody_des;
@@ -132,8 +136,10 @@ private:
   Vec3<float> vel_rpy_act;
   Vec2<float> fp_rel_act[4];
   Vec4<float>  fh_rel_act;
+  Vec4<int> offsets_act_prev;
   Vec4<int> offsets_act;
   Vec4<int> offsets_act_next;
+  Vec4<int> durations_act_prev;
   Vec4<int> durations_act;
   Vec4<int> durations_act_next;
   float footswing_height_act;

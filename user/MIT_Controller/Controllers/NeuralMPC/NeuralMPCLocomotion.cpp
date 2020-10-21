@@ -239,7 +239,7 @@ int* NeuralGait::mpc_gait() {
     }
   }
   
-  
+  /*
   std::cout << "offsets_prev: " << _offsets_prev[0] << ", " <<_offsets_prev[1] << ", " << _offsets_prev[2] << ", " << _offsets_prev[3] <<  "\n";
   std::cout << "durations_prev: " << _durations_prev[0] << ", " <<_durations_prev[1] << ", " << _durations_prev[2] << ", " << _durations_prev[3] <<  "\n";
   std::cout << "offsets: " << _offsets[0] << ", " <<_offsets[1] << ", " << _offsets[2] << ", " << _offsets[3] <<  "\n";
@@ -257,7 +257,7 @@ int* NeuralGait::mpc_gait() {
   }
   std::cout << "stances: " << _stance[0] << ", " <<_stance[1] << ", " << _stance[2] << ", " << _stance[3] <<  "\n";
   std::cout << "swings: " << _swing[0] << ", " <<_swing[1] << ", " << _swing[2] << ", " << _swing[3] <<  "\n";
-  
+  */
   /*for(int i=0; i < 4; i++){
     if(_stance[i] >= 10){
       std::cout << "Big stance value!";
@@ -740,7 +740,7 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
   Vec4<float> contactStates = gait->getContactState();
   Vec4<float> swingStates = gait->getSwingState();
 
-  std::cout << "contactStates: " << contactStates << " swingStates: " << swingStates << "\n";
+  //std::cout << "contactStates: " << contactStates << " swingStates: " << swingStates << "\n";
 
   //int* mpcTable = gait->mpc_gait();
   //updateMPCIfNeeded(mpcTable, data);

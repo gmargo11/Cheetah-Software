@@ -59,7 +59,6 @@ NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int> dura
   _swing = segments_list - durations;
   //_swing = _offsets_next - ((offsets + durations) % nMPC_segments)
   
-  
 
 }
 
@@ -178,23 +177,25 @@ int* NeuralGait::mpc_gait() {
     }
 
     //update stance times
-    if(_iteration < _offsets[i] + _durations[i]){ // in stance
-      if(_offsets[i] + _durations[i] ==  _nIterations and _offsets_next[i] == 0){ // current stance phase overlaps next stance phase...
-      _stance[i] = _durations[i] + _durations_next[i];
-      }
-      else{
-      _stance[i] = _durations[i];
-      }
-    } else{ // foot has finished this stance phase
+    if(_iteration > _offsets[i] + _durations[i]){ // in next swing
+      //if(_offsets[i] + _durations[i] ==  _nIterations and _offsets_next[i] == 0){ // current stance phase overlaps next stance phase...
+      //_stance[i] = _durations[i] + _durations_next[i];
+      //}
+      //else{
+      _stance[i] = _durations_next[i];
+      //}
+    } else{ // before next swing
       if(_offsets_prev[i] + _durations_prev[i] == _nIterations and _offsets[i] == 0){
       _stance[i] = _durations_prev[i] + _durations[i];
+      } else if (_offsets[i] + _durations[i] ==  _nIterations and _offsets_next[i] == 0){
+      _stance[i] = _durations[i] + _durations_next[i];
       } else{ 
-      _stance[i] = _durations_next[i];
+      _stance[i] = _durations[i];
       }
     }
   }
   
-  /* 
+  /*
   std::cout << "offsets_prev: " << _offsets_prev[0] << ", " <<_offsets_prev[1] << ", " << _offsets_prev[2] << ", " << _offsets_prev[3] <<  "\n";
   std::cout << "durations_prev: " << _durations_prev[0] << ", " <<_durations_prev[1] << ", " << _durations_prev[2] << ", " << _durations_prev[3] <<  "\n";
   std::cout << "offsets: " << _offsets[0] << ", " <<_offsets[1] << ", " << _offsets[2] << ", " << _offsets[3] <<  "\n";
@@ -213,6 +214,15 @@ int* NeuralGait::mpc_gait() {
   std::cout << "stances: " << _stance[0] << ", " <<_stance[1] << ", " << _stance[2] << ", " << _stance[3] <<  "\n";
   std::cout << "swings: " << _swing[0] << ", " <<_swing[1] << ", " << _swing[2] << ", " << _swing[3] <<  "\n";
   */
+  /*for(int i=0; i < 4; i++){
+    if(_stance[i] >= 10){
+      std::cout << "Big stance value!";
+    }
+    if(_swing[i] >= 10){
+      std::cout << "Big swing value!";
+    }
+  }*/
+
   return _mpc_table;
 }
 
@@ -594,9 +604,11 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
 
     if(firstSwing[i]) {
       swingTimeRemaining[i] = swingTimes[i];
+      //std::cout << "First Swing! " << i ;
     } else {
       swingTimeRemaining[i] -= dt;
     }
+      //std::cout << " swing time " << swingTimeRemaining[i] << " stance time " << gait->_stance[i] << "\n";
 
     // Swing Height
     //footSwingTrajectories[i].setHeight(_fin_foot_loc[i][2] + footswing_height);

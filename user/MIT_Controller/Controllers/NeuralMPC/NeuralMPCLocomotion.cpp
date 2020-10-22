@@ -980,7 +980,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   int _iteration = (iterationCounter / iterationsBetweenMPC) % horizonLength;
  
   if(_iteration == 0 and iterationCounter % (iterationsBetweenMPC * 10) == 0){ // updated command!
-     for(int i=0; i<3; i++){ vel_act_prev[i] = vel_act_next[i];}
+     //for(int i=0; i<3; i++){ vel_act_prev[i] = vel_act_next[i];}
      for(int i=0; i<4; i++){ offsets_act_prev[i] = offsets_act[i];}
      for(int i=0; i<4; i++){ offsets_act[i] = offsets_act_next[i];}
      for(int i=0; i<4; i++){ durations_act_prev[i] = durations_act[i];}
@@ -991,7 +991,7 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   //    offsets_act[i] = offsets_act_next[i]; // update offsets, durations on liftoff
   
   
-  for(int i=0; i<3; i++){ vel_act_next[i] = vel_cmd[i];}
+  for(int i=0; i<3; i++){ vel_act[i] = vel_cmd[i];}
   for(int i=0; i<3; i++){ vel_rpy_act[i] = vel_rpy_cmd[i];}
   for(int i=0; i<8; i++){ fp_rel_act[i%4][i/4] = fp_rel_cmd[i%4][i/4];} 
   for(int i=0; i<4; i++){ fh_rel_act[i] = fh_rel_cmd[i];}
@@ -1014,8 +1014,9 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   	iterationsBetweenMPC = iterationsBetweenMPC_cmd;
   }
 
-  _phase = (float)(iterationCounter % (iterationsBetweenMPC_cmd * horizonLength)) / (float) (iterationsBetweenMPC_cmd * horizonLength);
-  for(int i=0; i<3; i++){ vel_act[i] = (vel_act_next[i] - vel_act_prev[i]) * _phase + vel_act_prev[i];}  
+  //_phase = (float)(iterationCounter % (iterationsBetweenMPC_cmd * horizonLength)) / (float) (iterationsBetweenMPC_cmd * horizonLength);
+  //iterationCounter = _phase * data._desiredStateCommand->data.action[27] * horizonLength + _iteration * data._desiredStateCommand->data.action[27];
+  //for(int i=0; i<3; i++){ vel_act[i] = (vel_act_next[i] - vel_act_prev[i]) * _phase + vel_act_prev[i];}  
 
   // smooth offsets, durations transition
   //for(int i=0; i<3; i++){ vel_act_prev[i] = vel_act[i];}

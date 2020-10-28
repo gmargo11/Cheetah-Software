@@ -164,6 +164,36 @@ PYBIND11_MODULE(pycheetah, m) {
 	nmpc.def_readwrite("iterationCounter", &NeuralMPCLocomotion::iterationCounter);
 	nmpc.def_readwrite("iterationsBetweenMPC", &NeuralMPCLocomotion::iterationsBetweenMPC);
 
+        py::class_<VisionMPCLocomotion> vmpc(m, "VisionMPCLocomotion");
+	vmpc.def(py::init<float, int, MIT_UserParameters*>());
+	vmpc.def("initialize", py::overload_cast<>(&VisionMPCLocomotion::initialize), "");
+	vmpc.def("run", [](VisionMPCLocomotion& self, ControlFSMData<float>& data, const Vec3<float>& vel_cmd, const DMat<float> & height_map, const DMat<int> & idx_map){
+	    
+			self.run(data, vel_cmd, height_map, idx_map);
+
+	 }, "");
+
+	vmpc.def_readwrite("pBody_des", &VisionMPCLocomotion::pBody_des);
+	vmpc.def_readwrite("vBody_des", &VisionMPCLocomotion::vBody_des);
+	vmpc.def_readwrite("aBody_des", &VisionMPCLocomotion::aBody_des);
+	vmpc.def_readwrite("pBody_RPY_des", &VisionMPCLocomotion::pBody_RPY_des);
+	vmpc.def_readwrite("vBody_Ori_des", &VisionMPCLocomotion::vBody_Ori_des);
+	vmpc.def("get_pFoot_des", [](VisionMPCLocomotion &self, int idx){
+			return self.pFoot_des[idx];
+			});
+	vmpc.def("get_vFoot_des", [](VisionMPCLocomotion &self, int idx){
+			return self.vFoot_des[idx];
+			});
+	vmpc.def("get_aFoot_des", [](VisionMPCLocomotion &self, int idx){
+			return self.aFoot_des[idx];
+			});
+	vmpc.def("get_Fr_des", [](VisionMPCLocomotion &self, int idx){
+			return self.Fr_des[idx];
+			});
+	vmpc.def_readwrite("contact_state", &VisionMPCLocomotion::contact_state);
+	vmpc.def_readwrite("iterationCounter", &VisionMPCLocomotion::iterationCounter);
+	vmpc.def_readwrite("iterationsBetweenMPC", &VisionMPCLocomotion::iterationsBetweenMPC);
+
 	py::class_<ControlFSMData<float>> fsmdata(m, "ControlFSMData");
 	fsmdata.def(py::init<>(), "Initialize the Control FSM Data");
 

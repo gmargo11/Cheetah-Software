@@ -61,6 +61,9 @@ public:
 
   Vec4<float> contact_state;
 
+  int iterationsBetweenMPC;
+  int iterationCounter = 0;
+
 private:
   void _UpdateFoothold(Vec3<float> & foot, const Vec3<float> & body_pos,
       const DMat<float> & height_map, const DMat<int> & idx_map);
@@ -77,11 +80,11 @@ private:
   float _body_height = 0.31;
   void updateMPCIfNeeded(int* mpcTable, ControlFSMData<float>& data);
   void solveDenseMPC(int *mpcTable, ControlFSMData<float> &data);
-  int iterationsBetweenMPC;
+
   int horizonLength;
   float dt;
   float dtMPC;
-  int iterationCounter = 0;
+
   Vec3<float> f_ff[4];
   Vec4<float> swingTimes;
   FootSwingTrajectory<float> footSwingTrajectories[4];

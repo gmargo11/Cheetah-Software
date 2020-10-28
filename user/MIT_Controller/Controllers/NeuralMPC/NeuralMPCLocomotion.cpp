@@ -974,7 +974,11 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   }
   
     //std::cout << "vel_act: " << vel_act << "vel_rpy_act" << vel_rpy_act << "fp_rel_act " << fp_rel_act << "fh_rel_act" << fh_rel_act << "footswing_height_act" <<  footswing_height_act << "offsets_act: " << offsets_act << "durations_act" << durations_act << "\n";
-  */
+
+  // smooth velocity transition
+  //float _phase = (float)(iterationCounter % (iterationsBetweenMPC_cmd * horizonLength)) / (float) (iterationsBetweenMPC_cmd * horizonLength);
+  
+  //for(int i=0; i<3; i++){ vel_act[i] = (vel_act_next[i] - vel_act_prev[i]) * _phase + vel_act_prev[i];}
   
   // smooth offsets, durations transition
   int _iteration = (iterationCounter / iterationsBetweenMPC) % horizonLength;

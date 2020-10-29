@@ -11,15 +11,16 @@
 ///////////////
 // GAIT, SMOOTHED
 ///////////////
-NeuralGaitSmoothed::NeuralGaitSmoothed(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int> durations_prev, Vec4<int> offsets,
-    Vec4<int> durations, Vec4<int> offsets_next, Vec4<int> durations_next, const std::string &name) :
+NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int> durations_prev, Vec4<int> offsets,
+    Vec4<int> durations, Vec4<int> offsets_next, Vec4<int> durations_next, const std::string &name, const bool use_gait_smoothing) :
   _offsets_prev(offsets_prev.array()),
   _durations_prev(durations_prev.array()),
   _offsets(offsets.array()),
   _durations(durations.array()),
   _offsets_next(offsets_next.array()),
   _durations_next(durations_next.array()),
-  _nIterations(nMPC_segments)
+  _nIterations(nMPC_segments),
+  _use_gait_smoothing(use_gait_smoothing)
 {
   _mpc_table = new int[nMPC_segments * 4];
 
@@ -63,13 +64,15 @@ NeuralGaitSmoothed::NeuralGaitSmoothed(int nMPC_segments, Vec4<int> offsets_prev
 }
 
 
-NeuralGaitSmoothed::~NeuralGaitSmoothed() {
+NeuralGait::~NeuralGait() {
   delete[] _mpc_table;
 }
 
 
-Vec4<float> NeuralGaitSmoothed::getContactState() {
+Vec4<float> NeuralGait::getContactState() {
   Array4f progress = _phase - _offsetsFloat;
+
+  if(_use_gait_smoothing){
 
   for(int i = 0; i < 4; i++)
   {
@@ -99,10 +102,33 @@ Vec4<float> NeuralGaitSmoothed::getContactState() {
   }
 
   return progress.matrix();
+
+  }
+  else{
+    for(int i = 0; i < 4; i++)
+  {
+    if(progress[i] < 0) progress[i] += 1.;
+    if(progress[i] > _durationsNextFloat[i])
+    {
+      progress[i] = 0.;
+    }
+    else
+    {
+      progress[i] = progress[i] / _durationsNextFloat[i];
+    }
+  }
+
+  return progress.matrix();
+  }
 }
 
-Vec4<float> NeuralGaitSmoothed::getSwingState() {
+Vec4<float> NeuralGait::getSwingState() {
+  
+
+  if(_use_gait_smoothing){
+
   Array4f swing_offset = _offsetsFloat + _durationsFloat;
+
   for(int i = 0; i < 4; i++)
     if(swing_offset[i] > 1) swing_offset[i] -= 1.;
   //Array4f swing_duration = 1. - _durationsFloat;
@@ -139,13 +165,22 @@ Vec4<float> NeuralGaitSmoothed::getSwingState() {
 
   }
 
-  
-  /*
+
+  return progress.matrix();
+
+  } else{
+
+    Array4f swing_offset = _offsetsNextFloat + _durationsNextFloat;
+  for(int i = 0; i < 4; i++)
+    if(swing_offset[i] > 1) swing_offset[i] -= 1.;
+  Array4f swing_duration = 1. - _durationsNextFloat;
+
+  Array4f progress = _phase - swing_offset;
+
   for(int i = 0; i < 4; i++)
   {
     if(progress[i] < 0) progress[i] += 1.f;
     if(progress[i] > swing_duration[i])
-
     {
       progress[i] = 0.;
     }
@@ -154,12 +189,14 @@ Vec4<float> NeuralGaitSmoothed::getSwingState() {
       progress[i] = progress[i] / swing_duration[i];
     }
   }
-  */
 
   return progress.matrix();
+  }
 }
 
-int* NeuralGaitSmoothed::mpc_gait() {
+int* NeuralGait::mpc_gait() {
+
+if(_use_gait_smoothing){
 
   for(int i = _nIterations - _iteration - 1; i < _nIterations; i++)
   {
@@ -271,101 +308,16 @@ int* NeuralGaitSmoothed::mpc_gait() {
   }*/
 
   return _mpc_table;
-}
 
-void NeuralGaitSmoothed::setIterations(int iterationsPerMPC, int currentIteration) {
-  _iteration = (currentIteration / iterationsPerMPC) % _nIterations;
-  _phase = (float)(currentIteration % (iterationsPerMPC * _nIterations)) / (float) (iterationsPerMPC * _nIterations);
-  //std::cout << "iteration " << _iteration << " phase " << _phase << "\n";
-}
-
-
-///////////////
-// GAIT, UNSMOOTHED
-///////////////
-NeuralGait::NeuralGait(int nMPC_segments, Vec4<int> offsets, 
-    Vec4<int> durations, const std::string &name) :
-  _offsets(offsets.array()),
-  _durations(durations.array()),
-  _nIterations(nMPC_segments)
-{
-  _mpc_table = new int[nMPC_segments * 4];
-
-  _offsetsFloat = offsets.cast<float>() / (float) nMPC_segments;
-  _durationsFloat = durations.cast<float>() / (float) nMPC_segments;
-  /*std::cout << "NeuralGait " << name << "\n";
-  std::cout << "nMPC_segments    : " << _nIterations << "\n";
-  std::cout << "offsets (int)    : " << _offsets.transpose() << "\n";
-  std::cout << "durations (int)  : " << _durations.transpose() << "\n";
-  std::cout << "offsets (float)  : " << _offsetsFloat.transpose() << "\n";
-  std::cout << "durations (float): " << _durationsFloat.transpose() << "\n";
-  std::cout << "\n\n";
-  */
-  (void)name;
-  _stance = durations;
-  Vec4<int> segments_list(nMPC_segments, nMPC_segments, nMPC_segments, nMPC_segments);
-  _swing = segments_list - durations;
-
-}
-
-
-NeuralGait::~NeuralGait() {
-  delete[] _mpc_table;
-}
-
-
-Vec4<float> NeuralGait::getContactState() {
-  Array4f progress = _phase - _offsetsFloat;
-
-  for(int i = 0; i < 4; i++)
-  {
-    if(progress[i] < 0) progress[i] += 1.;
-    if(progress[i] > _durationsFloat[i])
-    {
-      progress[i] = 0.;
-    }
-    else
-    {
-      progress[i] = progress[i] / _durationsFloat[i];
-    }
-  }
-
-  return progress.matrix();
-}
-
-Vec4<float> NeuralGait::getSwingState() {
-  Array4f swing_offset = _offsetsFloat + _durationsFloat;
-  for(int i = 0; i < 4; i++)
-    if(swing_offset[i] > 1) swing_offset[i] -= 1.;
-  Array4f swing_duration = 1. - _durationsFloat;
-
-  Array4f progress = _phase - swing_offset;
-
-  for(int i = 0; i < 4; i++)
-  {
-    if(progress[i] < 0) progress[i] += 1.f;
-    if(progress[i] > swing_duration[i])
-    {
-      progress[i] = 0.;
-    }
-    else
-    {
-      progress[i] = progress[i] / swing_duration[i];
-    }
-  }
-
-  return progress.matrix();
-}
-
-int* NeuralGait::mpc_gait() {
-  for(int i = 0; i < _nIterations; i++)
+  } else {
+    for(int i = 0; i < _nIterations; i++)
   {
     int iter = (i + _iteration + 1) % _nIterations;
-    Array4i progress = iter - _offsets;
+    Array4i progress = iter - _offsets_next;
     for(int j = 0; j < 4; j++)
     {
       if(progress[j] < 0) progress[j] += _nIterations;
-      if(progress[j] < _durations[j])
+      if(progress[j] < _durations_next[j])
         _mpc_table[i*4 + j] = 1;
       else
         _mpc_table[i*4 + j] = 0;
@@ -373,12 +325,16 @@ int* NeuralGait::mpc_gait() {
   }
 
   return _mpc_table;
+  }
+
 }
 
 void NeuralGait::setIterations(int iterationsPerMPC, int currentIteration) {
   _iteration = (currentIteration / iterationsPerMPC) % _nIterations;
   _phase = (float)(currentIteration % (iterationsPerMPC * _nIterations)) / (float) (iterationsPerMPC * _nIterations);
+  //std::cout << "iteration " << _iteration << " phase " << _phase << "\n";
 }
+
 
 
 
@@ -390,13 +346,13 @@ NeuralMPCLocomotion::NeuralMPCLocomotion(float _dt, int _iterations_between_mpc,
   iterationsBetweenMPC(_iterations_between_mpc),
   horizonLength(10),
   dt(_dt),
-  trotting(horizonLength, Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10), Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), "Trotting"),
-  bounding(horizonLength, Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10), Vec4<int>(5,5,0,0),Vec4<int>(3,3,3,3), Vec4<int>(5,5,0,0), Vec4<int>(3,3,3,3),"Bounding"),
-  pronking(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,0,0,0),Vec4<int>(4,4,4,4), Vec4<int>(0,0,0,0), Vec4<int>(4,4,4,4),"Pronking"),
-  galloping(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3), Vec4<int>(0,2,7,9), Vec4<int>(3,3,3,3),"Galloping"),
-  standing(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10), Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),"Standing"),
-  trotRunning(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3), Vec4<int>(0,5,5,0), Vec4<int>(3,3,3,3),"Trot Running"),
-  cyclic(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8), Vec4<int>(0,2,4,6), Vec4<int>(8,8,8,8),"Cyclic Walk")
+  trotting(horizonLength, Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10), Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), Vec4<int>(0,5,5,0), Vec4<int>(5,5,5,5), "Trotting", false),
+  bounding(horizonLength, Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10), Vec4<int>(5,5,0,0),Vec4<int>(3,3,3,3), Vec4<int>(5,5,0,0), Vec4<int>(3,3,3,3),"Bounding", false),
+  pronking(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,0,0,0),Vec4<int>(4,4,4,4), Vec4<int>(0,0,0,0), Vec4<int>(4,4,4,4),"Pronking", false),
+  galloping(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,2,7,9),Vec4<int>(3,3,3,3), Vec4<int>(0,2,7,9), Vec4<int>(3,3,3,3),"Galloping", false),
+  standing(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,0,0,0),Vec4<int>(10,10,10,10), Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),"Standing", false),
+  trotRunning(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,5,5,0),Vec4<int>(3,3,3,3), Vec4<int>(0,5,5,0), Vec4<int>(3,3,3,3),"Trot Running", false),
+  cyclic(horizonLength,  Vec4<int>(0,0,0,0), Vec4<int>(10,10,10,10),Vec4<int>(0,2,4,6),Vec4<int>(8,8,8,8), Vec4<int>(0,2,4,6), Vec4<int>(8,8,8,8),"Cyclic Walk", false)
 //  _neuralLCM(getLcmUrl(255))
 {
   _parameters = parameters;
@@ -621,7 +577,7 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
     const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_prev, const Vec4<int> & durations_prev, const Vec4<int> & offsets_cmd,
     const Vec4<int> & durations_cmd, const Vec4<int> & offsets_next, const Vec4<int> & durations_next, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map, const bool use_gait_smoothing, const bool use_vel_smoothing) {
     
-  
+  (void)use_vel_smoothing;
 	
   //std::cout << "NeuralMPCLocomotion::run" << "\n";
   
@@ -653,14 +609,15 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
   }
 
   // pick gait
-  NeuralGaitSmoothed* gait = &trotting;
+  /*
+  NeuralGait* gait = &trotting;
   if(gaitNumber == 1)         gait = &bounding;
   else if(gaitNumber == 2)    gait = &pronking;
   else if(gaitNumber == 3)    gait = &galloping;
   else if(gaitNumber == 4)    gait = &standing;
   else if(gaitNumber == 5)    gait = &trotRunning;
   current_gait = gaitNumber;
-
+  */
   if(iterationsBetweenMPC != iterationsBetweenMPC_cmd){
     int iteration = (iterationCounter / iterationsBetweenMPC) % horizonLength;
     float phase = (float)(iterationCounter % (iterationsBetweenMPC * horizonLength)) / (float) (iterationsBetweenMPC * horizonLength);
@@ -677,12 +634,10 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
   //    dt, iterationsBetweenMPC, dtMPC);
   //neural_setup_problem(dtMPC, horizonLength, 0.4, 120);
   
-  if(use_gait_smoothing){
-    NeuralGaitSmoothed custom(horizonLength, offsets_prev, durations_prev, offsets_cmd, durations_cmd, offsets_next, durations_next, "Custom Gait!");
-  }
-  else{
-    NeuralGait custom(horizonLength, offsets_next, durations_next, "Custom Gait!")
-  }
+
+  NeuralGait custom(horizonLength, offsets_prev, durations_prev, offsets_cmd, durations_cmd, offsets_next, durations_next, "Custom Gait!", use_gait_smoothing);
+  NeuralGait* gait;
+  
   // Can modify
   gait = &custom; // set custom gait
   gait->setIterations(iterationsBetweenMPC, iterationCounter);

@@ -15,11 +15,11 @@ using Eigen::Array4f;
 using Eigen::Array4i;
 
 
-class NeuralGaitSmoothed
+class NeuralGait
 {
 public:
-  NeuralGaitSmoothed(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int>  durations_prev, Vec4<int> offsets, Vec4<int>  durations, Vec4<int> offsets_next, Vec4<int>  durations_next, const std::string& name="");
-  ~NeuralGaitSmoothed();
+  NeuralGait(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int>  durations_prev, Vec4<int> offsets, Vec4<int>  durations, Vec4<int> offsets_next, Vec4<int>  durations_next, const std::string& name="", const bool use_gait_smoothing = true);
+  ~NeuralGait();
   Vec4<float> getContactState();
   Vec4<float> getSwingState();
   int* mpc_gait();
@@ -45,37 +45,11 @@ private:
   Array4f _durationsNextFloat; // durations in phase (0 to 1)
   int _iteration;
   int _nIterations;
+  bool _use_gait_smoothing;
   float _phase;
 
 };
 
-
-class NeuralGait
-{
-public:
-  NeuralGait(int nMPC_segments, Vec4<int> offsets, Vec4<int>  durations, const std::string& name="");
-  ~NeuralGait();
-  Vec4<float> getContactState();
-  Vec4<float> getSwingState();
-  int* mpc_gait();
-  void setIterations(int iterationsPerMPC, int currentIteration);
-  Vec4<int> _stance;
-  Vec4<int> _swing;
-
-
-private:
-  int _nMPC_segments;
-  int* _mpc_table;
-  Array4i _offsets; // offset in mpc segments
-  Array4i _durations; // duration of step in mpc segments
-  Array4f _offsetsFloat; // offsets in phase (0 to 1)
-  Array4f _durationsFloat; // durations in phase (0 to 1)
-  int _iteration;
-  int _nIterations;
-  float _phase;
-
-
-};
 
 
 
@@ -87,12 +61,12 @@ public:
   template<typename T>
   void run(ControlFSMData<T>& data,
     const Vec3<T> & vel_cmd, const Vec3<T> & vel_rpy_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd,
-    const Vec4<int> & durations_cmd, const float footswing_height_cmd, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map);
+    const Vec4<int> & durations_cmd, const float footswing_height_cmd, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map, const bool use_gait_smoothing, const bool use_vel_smoothing);
 
   template<typename T>
   void runParamsFixed(ControlFSMData<T>& data, 
       const Vec3<T> & vel_cmd, const Vec3<T> & vel_rpy_cmd, const Vec2<T> (& fp_rel_cmd)[4], const Vec4<float> & fh_rel_cmd,
-      const Vec4<int> & offsets_prev_cmd, const Vec4<int> & durations_prev_cmd, const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, const Vec4<int> & offsets_next_cmd, const Vec4<int> & durations_next_cmd, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map);
+      const Vec4<int> & offsets_prev_cmd, const Vec4<int> & durations_prev_cmd, const Vec4<int> & offsets_cmd, const Vec4<int> & durations_cmd, const Vec4<int> & offsets_next_cmd, const Vec4<int> & durations_next_cmd, const float footswing_height, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map, const bool use_gait_smoothing, const bool use_vel_smoothing);
 
 
   Vec3<float> pBody_des;
@@ -142,7 +116,7 @@ private:
   Vec3<float> f_ff[4];
   Vec4<float> swingTimes;
   FootSwingTrajectory<float> footSwingTrajectories[4];
-  NeuralGaitSmoothed trotting, bounding, pronking, galloping, standing, trotRunning, cyclic;
+  NeuralGait trotting, bounding, pronking, galloping, standing, trotRunning, cyclic;
   Mat3<float> Kp, Kd, Kp_stance, Kd_stance;
   bool firstRun = true;
   bool firstSwing[4];

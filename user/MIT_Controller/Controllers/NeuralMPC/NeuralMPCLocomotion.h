@@ -15,11 +15,11 @@ using Eigen::Array4f;
 using Eigen::Array4i;
 
 
-class NeuralGait
+class NeuralGaitSmoothed
 {
 public:
-  NeuralGait(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int>  durations_prev, Vec4<int> offsets, Vec4<int>  durations, Vec4<int> offsets_next, Vec4<int>  durations_next, const std::string& name="");
-  ~NeuralGait();
+  NeuralGaitSmoothed(int nMPC_segments, Vec4<int> offsets_prev, Vec4<int>  durations_prev, Vec4<int> offsets, Vec4<int>  durations, Vec4<int> offsets_next, Vec4<int>  durations_next, const std::string& name="");
+  ~NeuralGaitSmoothed();
   Vec4<float> getContactState();
   Vec4<float> getSwingState();
   int* mpc_gait();
@@ -48,6 +48,35 @@ private:
   float _phase;
 
 };
+
+
+class NeuralGait
+{
+public:
+  NeuralGait(int nMPC_segments, Vec4<int> offsets, Vec4<int>  durations, const std::string& name="");
+  ~NeuralGait();
+  Vec4<float> getContactState();
+  Vec4<float> getSwingState();
+  int* mpc_gait();
+  void setIterations(int iterationsPerMPC, int currentIteration);
+  Vec4<int> _stance;
+  Vec4<int> _swing;
+
+
+private:
+  int _nMPC_segments;
+  int* _mpc_table;
+  Array4i _offsets; // offset in mpc segments
+  Array4i _durations; // duration of step in mpc segments
+  Array4f _offsetsFloat; // offsets in phase (0 to 1)
+  Array4f _durationsFloat; // durations in phase (0 to 1)
+  int _iteration;
+  int _nIterations;
+  float _phase;
+
+
+};
+
 
 
 class NeuralMPCLocomotion {
@@ -113,7 +142,7 @@ private:
   Vec3<float> f_ff[4];
   Vec4<float> swingTimes;
   FootSwingTrajectory<float> footSwingTrajectories[4];
-  NeuralGait trotting, bounding, pronking, galloping, standing, trotRunning, cyclic;
+  NeuralGaitSmoothed trotting, bounding, pronking, galloping, standing, trotRunning, cyclic;
   Mat3<float> Kp, Kd, Kp_stance, Kd_stance;
   bool firstRun = true;
   bool firstSwing[4];

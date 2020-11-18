@@ -944,7 +944,7 @@ void NeuralMPCLocomotion::runParamsFixed(ControlFSMData<float>& data,
 template<>
 void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
     const Vec3<float> & vel_cmd, const Vec3<float> & vel_rpy_cmd, const Vec2<float> (& fp_rel_cmd)[4], const Vec4<float>  & fh_rel_cmd, const Vec4<int> & offsets_cmd,
-    const Vec4<int> & durations_cmd, const float footswing_height_cmd, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map, const bool use_gait_smoothing, const bool use_vel_smoothing){
+    const Vec4<int> & durations_cmd, const float footswing_height_cmd, const int iterationsBetweenMPC_cmd, const DMat<float> & height_map, const bool use_gait_smoothing, const bool use_vel_smoothing, const bool use_gait_cycling){
   /*
   if((iterationCounter % (iterationsBetweenMPC * 10)) == 0){
   //auto& seResult = data._stateEstimator->getResult();
@@ -1065,11 +1065,13 @@ void NeuralMPCLocomotion::run(ControlFSMData<float>& data,
   for(int i=0; i<4; i++){ durations_act_next[i] = durations_cmd[i]; }
   
   // limit duration commands to not cycle over
-  //for(int i = 0; i < 4; i++){
-  //  if(offsets_act_next[i] + durations_act_next[i] > 10){ // wrapping
-  //      durations_act_next[i] = 10 - offsets_act_next[i];
-  //  }
-  //}
+  if(not use_gait_cycling){
+    for(int i = 0; i < 4; i++){
+      if(offsets_act_next[i] + durations_act_next[i] > 10){ // wrapping
+        durations_act_next[i] = 10 - offsets_act_next[i];
+      }
+    }
+  }
    
   //iterationCounter += -(iterationCounter %  msg->iterationsBetweenMPC_act) + (iterationCounter % iterationsBetweenMPC_cmd); 
   

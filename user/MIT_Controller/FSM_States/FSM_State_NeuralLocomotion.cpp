@@ -632,7 +632,7 @@ void FSM_State_NeuralLocomotion<T>::_LocomotionControlStep(const Vec3<T> & des_v
   // StateEstimate<T> stateEstimate = this->_data->_stateEstimator->getResult();
 
   // Contact state logic
-  neural_MPC.run<T>(*this->_data, des_vel, des_rpy_vel, des_fp_rel, des_fh_rel, des_offsets, des_durations, 0.06, 15, _height_map, true, false);
+  neural_MPC.run<T>(*this->_data, des_vel, des_rpy_vel, des_fp_rel, des_fh_rel, des_offsets, des_durations, 0.06, 15, _height_map, true, false, true);
 
   if(this->_data->userParameters->use_wbc > 0.9){
     _wbc_data->pBody_des = neural_MPC.pBody_des;

@@ -74,16 +74,38 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
   //++_iter;
   //printf("[WBC_Ctrl] Update Model");
   // Update Model
+  /*
+  using namespace std::chrono; 
+  auto start = high_resolution_clock::now(); 
+  */
   _UpdateModel(data._stateEstimator->getResult(), data._legController->datas);
-
+  
+  /*
+  auto stop = high_resolution_clock::now();
+  auto duration = duration_cast<microseconds>(stop - start);
+  std::cout << "UpdateModel " <<  duration.count() << endl; 
+  start = high_resolution_clock::now(); 
+  */
   //printf("[WBC_Ctrl] Update Contact Task");
   // Task & Contact Update
   _ContactTaskUpdate(input, data);
 
+  /*
+  stop = high_resolution_clock::now();
+  duration = duration_cast<microseconds>(stop - start);
+  std::cout << duration.count() << endl; 
+  */
   //std::cout << "[WBC_Ctrl] Compute WBC\n";
   // WBC Computation
   _ComputeWBC();
-  
+
+  /*
+  stop = high_resolution_clock::now();
+  duration = duration_cast<microseconds>(stop - start);
+  std::cout << "ComputeWBC " << duration.count() << endl; 
+  start = high_resolution_clock::now(); 
+  */
+
   // TEST
   //T dt(0.002);
   //for(size_t i(0); i<12; ++i){
@@ -99,9 +121,16 @@ void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data){
   //std::cout << "[WBC_Ctrl] Update Leg Cmd\n";
   _UpdateLegCMD(data);
 
+  /*
+  stop = high_resolution_clock::now();
+  duration = duration_cast<microseconds>(stop - start);
+  std::cout << "UpdateLegCMD " << duration.count() << endl; 
+  */
+
   // LCM publish
   //std::cout << "[WBC_Ctrl] Publish Result\n";
-  _LCM_PublishData();
+  //_LCM_PublishData();
+ 
 }
 
 

@@ -88,6 +88,8 @@ public:
   int iterationsBetweenMPC;
   int iterationsBetweenMPC_cmd;
 
+  void solveDenseMPC(int *mpcTable, ControlFSMData<float> &data);
+
 private:
   void _UpdateFoothold(Vec3<float> & foot, const Vec3<float> & body_pos,
       const DMat<float> & height_map);
@@ -109,7 +111,6 @@ private:
 
   float _body_height = 0.31;
   void updateMPCIfNeeded(int* mpcTable, ControlFSMData<float>& data);
-  void solveDenseMPC(int *mpcTable, ControlFSMData<float> &data);
   int horizonLength;
   float dt;
   float dtMPC;

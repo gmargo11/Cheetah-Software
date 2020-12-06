@@ -160,9 +160,29 @@ PYBIND11_MODULE(pycheetah, m) {
 	nmpc.def("get_Fr_des", [](NeuralMPCLocomotion &self, int idx){
 			return self.Fr_des[idx];
 			});
+
+	nmpc.def("set_pFoot_des", [](NeuralMPCLocomotion &self, int idx, Vec3<float> pFoot_des){
+			self.pFoot_des[idx] = pFoot_des;
+			});
+	nmpc.def("set_vFoot_des", [](NeuralMPCLocomotion &self, int idx, Vec3<float> vFoot_des){
+			self.vFoot_des[idx] = vFoot_des;
+			});
+	nmpc.def("set_aFoot_des", [](NeuralMPCLocomotion &self, int idx, Vec3<float> aFoot_des){
+			self.aFoot_des[idx] = aFoot_des;
+			});
+	nmpc.def("set_Fr_des", [](NeuralMPCLocomotion &self, int idx, Vec3<float> Fr_des){
+			self.Fr_des[idx] = Fr_des;
+			});
 	nmpc.def_readwrite("contact_state", &NeuralMPCLocomotion::contact_state);
 	nmpc.def_readwrite("iterationCounter", &NeuralMPCLocomotion::iterationCounter);
 	nmpc.def_readwrite("iterationsBetweenMPC", &NeuralMPCLocomotion::iterationsBetweenMPC);
+	nmpc.def("solve_dense_mpc", [](NeuralMPCLocomotion& self, DMat<int> mpc_table, ControlFSMData<float> &data){
+		int mpcTable[40];
+		for(int i=0; i < 40; i++){
+			mpcTable[i] = mpc_table(i);
+		}
+		self.solveDenseMPC(mpcTable, data);
+	}, "");
 
         py::class_<VisionMPCLocomotion> vmpc(m, "VisionMPCLocomotion");
 	vmpc.def(py::init<float, int, MIT_UserParameters*>());

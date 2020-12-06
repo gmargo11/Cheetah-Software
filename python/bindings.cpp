@@ -176,10 +176,13 @@ PYBIND11_MODULE(pycheetah, m) {
 	nmpc.def_readwrite("contact_state", &NeuralMPCLocomotion::contact_state);
 	nmpc.def_readwrite("iterationCounter", &NeuralMPCLocomotion::iterationCounter);
 	nmpc.def_readwrite("iterationsBetweenMPC", &NeuralMPCLocomotion::iterationsBetweenMPC);
-	nmpc.def("solve_dense_mpc", [](NeuralMPCLocomotion& self, DMat<int> mpc_table, ControlFSMData<float> &data){
+	nmpc.def("solve_dense_mpc", [](NeuralMPCLocomotion& self, DMat<int> mpc_table, ControlFSMData<float> &data, const DMat<float> & trajAllIn){
 		int mpcTable[40];
 		for(int i=0; i < 40; i++){
 			mpcTable[i] = mpc_table(i);
+		}
+		for(int i=0; i < 12*36; i++){
+			self.trajAll[i] = trajAllIn(i);
 		}
 		self.solveDenseMPC(mpcTable, data);
 	}, "");

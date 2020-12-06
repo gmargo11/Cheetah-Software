@@ -88,6 +88,7 @@ public:
   int iterationsBetweenMPC;
   int iterationsBetweenMPC_cmd;
 
+  float trajAll[12*36];
   void solveDenseMPC(int *mpcTable, ControlFSMData<float> &data);
 
 private:
@@ -130,7 +131,6 @@ private:
   Vec3<float> rpy_int;
   Vec3<float> rpy_comp;
   Vec3<float> pFoot[4];
-  float trajAll[12*36];
 
   MIT_UserParameters* _parameters = nullptr;
 
